@@ -352,7 +352,7 @@ main (int argc, char *argv[])
 
 
   //p2ph.EnablePcapAll ("mmwave-sgi-capture");
-   p2ph.EnablePcap ("Lav",internetDevices.Get (1));
+   p2ph.EnablePcap ("LHM",internetDevices.Get (1));
    // Add the dataset to the plot.
    plot.AddDataset (dataset);
 
