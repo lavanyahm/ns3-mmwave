@@ -193,12 +193,16 @@ main (int argc, char *argv[])
 
   /*Config::SetDefault ("ns3::LteRlcUm::MaxTxBufferSize", UintegerValue (10 * 1024 * 1024));
   Config::SetDefault ("ns3::LteRlcAm::MaxTxBufferSize", UintegerValue (10 * 1024 * 1024));
-  Config::SetDefault ("ns3::LteRlcUmLowLat::MaxTxBufferSize", UintegerValue (10 * 1024 * 1024));*/
-  Config::SetDefault ("ns3::DropTailQueue<Packet>::MaxSize", QueueSizeValue (QueueSize (QueueSize ("50000p"))));
+  Config::SetDefault ("ns3::LteRlcUmLowLat::MaxTxBufferSize", UintegerValue (50000 * 1024 * 1024));*/
+  //Config::SetDefault ("ns3::DropTailQueue<Packet>::MaxSize", QueueSizeValue (QueueSize (QueueSize ("50000p"))));
+ //RLC que configurations.
 
-  Config::SetDefault ("ns3::LteRlcUm::MaxTxBufferSize", UintegerValue (50 * 1024 *1024));//RLC queue length 50 packets
-  Config::SetDefault ("ns3::LteRlcAm::MaxTxBufferSize", UintegerValue (50 * 1024 *1024) );
-  Config::SetDefault ("ns3::LteRlcUmLowLat::MaxTxBufferSize", UintegerValue (50 * 1024*1024));
+ // Config::SetDefault ("ns3::DropTailQueue<Packet>::MaxSize", QueueSizeValue (QueueSize ("50000p")));
+  Config::SetDefault ("ns3::MmWaveHelper::RlcAmEnabled", BooleanValue (true));
+  Config::SetDefault ("ns3::LteRlcAm::EnableAQM", BooleanValue(false));//Enable AQM will activate CoDel
+  Config::SetDefault ("ns3::LteRlcAm::MaxTxBufferSize", UintegerValue (50 * 1024 * 1024));
+
+
   // TCP settings
   Config::SetDefault ("ns3::TcpL4Protocol::SocketType", TypeIdValue (TcpCubic::GetTypeId ()));
   Config::SetDefault ("ns3::TcpSocketBase::MinRto", TimeValue (MilliSeconds (200)));
