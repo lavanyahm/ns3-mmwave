@@ -42,6 +42,7 @@
 #include "ns3/applications-module.h"
 #include "ns3/log.h"
 #include <ns3/buildings-module.h>
+#include "ns3/config-store-module.h"
 
 using namespace ns3;
 using namespace mmwave;
@@ -49,7 +50,7 @@ using namespace mmwave;
 
 NS_LOG_COMPONENT_DEFINE ("mymmWave-example");
 
-
+#define PrintPositions false
 Ptr<PacketSink> sink;                         /* Pointer to the packet sink application */
 uint64_t lastTotalRx = 0;
 /*Ue moving */
@@ -60,18 +61,19 @@ ChangeSpeed (Ptr<Node> n, Vector speed)
   // NS_LOG_UNCOND (n->GetObject<ConstantVelocityMobilityModel> ()->GetDistanceFrom());
   //  NS_LOG_UNCOND ("************************--------------------Change Speed-------------------------------*****************");
 }
+#if 1
 void
 PrintPosition (Ptr<Node> Uenode,Ptr<Node>enB, Ptr<OutputStreamWrapper> stream)
 {
 
   Ptr<MobilityModel> Ue_model = Uenode->GetObject<MobilityModel> ();
   Ptr<MobilityModel> eNB_model = enB->GetObject<MobilityModel> ();
-  /*std::cout<<"Position " << Simulator::Now ().GetSeconds ()<<
-             "\t"<<model->GetPosition ()<<std::endl;*/
   *stream->GetStream () << Simulator::Now ().GetSeconds () << "\t" << Ue_model->GetDistanceFrom (eNB_model)<< std::endl;
-  //   *stream->GetStream () << Simulator::Now ().GetSeconds () << "\t" << model->GetPosition () << std::endl;
-
 }
+
+#endif
+
+
 #if 0
 void
 CalculateThroughput ()
@@ -95,10 +97,10 @@ main (int argc, char *argv[])
   Ptr<MmWaveHelper> ptr_mmWave = CreateObject<MmWaveHelper> ();
   /* A configuration example.
     * ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute("SymbolPerSlot", UintegerValue(30));*/
-
+#if PrintPositions
   UintegerValue uintegerValue;
   double ueInitialPosition = 40;
-  double ueFinalPosition = 150;
+  double ueFinalPosition = 140;
 
   int windowForTransient = 150; // number of samples for the vector to use in the filter
   //GlobalValue::GetValueByName ("reportTablePeriodicity", uintegerValue);
@@ -121,10 +123,14 @@ main (int argc, char *argv[])
       // NS_ASSERT_MSG (false, "Unrecognized");
       windowForTransient = 100;
     }
+
+
   int vectorTransient = windowForTransient * ReportTablePeriodicity;
   double ueSpeed = 20.0;
   double transientDuration = double(vectorTransient) / 1000000;
   double simTime = transientDuration + ((double)ueFinalPosition - (double)ueInitialPosition) / ueSpeed + 1;
+#endif
+
   /* Configuration setting in the paper 5G mmWave Module for the ns-3 Network Simulator*/
 
   double totalBandwidth = 13.88e6;//SubbandWidth
@@ -176,7 +182,7 @@ main (int argc, char *argv[])
       ptr_mmWave->SetChannelConditionModelType ("ns3::AlwaysLosChannelConditionModel");
       ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel");
     }
-  else if (condition == "n")
+  else if (condition == "l")
     {
       //ptr_mmWave->SetPathlossModelType (" ns3::ThreeGppBuildingPropagationLossModel");
       ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel");
@@ -216,7 +222,7 @@ main (int argc, char *argv[])
   uemobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
   uemobility.SetPositionAllocator (uePositionAlloc);
   uemobility.Install (ueNodes);
-  Simulator::Schedule (Seconds (2), &ChangeSpeed, ueNodes.Get (0), Vector (20, 0.0, 0)); // start UE movement
+  Simulator::Schedule (Seconds (0), &ChangeSpeed, ueNodes.Get (0), Vector (20, 0.0, 0)); // start UE movement
 
   BuildingsHelper::Install (ueNodes);
   NetDeviceContainer enbNetDev = ptr_mmWave->InstallEnbDevice (enbNodes);
@@ -271,15 +277,17 @@ main (int argc, char *argv[])
 
 
   //   streamUePosition->GetStream () << "Time" << "\t" << "Ue DistanceFrom eNB_model" << std::endl;
-
-  double numPrints = 15;
+#if 0
+  double numPrints = 0;
   for (int i = 0; i < numPrints; i++)
     {
-      Simulator::Schedule (Seconds(i * simTime / numPrints), &PrintPosition, ueNodes.Get (0),enbNodes.Get (0),streamUePosition);
+        //Simulator::Schedule (Seconds(i * simTime / numPrints), &PrintPosition, ueNodes.Get (0),enbNodes.Get (0),streamUePosition);
+        Simulator::Schedule (Seconds((10.0 / numPrints) * i), &PrintPosition, ueNodes.Get (0),enbNodes.Get (0),streamUePosition);
       //   Simulator::Schedule (Seconds (1.1), &CalculateThroughput);
     }
 
-
+#endif
+Simulator::Schedule (Seconds(4), &PrintPosition, ueNodes.Get (0),enbNodes.Get (0),streamUePosition);
 
 
   // Activate a data radio bearer
