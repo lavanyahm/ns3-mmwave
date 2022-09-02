@@ -51,8 +51,12 @@ using namespace mmwave;
 NS_LOG_COMPONENT_DEFINE ("mymmWave-example");
 
 #define PrintPositions false
+#define PrintUePosition false
+#define IsPrintFrequency true
 Ptr<PacketSink> sink;                         /* Pointer to the packet sink application */
 uint64_t lastTotalRx = 0;
+
+Ptr<MmWaveEnbNetDevice> enbMmwDev;
 /*Ue moving */
 void
 ChangeSpeed (Ptr<Node> n, Vector speed)
@@ -61,7 +65,7 @@ ChangeSpeed (Ptr<Node> n, Vector speed)
   // NS_LOG_UNCOND (n->GetObject<ConstantVelocityMobilityModel> ()->GetDistanceFrom());
   //  NS_LOG_UNCOND ("************************--------------------Change Speed-------------------------------*****************");
 }
-#if 1
+#if PrintUePosition
 void
 PrintPosition (Ptr<Node> Uenode,Ptr<Node>enB, Ptr<OutputStreamWrapper> stream)
 {
@@ -70,10 +74,22 @@ PrintPosition (Ptr<Node> Uenode,Ptr<Node>enB, Ptr<OutputStreamWrapper> stream)
   Ptr<MobilityModel> eNB_model = enB->GetObject<MobilityModel> ();
   *stream->GetStream () << Simulator::Now ().GetSeconds () << "\t" << Ue_model->GetDistanceFrom (eNB_model)<< std::endl;
 }
-
 #endif
 
+#if IsPrintFrequency
 
+// void PrintFrequency ( double frequency)
+void PrintFrequency (NetDeviceContainer enbNetDev )
+{
+   enbMmwDev = enbNetDev.Get (0)->GetObject<MmWaveEnbNetDevice> ();
+
+  std::cout <<"Free "<<enbMmwDev->GetEarfcn()<<"\t"<< enbMmwDev->GetBandwidth()<< "End"<<std::endl;
+  //*stream->GetStream () << Simulator::Now ().GetSeconds () << "\t" <<frequency<< std::endl;
+ // std::cout<<Simulator::Now ().GetSeconds () << "\t" <<frequency<< std::endl;
+ //std::cout<<Simulator::Now ().GetSeconds () << "\t" <<frequency<< std::endl
+//
+}
+#endif
 #if 0
 void
 CalculateThroughput ()
@@ -137,7 +153,7 @@ main (int argc, char *argv[])
   double frequency0 = 28e9;//value from Paper//CenterFreq
   double frequency1 = 73e9;
   bool useCa = false;
-  std::string condition = "n"; // channel condition, l = LOS, n = NLOS, otherwise the condition is randomly determined
+  std::string condition = "l"; // channel condition, l = LOS, n = NLOS, otherwise the condition is randomly determined
 
 
 #if 0
@@ -180,14 +196,14 @@ main (int argc, char *argv[])
   if (condition == "l")
     {
       ptr_mmWave->SetChannelConditionModelType ("ns3::AlwaysLosChannelConditionModel");
-      ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel");
-    }
-  else if (condition == "l")
+     }
+  else if (condition == "n")
     {
-      //ptr_mmWave->SetPathlossModelType (" ns3::ThreeGppBuildingPropagationLossModel");
+
       ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel");
       ptr_mmWave->SetChannelConditionModelType ("ns3::NeverLosChannelConditionModel");
     }
+
   double x_min = 0.0;
   double x_max = 40.0;
   double y_min = 20.0;
@@ -222,7 +238,7 @@ main (int argc, char *argv[])
   uemobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
   uemobility.SetPositionAllocator (uePositionAlloc);
   uemobility.Install (ueNodes);
-  Simulator::Schedule (Seconds (0), &ChangeSpeed, ueNodes.Get (0), Vector (20, 0.0, 0)); // start UE movement
+  Simulator::Schedule (Seconds (0.0), &ChangeSpeed, ueNodes.Get (0), Vector (20, 0.0, 0)); // start UE movement
 
   BuildingsHelper::Install (ueNodes);
   NetDeviceContainer enbNetDev = ptr_mmWave->InstallEnbDevice (enbNodes);
@@ -230,7 +246,7 @@ main (int argc, char *argv[])
   ptr_mmWave->AttachToClosestEnb (ueNetDev, enbNetDev);
   ptr_mmWave->EnableTraces ();
 
-  // CC 0
+  /// CC 0
   // 1. create MmWavePhyMacCommon object
   Ptr<MmWavePhyMacCommon> phyMacConfig0 = CreateObject<MmWavePhyMacCommon> ();
   phyMacConfig0->SetBandwidth (totalBandwidth );
@@ -240,6 +256,7 @@ main (int argc, char *argv[])
   phyMacConfig0->SetSubframePerFrame (10);
   phyMacConfig0->SetSymbolPeriod (MicroSeconds (4.16));
   phyMacConfig0->SetSymbPerSlot (30);
+  std::cout<< " System Bandwith "<<phyMacConfig0->GetRbWidth()* phyMacConfig0->GetNumRb();
   // 2. create the MmWaveComponentCarrier object
   Ptr<MmWaveComponentCarrier> cc0 = CreateObject<MmWaveComponentCarrier> ();
   cc0->SetConfigurationParameters (phyMacConfig0);
@@ -254,6 +271,7 @@ main (int argc, char *argv[])
       phyMacConfig1->SetBandwidth (totalBandwidth / 2);
       phyMacConfig1->SetCentreFrequency (frequency1);
       phyMacConfig1->SetCcId (1);
+
 
       // 2. create the MmWaveComponentCarrier object
       cc1 = CreateObject<MmWaveComponentCarrier> ();
@@ -277,26 +295,35 @@ main (int argc, char *argv[])
 
 
   //   streamUePosition->GetStream () << "Time" << "\t" << "Ue DistanceFrom eNB_model" << std::endl;
-#if 0
-  double numPrints = 0;
-  for (int i = 0; i < numPrints; i++)
-    {
-        //Simulator::Schedule (Seconds(i * simTime / numPrints), &PrintPosition, ueNodes.Get (0),enbNodes.Get (0),streamUePosition);
-        Simulator::Schedule (Seconds((10.0 / numPrints) * i), &PrintPosition, ueNodes.Get (0),enbNodes.Get (0),streamUePosition);
-      //   Simulator::Schedule (Seconds (1.1), &CalculateThroughput);
+#if PrintUePosition
+  double numPrints = 5;
+  for (int i = 0; i <= numPrints; i++)
+    { 
+      Simulator::Schedule (Seconds((5 / numPrints) * i), &PrintPosition, ueNodes.Get (0),enbNodes.Get (0),streamUePosition);
     }
 
-#endif
-Simulator::Schedule (Seconds(4), &PrintPosition, ueNodes.Get (0),enbNodes.Get (0),streamUePosition);
+  #endif
+
 
 
   // Activate a data radio bearer
   enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
   EpsBearer bearer (q);
-  //ptr_mmWave->EnableDlPhyTrace ();
-
   ptr_mmWave->ActivateDataRadioBearer (ueNetDev, bearer);
-  Simulator::Stop (Seconds (10));// 20m/s need to reach 100m
+
+  //enbMmwDev = enbNetDev.Get (0)->GetObject<MmWaveEnbNetDevice> ();
+  //tr<MmWaveEnbNetDevice> enbMmwDev = enbNetDev.Get (0)->GetObject<MmWaveEnbNetDevice> ();
+  //std::cout <<"DAbba "<<enbMmwDev->GetEarfcn()<< std::endl;
+
+
+#if IsPrintFrequency
+  double numOfPrints = 5;
+  for (int i = 0; i <= numOfPrints; i++)
+    {
+      Simulator::Schedule (Seconds((5 / numOfPrints) * i), &PrintFrequency,enbNetDev.Get (0));
+    }
+#endif
+  Simulator::Stop (Seconds (5));// 20m/s need to reach 100m
   Simulator::Run ();
   Simulator::Destroy ();
   return 0;
