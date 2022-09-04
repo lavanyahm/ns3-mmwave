@@ -51,9 +51,6 @@ using namespace mmwave;
 NS_LOG_COMPONENT_DEFINE ("mymmWave-example");
 
 #define PrintUePosition false
-Ptr<PacketSink> sink;                         /* Pointer to the packet sink application */
-uint64_t lastTotalRx = 0;
-
 /*Ue moving */
 void
 ChangeSpeed (Ptr<Node> n, Vector speed)
@@ -93,7 +90,7 @@ main (int argc, char *argv[])
     bool useCa = false;
 
     uint16_t numberOfeNBNodes = 1;
-    uint16_t numberOfUeNodes = 1;
+    uint16_t numberOfUeNodes = 2;
     //Position and Speed of Ues
     double Ue_x= 40.0;
     double Ue_y= 20.0;
@@ -137,17 +134,17 @@ main (int argc, char *argv[])
                                    6.0, 6.5,
                                    0.0, 1.5));
 
-/*Set Channel and Path Loss Conditions*/
+    /*Set Channel and Path Loss Conditions*/
     if (condition == "l")
-   {
-       ptr_mmWave->SetChannelConditionModelType ("ns3::AlwaysLosChannelConditionModel");
-   }
-   else if (condition == "n")
-   {
+    {
+        ptr_mmWave->SetChannelConditionModelType ("ns3::AlwaysLosChannelConditionModel");
+    }
+    else if (condition == "n")
+    {
 
-       ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel");
-       ptr_mmWave->SetChannelConditionModelType ("ns3::NeverLosChannelConditionModel");
-   }
+        ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel");
+        ptr_mmWave->SetChannelConditionModelType ("ns3::NeverLosChannelConditionModel");
+    }
     /*install  Mobility Model*/
     Ptr<ListPositionAllocator> uePositionAlloc = CreateObject<ListPositionAllocator> ();
     for (uint16_t i = 0; i < numberOfUeNodes; i++)
@@ -169,7 +166,7 @@ main (int argc, char *argv[])
     BuildingsHelper::Install (enbNodes);
     BuildingsHelper::Install (ueNodes);
 
-     /// CC 0
+    /// CC 0
     // 1. create MmWavePhyMacCommon object
     Ptr<MmWavePhyMacCommon> phyMacConfig0 = CreateObject<MmWavePhyMacCommon> ();
     phyMacConfig0->SetBandwidth (totalBandwidth );
@@ -220,10 +217,14 @@ main (int argc, char *argv[])
     EpsBearer bearer (q);
     ptr_mmWave->ActivateDataRadioBearer (ueNetDev, bearer);
     ptr_mmWave->EnableTraces ();
-
+    /*start Ue Moblity*/
+    for (uint16_t i = 0; i < numberOfUeNodes; i++)
+    {
+        Simulator::Schedule (Seconds (0.0), &ChangeSpeed, ueNodes.Get (i), Vector (Ue_Speed, 0.0, 0)); // start UE movement
+    }
 #if PrintUePosition
     AsciiTraceHelper asciiTraceHelper;
-    Ptr<OutputStreamWrapper> Ue_1Positionstream = asciiTraceHelper.CreateFileStream ("UePosition.dat");
+    Ptr<OutputStreamWrapper> Ue_1Positionstream = asciiTraceHelper.CreateFileStream ("Ue_1Positionstream.dat");
     Ptr<OutputStreamWrapper> Ue_2Positionstream = asciiTraceHelper.CreateFileStream ("Ue_2Positionstream.dat");
     double numPrints = 5;
     for (int i = 0; i <= numPrints; i++)
@@ -236,10 +237,6 @@ main (int argc, char *argv[])
         Simulator::Schedule (Seconds((simTime / numPrints) * i), &PrintPosition, ueNodes.Get (1),enbNodes.Get (0),Ue_2Positionstream);
     }
 #endif
-
-    /*start Ue Moblity*/
-    Simulator::Schedule (Seconds (0.0), &ChangeSpeed, ueNodes.Get (0), Vector (Ue_Speed, 0.0, 0)); // start UE movement
-  //  Simulator::Schedule (Seconds (0.0), &ChangeSpeed, ueNodes.Get (1), Vector (Ue_Speed, 0.0, 0)); // start UE movement
     Simulator::Stop (Seconds (simTime));// 20m/s need to reach 100m
     Simulator::Run ();
     Simulator::Destroy ();
