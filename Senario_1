@@ -1,0 +1,20 @@
+/* senario_1*/
+
+
+1. Exprimental setup 
+--------------------
+
+No Of Ues == 1
+No Of enB  ==1
+Ue speed   = Contant Speed 20 ms moving towords cell edge
+Ue initial Position = 40, 20, 00
+
+Results
+--------
+
+Extracting SINR(DB) and Data (tbSize) RxPacketTrace.txt
+
+TO Do 
+-----
+
+Radio Environment Map

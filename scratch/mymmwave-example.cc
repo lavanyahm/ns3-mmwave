@@ -50,282 +50,199 @@ using namespace mmwave;
 
 NS_LOG_COMPONENT_DEFINE ("mymmWave-example");
 
-#define PrintPositions false
 #define PrintUePosition false
-#define IsPrintFrequency true
 Ptr<PacketSink> sink;                         /* Pointer to the packet sink application */
 uint64_t lastTotalRx = 0;
 
-Ptr<MmWaveEnbNetDevice> enbMmwDev;
 /*Ue moving */
 void
 ChangeSpeed (Ptr<Node> n, Vector speed)
 {
-  n->GetObject<ConstantVelocityMobilityModel> ()->SetVelocity (speed);
-  // NS_LOG_UNCOND (n->GetObject<ConstantVelocityMobilityModel> ()->GetDistanceFrom());
-  //  NS_LOG_UNCOND ("************************--------------------Change Speed-------------------------------*****************");
+    n->GetObject<ConstantVelocityMobilityModel> ()->SetVelocity (speed);
+    // NS_LOG_UNCOND (n->GetObject<ConstantVelocityMobilityModel> ()->GetDistanceFrom());
+    //  NS_LOG_UNCOND ("************************--------------------Change Speed-------------------------------*****************");
 }
 #if PrintUePosition
 void
 PrintPosition (Ptr<Node> Uenode,Ptr<Node>enB, Ptr<OutputStreamWrapper> stream)
 {
-
-  Ptr<MobilityModel> Ue_model = Uenode->GetObject<MobilityModel> ();
-  Ptr<MobilityModel> eNB_model = enB->GetObject<MobilityModel> ();
-  *stream->GetStream () << Simulator::Now ().GetSeconds () << "\t" << Ue_model->GetDistanceFrom (eNB_model)<< std::endl;
+    Ptr<MobilityModel> Ue_model = Uenode->GetObject<MobilityModel> ();
+    Ptr<MobilityModel> eNB_model = enB->GetObject<MobilityModel> ();
+    *stream->GetStream () << Simulator::Now ().GetSeconds () << "\t" << Ue_model->GetDistanceFrom (eNB_model)<< std::endl;
 }
 #endif
 
-#if IsPrintFrequency
-
-// void PrintFrequency ( double frequency)
-void PrintFrequency (NetDeviceContainer enbNetDev )
-{
-   enbMmwDev = enbNetDev.Get (0)->GetObject<MmWaveEnbNetDevice> ();
-
-  std::cout <<"Free "<<enbMmwDev->GetEarfcn()<<"\t"<< enbMmwDev->GetBandwidth()<< "End"<<std::endl;
-  //*stream->GetStream () << Simulator::Now ().GetSeconds () << "\t" <<frequency<< std::endl;
- // std::cout<<Simulator::Now ().GetSeconds () << "\t" <<frequency<< std::endl;
- //std::cout<<Simulator::Now ().GetSeconds () << "\t" <<frequency<< std::endl
-//
-}
-#endif
-#if 0
-void
-CalculateThroughput ()
-{
-  Time now = Simulator::Now ();                                         /* Return the simulator's virtual time. */
-  double cur = (sink->GetTotalRx () - lastTotalRx) * (double) 8 / 1e5;     /* Convert Application RX Packets to MBits. */
-  std::cout << now.GetSeconds () << "s: \t" << cur << " Mbit/s" << std::endl;
-  lastTotalRx = sink->GetTotalRx ();
-  Simulator::Schedule (MilliSeconds (100), &CalculateThroughput);
-}
-#endif
 int
 main (int argc, char *argv[])
 {
-  CommandLine cmd;
-  cmd.Parse (argc, argv);
+    CommandLine cmd;
+    cmd.Parse (argc, argv);
 
-  Config::SetDefault ("ns3::MmWaveEnbPhy::TxPower", DoubleValue (double(30)));
-  Config::SetDefault ("ns3::MmWaveEnbPhy::NoiseFigure", DoubleValue (5));
+    Config::SetDefault ("ns3::MmWaveEnbPhy::TxPower", DoubleValue (double(30)));
+    Config::SetDefault ("ns3::MmWaveEnbPhy::NoiseFigure", DoubleValue (5));
 
-  Ptr<MmWaveHelper> ptr_mmWave = CreateObject<MmWaveHelper> ();
-  /* A configuration example.
+    Ptr<MmWaveHelper> ptr_mmWave = CreateObject<MmWaveHelper> ();
+    /* A configuration example.
     * ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute("SymbolPerSlot", UintegerValue(30));*/
-#if PrintPositions
-  UintegerValue uintegerValue;
-  double ueInitialPosition = 40;
-  double ueFinalPosition = 140;
+    /* Configuration setting in the paper 5G mmWave Module for the ns-3 Network Simulator*/
 
-  int windowForTransient = 150; // number of samples for the vector to use in the filter
-  //GlobalValue::GetValueByName ("reportTablePeriodicity", uintegerValue);
-  int ReportTablePeriodicity = 1600;//(int)uintegerValue.Get (); // in microseconds
+    double simTime=5;//Seconds
+    double totalBandwidth = 13.88e6;//SubbandWidth
+    double frequency0 = 28e9;//value from Paper//CenterFreq
+    double frequency1 = 73e9;
+    bool useCa = false;
 
-  if (ReportTablePeriodicity == 1600)
+    uint16_t numberOfeNBNodes = 1;
+    uint16_t numberOfUeNodes = 1;
+    //Position and Speed of Ues
+    double Ue_x= 40.0;
+    double Ue_y= 20.0;
+    double Ue_z= 00.0;
+    double Ue_Speed= 20.0;
+
+    std::string condition = "l"; // channel condition, l = LOS, n = NLOS, otherwise the condition is randomly determined
+    NodeContainer enbNodes;
+    NodeContainer ueNodes;
+    enbNodes.Create (numberOfeNBNodes);
+    ueNodes.Create (numberOfUeNodes);
+
+    /*Create Building obstracles*/
+    double x_min = 0.0;
+    double x_max = 40.0;
+    double y_min = 20.0;
+    double y_max = 50.0;
+    double z_min = 0.0;
+    double z_max =  1.5;
+
+    Ptr < Building > building1;
+    building1 = Create<Building> ();
+    building1->SetBoundaries (Box (x_min, x_max, y_min, y_max, z_min, z_max));
+    building1->SetBuildingType (Building::Residential);
+    building1->SetExtWallsType (Building::ConcreteWithWindows);
+
+    Ptr < Building > building2;
+    building2 = Create<Building> ();
+    building2->SetBoundaries (Box (0.0,60.5,
+                                   9.5, 10.0,
+                                   0.0, 1.5));
+
+    Ptr < Building > building3;
+    building3 = Create<Building> ();
+    building3->SetBoundaries (Box (4.0,60.5,
+                                   50.5, 60.0,
+                                   0.0, 1.5));
+    Ptr < Building > building4;
+    building1 = Create<Building> ();
+    building1->SetBoundaries (Box (60.0,60.5,
+                                   6.0, 6.5,
+                                   0.0, 1.5));
+
+/*Set Channel and Path Loss Conditions*/
+    if (condition == "l")
+   {
+       ptr_mmWave->SetChannelConditionModelType ("ns3::AlwaysLosChannelConditionModel");
+   }
+   else if (condition == "n")
+   {
+
+       ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel");
+       ptr_mmWave->SetChannelConditionModelType ("ns3::NeverLosChannelConditionModel");
+   }
+    /*install  Mobility Model*/
+    Ptr<ListPositionAllocator> uePositionAlloc = CreateObject<ListPositionAllocator> ();
+    for (uint16_t i = 0; i < numberOfUeNodes; i++)
     {
-      windowForTransient = 150;
-    }
-  else if (ReportTablePeriodicity == 25600)
-    {
-      windowForTransient = 50;
-    }
-  else if (ReportTablePeriodicity == 12800)
-    {
-      windowForTransient = 100;
-    }
-  else
-    {
-      // NS_ASSERT_MSG (false, "Unrecognized");
-      windowForTransient = 100;
-    }
-
-
-  int vectorTransient = windowForTransient * ReportTablePeriodicity;
-  double ueSpeed = 20.0;
-  double transientDuration = double(vectorTransient) / 1000000;
-  double simTime = transientDuration + ((double)ueFinalPosition - (double)ueInitialPosition) / ueSpeed + 1;
-#endif
-
-  /* Configuration setting in the paper 5G mmWave Module for the ns-3 Network Simulator*/
-
-  double totalBandwidth = 13.88e6;//SubbandWidth
-  double frequency0 = 28e9;//value from Paper//CenterFreq
-  double frequency1 = 73e9;
-  bool useCa = false;
-  std::string condition = "l"; // channel condition, l = LOS, n = NLOS, otherwise the condition is randomly determined
-
-
-#if 0
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute ("SlotPerSubFrame",UintegerValue(8));
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute ("SymbolLeghth",TimeValue (MicroSeconds (4.16))  );
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute ("SubframePerFrame",UintegerValue(10));
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute("NumReferenceSymbols", UintegerValue(6));
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute("TDDControlDataPattren", StringValue("ccdddddd"));
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute("SubcarriersPerSubband", UintegerValue(48));
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute("SubbandsPerRB", UintegerValue(18));
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute ("SubbandWidth", DoubleValue(13.89e6));
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute ("NumResourceBlock",UintegerValue(4));
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute ("CenterFreq",DoubleValue(28e9));
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetCentreFrequency (28e9);
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetNumReferenceSymbols (6);
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetSlotPerSubframe (8);
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetSubframePerFrame (10);
-  ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetSymbolPeriod ((MicroSeconds (4.16)));
-# endif
-
-  NodeContainer enbNodes;
-  NodeContainer ueNodes;
-  enbNodes.Create (1);
-  ueNodes.Create (1);
-
-  Ptr<ListPositionAllocator> enbPositionAlloc = CreateObject<ListPositionAllocator> ();
-  enbPositionAlloc->Add (Vector (0.0, 0.0, 0.0));
-
-  MobilityHelper enbmobility;
-  enbmobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  enbmobility.SetPositionAllocator (enbPositionAlloc);
-  enbmobility.Install (enbNodes);
-  BuildingsHelper::Install (enbNodes);
-
-
-  Ptr<ListPositionAllocator> uePositionAlloc = CreateObject<ListPositionAllocator> ();
-  uePositionAlloc->Add (Vector (40.0, 20.0, 0.0));
-
-
-  if (condition == "l")
-    {
-      ptr_mmWave->SetChannelConditionModelType ("ns3::AlwaysLosChannelConditionModel");
-     }
-  else if (condition == "n")
-    {
-
-      ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel");
-      ptr_mmWave->SetChannelConditionModelType ("ns3::NeverLosChannelConditionModel");
+        uePositionAlloc->Add (Vector (Ue_x+(20*i), Ue_y, Ue_z));
     }
 
-  double x_min = 0.0;
-  double x_max = 40.0;
-  double y_min = 20.0;
-  double y_max = 50.0;
-  double z_min = 0.0;
-  double z_max =  1.5;
+    MobilityHelper uemobility;
+    uemobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
+    uemobility.SetPositionAllocator (uePositionAlloc);
+    uemobility.Install (ueNodes);
 
-  Ptr < Building > building1;
-  building1 = Create<Building> ();
-  building1->SetBoundaries (Box (x_min, x_max, y_min, y_max, z_min, z_max));
-  building1->SetBuildingType (Building::Residential);
-  building1->SetExtWallsType (Building::ConcreteWithWindows);
+    Ptr<ListPositionAllocator> enbPositionAlloc = CreateObject<ListPositionAllocator> ();
+    enbPositionAlloc->Add (Vector (0.0, 0.0, 0.0));
+    MobilityHelper enbmobility;
+    enbmobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
+    enbmobility.SetPositionAllocator (enbPositionAlloc);
+    enbmobility.Install (enbNodes);
+    BuildingsHelper::Install (enbNodes);
+    BuildingsHelper::Install (ueNodes);
 
-  Ptr < Building > building2;
-  building2 = Create<Building> ();
-  building2->SetBoundaries (Box (0.0,60.5,
-                                 9.5, 10.0,
-                                 0.0, 1.5));
+     /// CC 0
+    // 1. create MmWavePhyMacCommon object
+    Ptr<MmWavePhyMacCommon> phyMacConfig0 = CreateObject<MmWavePhyMacCommon> ();
+    phyMacConfig0->SetBandwidth (totalBandwidth );
+    phyMacConfig0->SetCentreFrequency (frequency0);
+    phyMacConfig0->SetNumReferenceSymbols (6);
+    phyMacConfig0->SetSlotPerSubframe (8);
+    phyMacConfig0->SetSubframePerFrame (10);
+    phyMacConfig0->SetSymbolPeriod (MicroSeconds (4.16));
+    phyMacConfig0->SetSymbPerSlot (30);
+    std::cout<< " System Bandwith "<<phyMacConfig0->GetRbWidth()* phyMacConfig0->GetNumRb()<<"\n";
+    // 2. create the MmWaveComponentCarrier object
+    Ptr<MmWaveComponentCarrier> cc0 = CreateObject<MmWaveComponentCarrier> ();
+    cc0->SetConfigurationParameters (phyMacConfig0);
+    cc0->SetAsPrimary (true);
 
-  Ptr < Building > building3;
-  building3 = Create<Building> ();
-  building3->SetBoundaries (Box (4.0,60.5,
-                                 50.5, 60.0,
-                                 0.0, 1.5));
-  Ptr < Building > building4;
-  building1 = Create<Building> ();
-  building1->SetBoundaries (Box (60.0,60.5,
-                                 6.0, 6.5,
-                                 0.0, 1.5));
-
-  MobilityHelper uemobility;
-  uemobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
-  uemobility.SetPositionAllocator (uePositionAlloc);
-  uemobility.Install (ueNodes);
-  Simulator::Schedule (Seconds (0.0), &ChangeSpeed, ueNodes.Get (0), Vector (20, 0.0, 0)); // start UE movement
-
-  BuildingsHelper::Install (ueNodes);
-  NetDeviceContainer enbNetDev = ptr_mmWave->InstallEnbDevice (enbNodes);
-  NetDeviceContainer ueNetDev = ptr_mmWave->InstallUeDevice (ueNodes);
-  ptr_mmWave->AttachToClosestEnb (ueNetDev, enbNetDev);
-  ptr_mmWave->EnableTraces ();
-
-  /// CC 0
-  // 1. create MmWavePhyMacCommon object
-  Ptr<MmWavePhyMacCommon> phyMacConfig0 = CreateObject<MmWavePhyMacCommon> ();
-  phyMacConfig0->SetBandwidth (totalBandwidth );
-  phyMacConfig0->SetCentreFrequency (frequency0);
-  phyMacConfig0->SetNumReferenceSymbols (6);
-  phyMacConfig0->SetSlotPerSubframe (8);
-  phyMacConfig0->SetSubframePerFrame (10);
-  phyMacConfig0->SetSymbolPeriod (MicroSeconds (4.16));
-  phyMacConfig0->SetSymbPerSlot (30);
-  std::cout<< " System Bandwith "<<phyMacConfig0->GetRbWidth()* phyMacConfig0->GetNumRb();
-  // 2. create the MmWaveComponentCarrier object
-  Ptr<MmWaveComponentCarrier> cc0 = CreateObject<MmWaveComponentCarrier> ();
-  cc0->SetConfigurationParameters (phyMacConfig0);
-  cc0->SetAsPrimary (true);
-
-  // CC 1
-  Ptr<MmWaveComponentCarrier> cc1;
-  if (useCa)
+    // CC 1
+    Ptr<MmWaveComponentCarrier> cc1;
+    if (useCa)
     {
-      // 1. create MmWavePhyMacCommon object
-      Ptr<MmWavePhyMacCommon> phyMacConfig1 = CreateObject<MmWavePhyMacCommon> ();
-      phyMacConfig1->SetBandwidth (totalBandwidth / 2);
-      phyMacConfig1->SetCentreFrequency (frequency1);
-      phyMacConfig1->SetCcId (1);
+        // 1. create MmWavePhyMacCommon object
+        Ptr<MmWavePhyMacCommon> phyMacConfig1 = CreateObject<MmWavePhyMacCommon> ();
+        phyMacConfig1->SetBandwidth (totalBandwidth / 2);
+        phyMacConfig1->SetCentreFrequency (frequency1);
+        phyMacConfig1->SetCcId (1);
 
-
-      // 2. create the MmWaveComponentCarrier object
-      cc1 = CreateObject<MmWaveComponentCarrier> ();
-      cc1->SetConfigurationParameters (phyMacConfig1);
-      cc1->SetAsPrimary (false);
+        // 2. create the MmWaveComponentCarrier object
+        cc1 = CreateObject<MmWaveComponentCarrier> ();
+        cc1->SetConfigurationParameters (phyMacConfig1);
+        cc1->SetAsPrimary (false);
     }
-  // create the CC map
-  std::map<uint8_t, MmWaveComponentCarrier> ccMap;
-  ccMap [0] = *cc0;
-  if (useCa)
+    // create the CC map
+    std::map<uint8_t, MmWaveComponentCarrier> ccMap;
+    ccMap [0] = *cc0;
+    if (useCa)
     {
-      ccMap [1] = *cc1;
+        ccMap [1] = *cc1;
     }
+    /* Add mmWave stack to Ue and enbs*/
+    NetDeviceContainer enbNetDev = ptr_mmWave->InstallEnbDevice (enbNodes);
+    NetDeviceContainer ueNetDev = ptr_mmWave->InstallUeDevice (ueNodes);
 
-  ptr_mmWave->SetCcPhyParams (ccMap);
-  ptr_mmWave->Initialize ();
+    /*Attach Ues to Enb */
+    ptr_mmWave->SetCcPhyParams (ccMap);
+    ptr_mmWave->Initialize ();
+    ptr_mmWave->AttachToClosestEnb (ueNetDev, enbNetDev);
+    // Activate a data radio bearer
+    enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
+    EpsBearer bearer (q);
+    ptr_mmWave->ActivateDataRadioBearer (ueNetDev, bearer);
+    ptr_mmWave->EnableTraces ();
 
-
-  AsciiTraceHelper asciiTraceHelper;
-  Ptr<OutputStreamWrapper> streamUePosition = asciiTraceHelper.CreateFileStream ("UePosition.dat");
-
-
-  //   streamUePosition->GetStream () << "Time" << "\t" << "Ue DistanceFrom eNB_model" << std::endl;
 #if PrintUePosition
-  double numPrints = 5;
-  for (int i = 0; i <= numPrints; i++)
-    { 
-      Simulator::Schedule (Seconds((5 / numPrints) * i), &PrintPosition, ueNodes.Get (0),enbNodes.Get (0),streamUePosition);
+    AsciiTraceHelper asciiTraceHelper;
+    Ptr<OutputStreamWrapper> Ue_1Positionstream = asciiTraceHelper.CreateFileStream ("UePosition.dat");
+    Ptr<OutputStreamWrapper> Ue_2Positionstream = asciiTraceHelper.CreateFileStream ("Ue_2Positionstream.dat");
+    double numPrints = 5;
+    for (int i = 0; i <= numPrints; i++)
+    {
+        Simulator::Schedule (Seconds((simTime / numPrints) * i), &PrintPosition, ueNodes.Get (0),enbNodes.Get (0),Ue_1Positionstream);
     }
 
-  #endif
-
-
-
-  // Activate a data radio bearer
-  enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
-  EpsBearer bearer (q);
-  ptr_mmWave->ActivateDataRadioBearer (ueNetDev, bearer);
-
-  //enbMmwDev = enbNetDev.Get (0)->GetObject<MmWaveEnbNetDevice> ();
-  //tr<MmWaveEnbNetDevice> enbMmwDev = enbNetDev.Get (0)->GetObject<MmWaveEnbNetDevice> ();
-  //std::cout <<"DAbba "<<enbMmwDev->GetEarfcn()<< std::endl;
-
-
-#if IsPrintFrequency
-  double numOfPrints = 5;
-  for (int i = 0; i <= numOfPrints; i++)
+    for (int i = 0; i <= numPrints; i++)
     {
-      Simulator::Schedule (Seconds((5 / numOfPrints) * i), &PrintFrequency,enbNetDev.Get (0));
+        Simulator::Schedule (Seconds((simTime / numPrints) * i), &PrintPosition, ueNodes.Get (1),enbNodes.Get (0),Ue_2Positionstream);
     }
 #endif
-  Simulator::Stop (Seconds (5));// 20m/s need to reach 100m
-  Simulator::Run ();
-  Simulator::Destroy ();
-  return 0;
+
+    /*start Ue Moblity*/
+    Simulator::Schedule (Seconds (0.0), &ChangeSpeed, ueNodes.Get (0), Vector (Ue_Speed, 0.0, 0)); // start UE movement
+  //  Simulator::Schedule (Seconds (0.0), &ChangeSpeed, ueNodes.Get (1), Vector (Ue_Speed, 0.0, 0)); // start UE movement
+    Simulator::Stop (Seconds (simTime));// 20m/s need to reach 100m
+    Simulator::Run ();
+    Simulator::Destroy ();
+    return 0;
 }
 
