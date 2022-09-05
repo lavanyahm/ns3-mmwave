@@ -7,7 +7,7 @@ Ue_1_data_array = []
 Ue_2_data_array = []
 Ue_1_SINR_array = []
 Ue_2_SINR_array = []
-with open("RxPacketTrace_LOS.dat")as f1:
+with open("RxPacketTrace_NLOS.dat")as f1:
     for  line1 in f1:
         if (line1.split('\t')[8]) == '1':
             Ue_1_data_array.append(Ue1_iniPosi)
@@ -30,19 +30,19 @@ with open("RxPacketTrace_LOS.dat")as f1:
             Ue_2_SINR_array.append('\n')
             Ue2_iniPosi = Ue2_iniPosi + 0.002572687 
 f1.close()        
-with open("Data_RxPacketTrace_LOS_Ue1.dat","w") as fileh:
+with open("Data_RxPacketTrace_NLOS_Ue1.dat","w") as fileh:
     for item in Ue_1_data_array:
         fileh.write('%s' %item)
 fileh.close()            
-with open("Data_RxPacketTrace_LOS_Ue2.dat","w") as fileh:
+with open("Data_RxPacketTrace_NLOS_Ue2.dat","w") as fileh:
     for item in Ue_2_data_array:
         fileh.write('%s' %item)
 fileh.close()  
-with open("SINR_RxPacketTrace_LOS_Ue1.dat","w") as fileh:
+with open("SINR_RxPacketTrace_NLOS_Ue1.dat","w") as fileh:
     for item in Ue_1_SINR_array:
         fileh.write('%s' %item)
 fileh.close()            
-with open("SINR_RxPacketTrace_LOS_Ue2.dat","w") as fileh:
+with open("SINR_RxPacketTrace_NLOS_Ue2.dat","w") as fileh:
     for item in Ue_2_SINR_array:
         fileh.write('%s' %item)
 fileh.close()            
