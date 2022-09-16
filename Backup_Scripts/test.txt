@@ -1,0 +1,71 @@
+grep: .qtc_clangd/.cache/clangd/index/channel-condition-model.h.87E8114C117E41F7.idx: binary file matches
+grep: .qtc_clangd/.cache/clangd/index/channel-condition-model.h.3691A052A7DC6595.idx: binary file matches
+grep: .qtc_clangd/.cache/clangd/index/tcp-tx-buffer.h.730770F4F6FA4FCD.idx: binary file matches
+grep: .qtc_clangd/.cache/clangd/index/tcp-tx-buffer.cc.A70D4443CA43E3CF.idx: binary file matches
+grep: .qtc_clangd/.cache/clangd/index/channel-condition-model.cc.B02B1C1A31910BAA.idx: binary file matches
+grep: .qtc_clangd/.cache/clangd/index/tcp-tx-buffer.h.184C0EBF69DB5C17.idx: binary file matches
+grep: .qtc_clangd/.cache/clangd/index/tcp-tx-buffer-test.cc.D00E4F920AF4EF64.idx: binary file matches
+RELEASE_NOTES:- Bug 2874 - tcp: Corrected interpretation of RFC 6675 for IsLost check
+src/wifi/bindings/modulegen__gcc_ILP32.py:    ## channel-condition-model.h (module 'propagation'): bool ns3::ChannelCondition::IsLos() const [member function]
+src/wifi/bindings/modulegen__gcc_ILP32.py:    cls.add_method('IsLos', 
+src/wifi/bindings/modulegen__gcc_LP64.py:    ## channel-condition-model.h (module 'propagation'): bool ns3::ChannelCondition::IsLos() const [member function]
+src/wifi/bindings/modulegen__gcc_LP64.py:    cls.add_method('IsLos', 
+src/internet/bindings/modulegen__gcc_ILP32.py:    ## tcp-tx-buffer.h (module 'internet'): bool ns3::TcpTxBuffer::IsLost(ns3::SequenceNumber32 const & seq) const [member function]
+src/internet/bindings/modulegen__gcc_ILP32.py:    cls.add_method('IsLost', 
+src/internet/bindings/modulegen__gcc_LP64.py:    ## tcp-tx-buffer.h (module 'internet'): bool ns3::TcpTxBuffer::IsLost(ns3::SequenceNumber32 const & seq) const [member function]
+src/internet/bindings/modulegen__gcc_LP64.py:    cls.add_method('IsLost', 
+src/internet/test/tcp-tx-buffer-test.cc:  void TestIsLost ();
+src/internet/test/tcp-tx-buffer-test.cc:  Simulator::Schedule (Seconds (0.0), &TcpTxBufferTestCase::TestIsLost, this);
+src/internet/test/tcp-tx-buffer-test.cc:TcpTxBufferTestCase::TestIsLost ()
+src/internet/test/tcp-tx-buffer-test.cc:    NS_TEST_ASSERT_MSG_EQ (txBuf->IsLost(SequenceNumber32((i*1000)+1)), false,
+src/internet/test/tcp-tx-buffer-test.cc:    NS_TEST_ASSERT_MSG_EQ (txBuf->IsLost(SequenceNumber32((i*1000)+1)), false,
+src/internet/test/tcp-tx-buffer-test.cc:    NS_TEST_ASSERT_MSG_EQ (txBuf->IsLost(SequenceNumber32((i*1000)+1)), false,
+src/internet/test/tcp-tx-buffer-test.cc:  NS_TEST_ASSERT_MSG_EQ (txBuf->IsLost(SequenceNumber32(1)), true,
+src/internet/test/tcp-tx-buffer-test.cc:    NS_TEST_ASSERT_MSG_EQ (txBuf->IsLost(SequenceNumber32((i*1000)+1)), false,
+src/internet/model/tcp-tx-buffer.h:  bool IsLost (const SequenceNumber32 &seq) const;
+src/internet/model/tcp-tx-buffer.h:  bool IsLostRFC (const SequenceNumber32 &seq, const PacketList::const_iterator &segment) const;
+src/internet/model/tcp-tx-buffer.cc:TcpTxBuffer::IsLost (const SequenceNumber32 &seq) const
+src/internet/model/tcp-tx-buffer.cc:      // Search for the right iterator before calling IsLost()
+src/internet/model/tcp-tx-buffer.cc:   *     (1.c) IsLost (S2) returns true.
+src/internet/model/tcp-tx-buffer.cc:              NS_LOG_INFO("IsLost, returning" << beginOfCurrentPkt);
+src/internet/model/tcp-tx-buffer.cc:          bool isLost = IsLostRFC (beginOfCurrentPkt, it);
+src/internet/model/tcp-tx-buffer.cc:          // (a) If IsLost (S1) returns false: Pipe is incremented by 1 octet.
+src/internet/model/tcp-tx-buffer.cc:TcpTxBuffer::IsLostRFC (const SequenceNumber32 &seq, const PacketList::const_iterator &segment) const
+src/internet/model/tcp-socket-base.cc:      if (!m_txBuffer->IsLost (m_txBuffer->HeadSequence ()))
+src/internet/model/tcp-socket-base.cc:      // (2) If DupAcks < DupThresh but IsLost (HighACK + 1) returns true
+src/internet/model/tcp-socket-base.cc:      else if (m_txBuffer->IsLost (m_highRxAckMark + m_tcb->m_segmentSize))
+src/propagation/bindings/modulegen__gcc_ILP32.py:    ## channel-condition-model.h (module 'propagation'): bool ns3::ChannelCondition::IsLos() const [member function]
+src/propagation/bindings/modulegen__gcc_ILP32.py:    cls.add_method('IsLos', 
+src/propagation/bindings/modulegen__gcc_LP64.py:    ## channel-condition-model.h (module 'propagation'): bool ns3::ChannelCondition::IsLos() const [member function]
+src/propagation/bindings/modulegen__gcc_LP64.py:    cls.add_method('IsLos', 
+src/propagation/model/channel-condition-model.cc:ChannelCondition::IsLos () const
+src/propagation/model/channel-condition-model.h:  bool IsLos () const;
+src/spectrum/bindings/modulegen__gcc_ILP32.py:    ## channel-condition-model.h (module 'propagation'): bool ns3::ChannelCondition::IsLos() const [member function]
+src/spectrum/bindings/modulegen__gcc_ILP32.py:    cls.add_method('IsLos', 
+src/spectrum/bindings/modulegen__gcc_LP64.py:    ## channel-condition-model.h (module 'propagation'): bool ns3::ChannelCondition::IsLos() const [member function]
+src/spectrum/bindings/modulegen__gcc_LP64.py:    cls.add_method('IsLos', 
+src/spectrum/model/three-gpp-channel-model.cc:  bool los = channelCondition->IsLos ();
+src/spectrum/model/three-gpp-channel-model.cc:      if (channelCondition->IsLos ())
+src/spectrum/model/three-gpp-channel-model.cc:      if (channelCondition->IsLos ())
+src/spectrum/model/three-gpp-channel-model.cc:  bool los = channelCondition->IsLos ();
+src/buildings/bindings/modulegen__gcc_ILP32.py:    ## channel-condition-model.h (module 'propagation'): bool ns3::ChannelCondition::IsLos() const [member function]
+src/buildings/bindings/modulegen__gcc_ILP32.py:    cls.add_method('IsLos', 
+src/buildings/bindings/modulegen__gcc_LP64.py:    ## channel-condition-model.h (module 'propagation'): bool ns3::ChannelCondition::IsLos() const [member function]
+src/buildings/bindings/modulegen__gcc_LP64.py:    cls.add_method('IsLos', 
+src/buildings/model/three-gpp-v2v-channel-condition-model.cc:  if (cond->IsLos ())
+src/buildings/model/three-gpp-v2v-channel-condition-model.cc:  if (cond->IsLos ())
+grep: test.txt: input file is also the output
+grep: build/lib/libns3.33-internet-test-debug.so: binary file matches
+grep: build/lib/libns3.33-spectrum-debug.so: binary file matches
+grep: build/lib/libns3.33-internet-debug.so: binary file matches
+grep: build/lib/libns3.33-buildings-debug.so: binary file matches
+grep: build/lib/libns3.33-propagation-debug.so: binary file matches
+build/ns3/tcp-tx-buffer.h:  bool IsLost (const SequenceNumber32 &seq) const;
+build/ns3/tcp-tx-buffer.h:  bool IsLostRFC (const SequenceNumber32 &seq, const PacketList::const_iterator &segment) const;
+build/ns3/channel-condition-model.h:  bool IsLos () const;
+grep: build/src/internet/test/tcp-tx-buffer-test.cc.3.o: binary file matches
+grep: build/src/internet/model/tcp-socket-base.cc.1.o: binary file matches
+grep: build/src/internet/model/tcp-tx-buffer.cc.1.o: binary file matches
+grep: build/src/propagation/model/channel-condition-model.cc.1.o: binary file matches
+grep: build/src/spectrum/model/three-gpp-channel-model.cc.1.o: binary file matches
+grep: build/src/buildings/model/three-gpp-v2v-channel-condition-model.cc.1.o: binary file matches

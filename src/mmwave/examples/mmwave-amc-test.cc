@@ -100,7 +100,7 @@ main (int argc, char *argv[])
    *    Time (micro-sec)  |  Tb-size in bytes
    * */
   uint16_t numEnb = 1;
-  uint16_t numUe = 1;
+  uint16_t numUe = 2;
 
   double simTime = 1.0;
   bool harqEnabled = true;

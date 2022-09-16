@@ -72,9 +72,13 @@ PrintPosition (Ptr<Node> Uenode,Ptr<Node>enB, Ptr<OutputStreamWrapper> stream)
 int
 main (int argc, char *argv[])
 {
-    CommandLine cmd;
-    cmd.Parse (argc, argv);
 
+
+    std::string channel_condition = "l"; // channel condition, l = LOS, n = NLOS, otherwise the condition is randomly determined
+
+    CommandLine cmd;
+    cmd.AddValue("channel_condition","Channel Condition (LOS =l : NLOS=n",channel_condition);
+    cmd.Parse(argc,argv);
     Config::SetDefault ("ns3::MmWaveEnbPhy::TxPower", DoubleValue (double(30)));
     Config::SetDefault ("ns3::MmWaveEnbPhy::NoiseFigure", DoubleValue (5));
 
@@ -90,14 +94,25 @@ main (int argc, char *argv[])
     bool useCa = false;
 
     uint16_t numberOfeNBNodes = 1;
-    uint16_t numberOfUeNodes = 2;
+    uint16_t numberOfUeNodes = 1;
     //Position and Speed of Ues
     double Ue_x= 40.0;
     double Ue_y= 20.0;
     double Ue_z= 00.0;
-    double Ue_Speed= 20.0;
+    double Ue_Speed[2]= {20.0,0.0};
 
-    std::string condition = "l"; // channel condition, l = LOS, n = NLOS, otherwise the condition is randomly determined
+#if 0
+    double SetSlotPerSubframe [5]= {4,8,16,32,64};//Numeriology from 3
+    double SetBandwidthh[5]= {13.88e6,13.88e6,13.88e6,13.88e6,13.88e6};
+    double SetCentreFrequency[5]={28e9,28e9,28e9,28e9,28e9};
+    double SetNumReferenceSymbols[5]={6,6,6,6,6};
+    double SetSubframePerFrame [5]={10,10,10,10,10};
+    double SetSymbolPeriod [5]={4.16,4.16,4.16,4.16,4.16,};//MicroSeconds (4.16)
+    double SetSymbPerSlot [5]= {30,30,30,30,30};
+#endif
+
+
+
     NodeContainer enbNodes;
     NodeContainer ueNodes;
     enbNodes.Create (numberOfeNBNodes);
@@ -135,14 +150,20 @@ main (int argc, char *argv[])
                                    0.0, 1.5));
 
     /*Set Channel and Path Loss Conditions*/
-    if (condition == "l")
-    {
-        ptr_mmWave->SetChannelConditionModelType ("ns3::AlwaysLosChannelConditionModel");
-    }
-    else if (condition == "n")
-    {
+     ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel");
+   //Dont Conside ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppRmaPropagationLossModel");
+    // ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmaPropagationLossModel");
+    //   ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppIndoorOfficePropagationLossModel");
 
-        ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel");
+    if (channel_condition == "l")
+    {
+        std::cout<<"Channel Codition is LOS";
+        ptr_mmWave->SetChannelConditionModelType ("ns3::AlwaysLosChannelConditionModel");
+
+    }
+    else if (channel_condition == "n")
+    {
+         std::cout<<"Channel Codition is NLOS";       
         ptr_mmWave->SetChannelConditionModelType ("ns3::NeverLosChannelConditionModel");
     }
     /*install  Mobility Model*/
@@ -156,6 +177,8 @@ main (int argc, char *argv[])
     uemobility.SetMobilityModel ("ns3::ConstantVelocityMobilityModel");
     uemobility.SetPositionAllocator (uePositionAlloc);
     uemobility.Install (ueNodes);
+
+
 
     Ptr<ListPositionAllocator> enbPositionAlloc = CreateObject<ListPositionAllocator> ();
     enbPositionAlloc->Add (Vector (0.0, 0.0, 0.0));
@@ -172,10 +195,11 @@ main (int argc, char *argv[])
     phyMacConfig0->SetBandwidth (totalBandwidth );
     phyMacConfig0->SetCentreFrequency (frequency0);
     phyMacConfig0->SetNumReferenceSymbols (6);
-    phyMacConfig0->SetSlotPerSubframe (8);
+    phyMacConfig0->SetSlotPerSubframe (32);
     phyMacConfig0->SetSubframePerFrame (10);
     phyMacConfig0->SetSymbolPeriod (MicroSeconds (4.16));
     phyMacConfig0->SetSymbPerSlot (30);
+
     std::cout<< " System Bandwith "<<phyMacConfig0->GetRbWidth()* phyMacConfig0->GetNumRb()<<"\n";
     // 2. create the MmWaveComponentCarrier object
     Ptr<MmWaveComponentCarrier> cc0 = CreateObject<MmWaveComponentCarrier> ();
@@ -220,7 +244,7 @@ main (int argc, char *argv[])
     /*start Ue Moblity*/
     for (uint16_t i = 0; i < numberOfUeNodes; i++)
     {
-        Simulator::Schedule (Seconds (0.0), &ChangeSpeed, ueNodes.Get (i), Vector (Ue_Speed, 0.0, 0)); // start UE movement
+        Simulator::Schedule (Seconds (0.0), &ChangeSpeed, ueNodes.Get (i), Vector (Ue_Speed[i], 0.0, 0)); // start UE movement
     }
 #if PrintUePosition
     AsciiTraceHelper asciiTraceHelper;
@@ -232,10 +256,11 @@ main (int argc, char *argv[])
         Simulator::Schedule (Seconds((simTime / numPrints) * i), &PrintPosition, ueNodes.Get (0),enbNodes.Get (0),Ue_1Positionstream);
     }
 
+    /*
     for (int i = 0; i <= numPrints; i++)
     {
         Simulator::Schedule (Seconds((simTime / numPrints) * i), &PrintPosition, ueNodes.Get (1),enbNodes.Get (0),Ue_2Positionstream);
-    }
+    }*/
 #endif
     Simulator::Stop (Seconds (simTime));// 20m/s need to reach 100m
     Simulator::Run ();
