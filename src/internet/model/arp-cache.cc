@@ -105,7 +105,7 @@ ArpCache::DoDispose (void)
   m_interface = 0;
   if (!m_waitReplyTimer.IsRunning ())
     {
-      Simulator::Remove (m_waitReplyTimer);
+      m_waitReplyTimer.Cancel ();
     }
   Object::DoDispose ();
 }
@@ -318,10 +318,10 @@ ArpCache::Entry *
 ArpCache::Lookup (Ipv4Address to)
 {
   NS_LOG_FUNCTION (this << to);
-  if (m_arpCache.find (to) != m_arpCache.end ()) 
+  CacheI it = m_arpCache.find (to);
+  if (it != m_arpCache.end ())
     {
-      ArpCache::Entry *entry = m_arpCache[to];
-      return entry;
+      return it->second;
     }
   return 0;
 }
@@ -457,7 +457,7 @@ ArpCache::Entry::GetMacAddress (void) const
   return m_macAddress;
 }
 void 
-ArpCache::Entry::SetMacAddresss (Address macAddress)
+ArpCache::Entry::SetMacAddress (Address macAddress)
 {
   NS_LOG_FUNCTION (this);
   m_macAddress = macAddress;

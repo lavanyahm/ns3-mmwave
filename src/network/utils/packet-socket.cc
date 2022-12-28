@@ -343,6 +343,7 @@ PacketSocket::SendTo (Ptr<Packet> p, uint32_t flags, const Address &address)
 
   bool error = false;
   Address dest = ad.GetPhysicalAddress ();
+  uint32_t pktSize = p->GetSize (); // device->Send() may modify the packet
   if (ad.IsSingleDevice ())
     {
       Ptr<NetDevice> device = m_node->GetDevice (ad.GetSingleDevice ());
@@ -366,7 +367,7 @@ PacketSocket::SendTo (Ptr<Packet> p, uint32_t flags, const Address &address)
     }
   if (!error)
     {
-      NotifyDataSent (p->GetSize ());
+      NotifyDataSent (pktSize);
       NotifySend (GetTxAvailable ());
     }
 
@@ -378,7 +379,7 @@ PacketSocket::SendTo (Ptr<Packet> p, uint32_t flags, const Address &address)
     }
   else
     {
-      return p->GetSize ();
+      return pktSize;
     }
 }
 
@@ -643,7 +644,6 @@ uint32_t
 DeviceNameTag::GetSerializedSize (void) const
 {
   uint32_t s = 1 + m_deviceName.size();  // +1 for name length field
-  s = std::min (s, (uint32_t)PacketTagList::TagData::MAX_SIZE);
   return s;
 }
 void
@@ -651,8 +651,6 @@ DeviceNameTag::Serialize (TagBuffer i) const
 {
   const char *n = m_deviceName.c_str();
   uint8_t l = (uint8_t) m_deviceName.size ();
-
-  l = std::min ((uint32_t)l, (uint32_t)PacketTagList::TagData::MAX_SIZE - 1);
 
   i.WriteU8 (l);
   i.Write ( (uint8_t*) n , (uint32_t) l);

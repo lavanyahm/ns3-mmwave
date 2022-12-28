@@ -1,3 +1,4 @@
+<<<<<<< HEAD
  /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
  /*
  *   Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
@@ -24,11 +25,45 @@
  *        	 	  Russell Ford <russell.ford@nyu.edu>
  *        		  Menglei Zhang <menglei@nyu.edu>
  */
+=======
+/* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
+/*
+*   Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
+*   Copyright (c) 2015, NYU WIRELESS, Tandon School of Engineering, New York University
+*   Copyright (c) 2016, University of Padova, Dep. of Information Engineering, SIGNET lab.
+*
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License version 2 as
+*   published by the Free Software Foundation;
+*
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
+*
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+*   Author: Marco Miozzo <marco.miozzo@cttc.es>
+*           Nicola Baldo  <nbaldo@cttc.es>
+*
+*   Modified by: Marco Mezzavilla < mezzavilla@nyu.edu>
+*                         Sourjya Dutta <sdutta@nyu.edu>
+*                         Russell Ford <russell.ford@nyu.edu>
+*                         Menglei Zhang <menglei@nyu.edu>
+*
+* Modified by: Michele Polese <michele.polese@gmail.com>
+*                Dual Connectivity and Handover functionalities
+*/
+
+>>>>>>> origin
 
 
 #include "mmwave-bearer-stats-calculator.h"
 #include "ns3/string.h"
 #include "ns3/nstime.h"
+#include <ns3/boolean.h>
 #include <ns3/log.h>
 #include <vector>
 #include <algorithm>
@@ -37,11 +72,14 @@ namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("MmWaveBearerStatsCalculator");
 
+namespace mmwave {
+
 NS_OBJECT_ENSURE_REGISTERED ( MmWaveBearerStatsCalculator);
 
 MmWaveBearerStatsCalculator::MmWaveBearerStatsCalculator ()
   : m_firstWrite (true),
-    m_pendingOutput (false), 
+    m_pendingOutput (false),
+    m_aggregatedStats (true),
     m_protocolType ("RLC")
 {
   NS_LOG_FUNCTION (this);
@@ -49,7 +87,8 @@ MmWaveBearerStatsCalculator::MmWaveBearerStatsCalculator ()
 
 MmWaveBearerStatsCalculator::MmWaveBearerStatsCalculator (std::string protocolType)
   : m_firstWrite (true),
-    m_pendingOutput (false)
+    m_pendingOutput (false),
+    m_aggregatedStats (true)
 {
   NS_LOG_FUNCTION (this);
   m_protocolType = protocolType;
@@ -66,14 +105,19 @@ MmWaveBearerStatsCalculator::GetTypeId (void)
   static TypeId tid =
     TypeId ("ns3::MmWaveBearerStatsCalculator")
     .SetParent<LteStatsCalculator> ().AddConstructor<MmWaveBearerStatsCalculator> ()
-    .SetGroupName("Lte")
-    .AddAttribute ("StartTime", "Start time of the on going epoch.", 
+    .SetGroupName ("Lte")
+    .AddAttribute ("AggregatedStats",
+                   "Choice to show the results aggregated of disaggregated.",
+                   BooleanValue (true),
+                   MakeBooleanAccessor (&MmWaveBearerStatsCalculator::m_aggregatedStats),
+                   MakeBooleanChecker ())
+    .AddAttribute ("StartTime", "Start time of the on going epoch.",
                    TimeValue (Seconds (0.)),
                    MakeTimeAccessor (&MmWaveBearerStatsCalculator::SetStartTime,
                                      &MmWaveBearerStatsCalculator::GetStartTime),
                    MakeTimeChecker ())
-    .AddAttribute ("EpochDuration", "Epoch duration.", 
-                   TimeValue (Seconds (0.25)), 
+    .AddAttribute ("EpochDuration", "Epoch duration.",
+                   TimeValue (Seconds (0.25)),
                    MakeTimeAccessor (&MmWaveBearerStatsCalculator::GetEpoch,
                                      &MmWaveBearerStatsCalculator::SetEpoch),
                    MakeTimeChecker ())
@@ -111,182 +155,171 @@ MmWaveBearerStatsCalculator::DoDispose ()
     }
 }
 
-void 
+void
 MmWaveBearerStatsCalculator::SetStartTime (Time t)
 {
   m_startTime = t;
-  //RescheduleEndEpoch ();
+  if (m_aggregatedStats)
+  {
+    RescheduleEndEpoch ();
+  }
 }
 
-Time 
+Time
 MmWaveBearerStatsCalculator::GetStartTime () const
 {
   return m_startTime;
 }
 
-void 
+void
 MmWaveBearerStatsCalculator::SetEpoch (Time e)
 {
   m_epochDuration = e;
-  //RescheduleEndEpoch ();
+  if (m_aggregatedStats)
+  {
+    RescheduleEndEpoch ();
+  }
 }
 
-Time 
+Time
 MmWaveBearerStatsCalculator::GetEpoch () const
 {
-  return m_epochDuration;  
+  return m_epochDuration;
 }
 
 void
 MmWaveBearerStatsCalculator::UlTxPdu (uint16_t cellId, uint64_t imsi, uint16_t rnti, uint8_t lcid, uint32_t packetSize)
 {
   NS_LOG_FUNCTION (this << "UlTxPdu" << cellId << imsi << rnti << (uint32_t) lcid << packetSize);
-
-  if (!m_ulOutFile.is_open ())
+  if(m_aggregatedStats)
   {
-  	m_ulOutFile.open (GetUlOutputFilename ().c_str (), std::ios_base::app);
-  }
-
-  if (m_protocolType == "RLC")
-  {
-  	m_ulOutFile << "RLC ";
+    ImsiLcidPair_t p (imsi, lcid);
+    if (Simulator::Now () >= m_startTime)
+      {
+        m_ulCellId[p] = cellId;
+        m_flowId[p] = LteFlowId_t (rnti, lcid);
+        m_ulTxPackets[p]++;
+        m_ulTxData[p] += packetSize;
+      }
+    m_pendingOutput = true;
   }
   else
   {
-  	m_ulOutFile << "PDCP ";
+    if (!m_ulOutFile.is_open ())
+      {
+        m_ulOutFile.open (GetUlOutputFilename ().c_str ());
+        m_ulOutFile << "TYPE\tTIME\tCellId\tIMSI\tRNTI\tLCID\tSIZE\tDELAY\t" << std::endl;
+      }
+    m_ulOutFile << "Tx\t" << Simulator::Now ().GetNanoSeconds () / 1.0e9 << "\t" 
+    << cellId << "\t" << imsi << "\t" << rnti << "\t" << (uint32_t) lcid << "\t" 
+    << packetSize << "\t" << 0 << "\t" << std::endl;
   }
-
-  m_ulOutFile << "UlTxPDU " << Simulator::Now () << " "<< cellId << " "
-  		<< rnti << " " << (uint32_t) lcid << " " << packetSize << " " << std::endl;
-
-  /*ImsiLcidPair_t p (imsi, lcid);
-  if (Simulator::Now () >= m_startTime)
-    {
-      m_ulCellId[p] = cellId;
-      m_flowId[p] = LteFlowId_t (rnti, lcid);
-      m_ulTxPackets[p]++;
-      m_ulTxData[p] += packetSize;
-    }
-  m_pendingOutput = true;*/
 }
 
 void
 MmWaveBearerStatsCalculator::DlTxPdu (uint16_t cellId, uint64_t imsi, uint16_t rnti, uint8_t lcid, uint32_t packetSize)
 {
   NS_LOG_FUNCTION (this << "DlTxPDU" << cellId << imsi << rnti << (uint32_t) lcid << packetSize);
-
-  if (!m_dlOutFile.is_open ())
+  if(m_aggregatedStats)
   {
-  	m_dlOutFile.open (GetDlOutputFilename ().c_str (), std::ios_base::app);
-  }
-
-  if (m_protocolType == "RLC")
-  {
-  	m_dlOutFile << "RLC ";
-  }
+    ImsiLcidPair_t p (imsi, lcid);
+    if (Simulator::Now () >= m_startTime)
+      {
+        m_dlCellId[p] = cellId;
+        m_flowId[p] = LteFlowId_t (rnti, lcid);
+        m_dlTxPackets[p]++;
+        m_dlTxData[p] += packetSize;
+      }
+    m_pendingOutput = true;
+  }            
   else
   {
-  	m_dlOutFile << "PDCP ";
+    if (!m_dlOutFile.is_open ())
+      {
+        m_dlOutFile.open (GetDlOutputFilename ().c_str ());
+        m_dlOutFile << "TYPE\tTIME\tCellId\tIMSI\tRNTI\tLCID\tSIZE\tDELAY\t" << std::endl;
+      }
+    m_dlOutFile << "Tx\t" << Simulator::Now ().GetNanoSeconds () / 1.0e9 << "\t" 
+    << cellId << "\t" << imsi << "\t" << rnti << "\t" << (uint32_t) lcid << "\t" 
+    << packetSize << "\t" << 0 << "\t" << std::endl;
   }
-
-  m_dlOutFile << "DlTxPDU " << Simulator::Now () << " "<< cellId << " "
-  		<< rnti << " " << (uint32_t) lcid << " " << packetSize << " " << std::endl;
-
-
-  /*ImsiLcidPair_t p (imsi, lcid);
-  if (Simulator::Now () >= m_startTime)
-    {
-      m_dlCellId[p] = cellId;
-      m_flowId[p] = LteFlowId_t (rnti, lcid);
-      m_dlTxPackets[p]++;
-      m_dlTxData[p] += packetSize;
-    }
-  m_pendingOutput = true;*/
 }
 
 void
 MmWaveBearerStatsCalculator::UlRxPdu (uint16_t cellId, uint64_t imsi, uint16_t rnti, uint8_t lcid, uint32_t packetSize,
-                                     uint64_t delay)
+                                      uint64_t delay)
 {
   NS_LOG_FUNCTION (this << "UlRxPDU" << cellId << imsi << rnti << (uint32_t) lcid << packetSize << delay);
-
-  if (!m_ulOutFile.is_open ())
+  if(m_aggregatedStats)
   {
-  	m_ulOutFile.open (GetUlOutputFilename ().c_str (), std::ios_base::app);
-  }
+    ImsiLcidPair_t p (imsi, lcid);
+    if (Simulator::Now () >= m_startTime)
+      {
+        m_ulCellId[p] = cellId;
+        m_ulRxPackets[p]++;
+        m_ulRxData[p] += packetSize;
 
-  if (m_protocolType == "RLC")
-  {
-  	m_ulOutFile << "RLC ";
+        Uint64StatsMap::iterator it = m_ulDelay.find (p);
+        if (it == m_ulDelay.end ())
+          {
+            NS_LOG_DEBUG (this << " Creating UL stats calculators for IMSI " << p.m_imsi << " and LCID " << (uint32_t) p.m_lcId);
+            m_ulDelay[p] = CreateObject<MinMaxAvgTotalCalculator<uint64_t> > ();
+            m_ulPduSize[p] = CreateObject<MinMaxAvgTotalCalculator<uint32_t> > ();
+          }
+        m_ulDelay[p]->Update (delay);
+        m_ulPduSize[p]->Update (packetSize);
+      }
+    m_pendingOutput = true;
   }
   else
   {
-  	m_ulOutFile << "PDCP ";
+    if (!m_ulOutFile.is_open ())
+      {
+        m_ulOutFile.open (GetUlOutputFilename ().c_str ());
+        m_ulOutFile << "TYPE\tTIME\tCellId\tIMSI\tRNTI\tLCID\tSIZE\tDELAY\t" << std::endl;
+      }
+    m_ulOutFile << "Rx\t" << Simulator::Now ().GetNanoSeconds () / 1.0e9 << "\t" 
+    << cellId << "\t" << imsi << "\t" << rnti << "\t" << (uint32_t) lcid << "\t" 
+    << packetSize << "\t" << delay << "\t" << std::endl;
   }
-
-  m_ulOutFile << "UlRxPDU " << Simulator::Now () << " "<< cellId << " "
-  		<< rnti << " " << (uint32_t) lcid << " " << packetSize << " " << delay << std::endl;
-
-  /*ImsiLcidPair_t p (imsi, lcid);
-  if (Simulator::Now () >= m_startTime)
-    {
-      m_ulCellId[p] = cellId;
-      m_ulRxPackets[p]++;
-      m_ulRxData[p] += packetSize;
-
-      Uint64StatsMap::iterator it = m_ulDelay.find (p);
-      if (it == m_ulDelay.end ())
-        {
-          NS_LOG_DEBUG (this << " Creating UL stats calculators for IMSI " << p.m_imsi << " and LCID " << (uint32_t) p.m_lcId);
-          m_ulDelay[p] = CreateObject<MinMaxAvgTotalCalculator<uint64_t> > ();
-          m_ulPduSize[p] = CreateObject<MinMaxAvgTotalCalculator<uint32_t> > ();
-        }
-      m_ulDelay[p]->Update (delay);
-      m_ulPduSize[p]->Update (packetSize);
-    }
-  m_pendingOutput = true;*/
 }
 
 void
 MmWaveBearerStatsCalculator::DlRxPdu (uint16_t cellId, uint64_t imsi, uint16_t rnti, uint8_t lcid, uint32_t packetSize, uint64_t delay)
 {
   NS_LOG_FUNCTION (this << "DlRxPDU" << cellId << imsi << rnti << (uint32_t) lcid << packetSize << delay);
-
-  if (!m_dlOutFile.is_open ())
+  if(m_aggregatedStats)
   {
-  	m_dlOutFile.open (GetDlOutputFilename ().c_str (), std::ios_base::app);
-  }
-
-  if (m_protocolType == "RLC")
-  {
-  	m_dlOutFile << "RLC ";
-  }
-  else
-  {
-  	m_dlOutFile << "PDCP ";
-  }
-
-  m_dlOutFile << "DlRxPDU " << Simulator::Now () << " "<< cellId << " "
-  		<< rnti << " " << (uint32_t) lcid << " " << packetSize << " " << delay << std::endl;
-
- /* ImsiLcidPair_t p (imsi, lcid);
-  if (Simulator::Now () >= m_startTime)
+    ImsiLcidPair_t p (imsi, lcid);
+    if (Simulator::Now () >= m_startTime)
     {
       m_dlCellId[p] = cellId;
       m_dlRxPackets[p]++;
       m_dlRxData[p] += packetSize;
-
+      
       Uint64StatsMap::iterator it = m_dlDelay.find (p);
       if (it == m_dlDelay.end ())
-        {
-          NS_LOG_DEBUG (this << " Creating DL stats calculators for IMSI " << p.m_imsi << " and LCID " << (uint32_t) p.m_lcId);
-          m_dlDelay[p] = CreateObject<MinMaxAvgTotalCalculator<uint64_t> > ();
-          m_dlPduSize[p] = CreateObject<MinMaxAvgTotalCalculator<uint32_t> > ();
-        }
+      {
+        NS_LOG_DEBUG (this << " Creating DL stats calculators for IMSI " << p.m_imsi << " and LCID " << (uint32_t) p.m_lcId);
+        m_dlDelay[p] = CreateObject<MinMaxAvgTotalCalculator<uint64_t> > ();
+        m_dlPduSize[p] = CreateObject<MinMaxAvgTotalCalculator<uint32_t> > ();
+      }
       m_dlDelay[p]->Update (delay);
       m_dlPduSize[p]->Update (packetSize);
     }
-  m_pendingOutput = true;*/
+    m_pendingOutput = true;
+  }
+  else
+  {
+    if (!m_dlOutFile.is_open ())
+    {
+      m_dlOutFile.open (GetDlOutputFilename ().c_str ());
+      m_dlOutFile << "TYPE\tTIME\tCellId\tIMSI\tRNTI\tLCID\tSIZE\tDELAY\t" << std::endl;
+    }
+    m_dlOutFile << "Rx\t" << Simulator::Now ().GetNanoSeconds () / 1.0e9 << "\t" 
+    << cellId << "\t" << imsi << "\t" << rnti << "\t" << (uint32_t) lcid << "\t" 
+    << packetSize << "\t" << delay << "\t" << std::endl;
+  }
 }
 
 void
@@ -294,7 +327,7 @@ MmWaveBearerStatsCalculator::ShowResults (void)
 {
 
   NS_LOG_FUNCTION (this << GetUlOutputFilename ().c_str () << GetDlOutputFilename ().c_str ());
-  NS_LOG_INFO ("Write Rlc Stats in " << GetUlOutputFilename ().c_str () << " and in " << GetDlOutputFilename ().c_str ());
+  NS_LOG_INFO ("Write stats in " << GetUlOutputFilename ().c_str () << " and in " << GetDlOutputFilename ().c_str ());
 
   std::ofstream ulOutFile;
   std::ofstream dlOutFile;
@@ -726,5 +759,7 @@ MmWaveBearerStatsCalculator::GetDlPdcpOutputFilename (void)
 {
   return m_dlPdcpOutputFilename;
 }
+
+} // namespace mmwave
 
 } // namespace ns3

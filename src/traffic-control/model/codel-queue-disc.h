@@ -28,7 +28,10 @@
 #ifndef CODEL_H
 #define CODEL_H
 
+<<<<<<< HEAD
 #include "ns3/packet.h"
+=======
+>>>>>>> origin
 #include "ns3/queue-disc.h"
 #include "ns3/nstime.h"
 #include "ns3/simulator.h"
@@ -77,6 +80,7 @@ public:
   CoDelQueueDisc ();
 
   virtual ~CoDelQueueDisc ();
+<<<<<<< HEAD
 
   /**
    * \brief Set the operating mode of this device.
@@ -113,6 +117,8 @@ public:
    * \returns The number of dropped packets
    */
   uint32_t GetDropCount (void);
+=======
+>>>>>>> origin
 
   /**
    * \brief Get the target queue delay
@@ -134,6 +140,13 @@ public:
    * \returns The time for next packet drop
    */
   uint32_t GetDropNext (void);
+
+  // Reasons for dropping packets
+  static constexpr const char* TARGET_EXCEEDED_DROP = "Target exceeded drop";  //!< Sojourn time above target
+  static constexpr const char* OVERLIMIT_DROP = "Overlimit drop";  //!< Overlimit dropped packet
+  // Reasons for marking packets
+  static constexpr const char* TARGET_EXCEEDED_MARK = "Target exceeded mark";  //!< Sojourn time above target
+  static constexpr const char* CE_THRESHOLD_EXCEEDED_MARK = "CE threshold exceeded mark";  //!< Sojourn time above CE threshold
 
 private:
   friend class::CoDelQueueDiscNewtonStepTest;  // Test code
@@ -157,15 +170,21 @@ private:
    */
   virtual Ptr<QueueDiscItem> DoDequeue (void);
 
+<<<<<<< HEAD
   virtual Ptr<const QueueDiscItem> DoPeek (void) const;
+=======
+>>>>>>> origin
   virtual bool CheckConfig (void);
 
   /**
    * \brief Calculate the reciprocal square root of m_count by using Newton's method
    *  http://en.wikipedia.org/wiki/Methods_of_computing_square_roots#Iterative_methods_for_reciprocal_square_roots
    * m_recInvSqrt (new) = (m_recInvSqrt (old) / 2) * (3 - m_count * m_recInvSqrt^2)
+   * \param recInvSqrt reciprocal value of sqrt (count)
+   * \param count count value
+   * \return The new recInvSqrt value
    */
-  void NewtonStep (void);
+  static uint16_t NewtonStep (uint16_t recInvSqrt, uint32_t count);
 
   /**
    * \brief Determine the time for next drop
@@ -173,20 +192,22 @@ private:
    * Here, we use m_recInvSqrt calculated by Newton's method in NewtonStep() to avoid
    * both sqrt() and divide operations
    *
-   * \param t Current next drop time
-   * \returns The new next drop time:
+   * \param t Current next drop time (in units of CoDel time)
+   * \param interval interval (in units of CoDel time)
+   * \param recInvSqrt reciprocal value of sqrt (count)
+   * \return The new next drop time (in units of CoDel time)
    */
-  uint32_t ControlLaw (uint32_t t);
+  static uint32_t ControlLaw (uint32_t t, uint32_t interval, uint32_t recInvSqrt);
 
   /**
    * \brief Determine whether a packet is OK to be dropped. The packet
    * may not be actually dropped (depending on the drop state)
    *
-   * \param p The packet that is considered
+   * \param item The packet that is considered
    * \param now The current time represented as 32-bit unsigned integer (us)
    * \returns True if it is OK to drop the packet (sojourn time above target for at least interval)
    */
-  bool OkToDrop (Ptr<Packet> p, uint32_t now);
+  bool OkToDrop (Ptr<QueueDiscItem> item, uint32_t now);
 
   /**
    * Check if CoDel time a is successive to b
@@ -218,25 +239,33 @@ private:
   bool CoDelTimeBeforeEq (uint32_t a, uint32_t b);
 
   /**
-   * returned unsigned 32-bit integer representation of the input Time object
-   * units are microseconds
+   * Return the unsigned 32-bit integer representation of the input Time
+   * object. Units are microseconds
+   * @param t the input Time Object
+   * @return the unsigned 32-bit integer representation
    */
   uint32_t Time2CoDel (Time t);
 
   virtual void InitializeParams (void);
 
+<<<<<<< HEAD
   uint32_t m_maxPackets;                  //!< Max # of packets accepted by the queue
   uint32_t m_maxBytes;                    //!< Max # of bytes accepted by the queue
+=======
+  bool m_useEcn;                          //!< True if ECN is used (packets are marked instead of being dropped)
+  bool m_useL4s;                          //!< True if L4S is used (ECT1 packets are marked at CE threshold)
+>>>>>>> origin
   uint32_t m_minBytes;                    //!< Minimum bytes in queue to allow a packet drop
   Time m_interval;                        //!< 100 ms sliding minimum time window width
   Time m_target;                          //!< 5 ms target queue delay
+  Time m_ceThreshold;                     //!< Threshold above which to CE mark
   TracedValue<uint32_t> m_count;          //!< Number of packets dropped since entering drop state
-  TracedValue<uint32_t> m_dropCount;      //!< Number of dropped packets according CoDel algorithm
   TracedValue<uint32_t> m_lastCount;      //!< Last number of packets dropped since entering drop state
   TracedValue<bool> m_dropping;           //!< True if in dropping state
   uint16_t m_recInvSqrt;                  //!< Reciprocal inverse square root
   uint32_t m_firstAboveTime;              //!< Time to declare sojourn time above target
   TracedValue<uint32_t> m_dropNext;       //!< Time to drop next packet
+<<<<<<< HEAD
   uint32_t m_state1;                      //!< Number of times packet sojourn goes above target for interval
   uint32_t m_state2;                      //!< Number of times we perform next drop while in dropping state
   uint32_t m_state3;                      //!< Number of times we enter drop state and drop the fist packet
@@ -244,6 +273,8 @@ private:
   uint32_t m_dropOverLimit;               //!< The number of packets dropped due to full queue
   Queue::QueueMode     m_mode;                   //!< The operating mode (Bytes or packets)
   TracedValue<Time> m_sojourn;            //!< Time in queue
+=======
+>>>>>>> origin
 };
 
 } // namespace ns3

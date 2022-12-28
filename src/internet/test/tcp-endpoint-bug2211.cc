@@ -17,8 +17,26 @@
  *
  */
 
+<<<<<<< HEAD
 /*
  * Test for bug 2211
+=======
+#include <iostream>
+
+#include "ns3/test.h"
+#include "ns3/core-module.h"
+#include "ns3/network-module.h"
+#include "ns3/internet-module.h"
+
+using namespace ns3;
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief Test for bug 2211.
+ *
+>>>>>>> origin
  * https://www.nsnam.org/bugzilla/show_bug.cgi?id=2211
  *
  * NOTE: It is a valgrind testcase, it contains no ASSERTs.
@@ -36,6 +54,7 @@
  * However, Ipv4EndPoint::DoForwardUp is already scheduled for third segment.
  * It is a use-after-free bug.
  */
+<<<<<<< HEAD
 #include <iostream>
 
 #include "ns3/test.h"
@@ -56,6 +75,37 @@ public:
   virtual void DoRun ();
 private:
   bool m_v6;
+=======
+class TcpEndPointBug2211Test : public TestCase
+{
+public:
+  /**
+   * Constructor.
+   * \param desc Test description.
+   * \param ipVersion True to use IPv6.
+   */
+  TcpEndPointBug2211Test (std::string desc, bool ipVersion);
+
+  /**
+   * \brief Receive a packet.
+   * \param socket The receiving socket.
+   */
+  void Recv (Ptr<Socket> socket);
+  /**
+   * \brief Handle an incoming connection.
+   * \param s The receiving socket.
+   * \param from The other node IP address.
+   */
+  void HandleAccept (Ptr<Socket> s, const Address &from);
+  /**
+   * \brief Handle a connection establishment.
+   * \param socket The receiving socket.
+   */
+  void HandleConnect (Ptr<Socket> socket);
+  virtual void DoRun ();
+private:
+  bool m_v6; //!< True to use IPv6.
+>>>>>>> origin
 };
 
 void
@@ -126,6 +176,15 @@ TcpEndPointBug2211Test::DoRun ()
   Simulator::Destroy ();
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief TestSuite for bug 2211 - It must be used with valgrind.
+ */
+>>>>>>> origin
 class TcpEndpointBug2211TestSuite : public TestSuite
 {
 public:
@@ -134,6 +193,15 @@ public:
     AddTestCase (new TcpEndPointBug2211Test ("Bug 2211 testcase IPv4", false), TestCase::QUICK);
     AddTestCase (new TcpEndPointBug2211Test ("Bug 2211 testcase IPv6", true), TestCase::QUICK);
   }
+<<<<<<< HEAD
 } g_TcpEndPoint2211TestSuite;
 
 } // namespace ns3
+=======
+};
+
+static TcpEndpointBug2211TestSuite g_TcpEndPoint2211TestSuite; //!< Static variable for test initialization
+
+
+
+>>>>>>> origin

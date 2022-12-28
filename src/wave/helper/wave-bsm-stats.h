@@ -51,7 +51,6 @@ class WaveBsmStats : public Object
 public:
   /**
    * \brief Constructor
-   * \return none
    */
   WaveBsmStats ();
 
@@ -63,7 +62,6 @@ public:
   
   /**
    * \brief Increments the count of transmitted packets
-   * \return none
    */
   void IncTxPktCount ();
 
@@ -106,14 +104,13 @@ public:
    * are expected to be received within the coverage area, even
    * though they may not be physically received (due to collisions
    * or receiver power thresholds).
-  * \return none
+   * \param index index for statistics
    */
   void IncExpectedRxPktCount (int index);
 
   /**
    * \brief Increments the count of actual packets received
    * (regardless of coverage area).
-   * \return none
    */
   void IncRxPktCount ();
 
@@ -123,7 +120,7 @@ public:
    * (i.e. WAVE Basic Safety Messages) are not ACK'd.  For packet
    * delivery ratio (PDR), we need to count only those received packets
    * that are actually received within the (circular) coverage area.
-   * \return none
+   * \param index index for statistics
    */
   void IncRxPktInRangeCount (int index);
 
@@ -135,50 +132,48 @@ public:
 
   /**
    * \brief Returns the count of expected packets received within range(index)
+   * \param index index for statistics
    * \return the count of expected packets received within range(index)
    */
   int GetExpectedRxPktCount (int index);
 
   /**
-   * \brief Increments the count of actual packets recevied within range(index)
+   * \brief Increments the count of actual packets received within range(index)
+   * \param index index for statistics
    * \return the count of actual packets received within range(index)
    */
   int GetRxPktInRangeCount (int index);
 
   /**
    * \brief Sets the count of packets expected to received
-   * \param range index
+   * \param index index for statistics
    * \param count the count of packets
-   * \return none
    */
   void SetExpectedRxPktCount (int index, int count);
 
   /**
    * \brief Sets the count of packets within range that are received
-   * \param range index
+   * \param index index for statistics
    * \param count the count of packets
-   * \return none
    */
   void SetRxPktInRangeCount (int index, int count);
 
   /**
    * \brief Resets the count of total packets
    * expected and/or within range(index) that are received
-   * \return none
+   * \param index index for statistics
    */
   void ResetTotalRxPktCounts (int index);
 
   /**
    * \brief Sets the count of packets transmitted
    * \param count the count of packets transmitted
-   * \return none
    */
   void SetTxPktCount (int count);
 
   /**
    * \brief Sets the count of packets received
    * \param count the count of packets received
-   * \return none
    */
   void SetRxPktCount (int count);
 
@@ -186,7 +181,6 @@ public:
    * \brief Increments the count of (application data) bytes transmitted
    * not including MAC/PHY overhead
    * \param bytes the bytes of application-data transmitted
-   * \return none
    */
   void IncTxByteCount (int bytes);
 
@@ -201,6 +195,7 @@ public:
    * \brief Returns the BSM Packet Delivery Ratio (PDR)
    * which is the percent of expected packets within range(index) that
    * are actually received
+   * \param index index for statistics
    * \return the packet delivery ratio (PDR) of BSMs.
    */
   double GetBsmPdr (int index);
@@ -209,13 +204,14 @@ public:
    * \brief Returns the cumulative BSM Packet Delivery Ratio (PDR)
    * which is the percent of cumulative expected packets within range(index)
    * that are actually received
+   * \param index index for statistics
    * \return the packet delivery ratio (PDR) of BSMs.
    */
   double GetCumulativeBsmPdr (int index);
 
   /**
    * \brief Enables/disables logging
-   * \return none
+   * \param log
    */
   void SetLogging (int log);
 
@@ -226,14 +222,14 @@ public:
   int GetLogging ();
 
 private:
-  int m_wavePktSendCount;
-  int m_waveByteSendCount;
-  int m_wavePktReceiveCount;
-  std::vector <int> m_wavePktInCoverageReceiveCounts;
-  std::vector <int> m_wavePktExpectedReceiveCounts;
-  std::vector <int> m_waveTotalPktInCoverageReceiveCounts;
-  std::vector <int> m_waveTotalPktExpectedReceiveCounts;
-  int m_log;
+  int m_wavePktSendCount; ///< packet sent count
+  int m_waveByteSendCount; ///< byte sent count
+  int m_wavePktReceiveCount; ///< packet receive count 
+  std::vector <int> m_wavePktInCoverageReceiveCounts; ///< packet in ceoverage receive counts
+  std::vector <int> m_wavePktExpectedReceiveCounts; ///< packet expected receive counts
+  std::vector <int> m_waveTotalPktInCoverageReceiveCounts; ///< total packet in coverage receive counts
+  std::vector <int> m_waveTotalPktExpectedReceiveCounts; ///< total packet expected receive counts
+  int m_log; ///< log
 };
 
 } // namespace ns3

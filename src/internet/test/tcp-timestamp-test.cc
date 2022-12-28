@@ -20,15 +20,34 @@
 #include "tcp-general-test.h"
 #include "ns3/node.h"
 #include "ns3/log.h"
+<<<<<<< HEAD
 #include "ns3/private/tcp-option-ts.h"
 
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("TimestampTestSuite");
 
+=======
+#include "ns3/tcp-option-ts.h"
+#include "ns3/tcp-header.h"
+
+using namespace ns3;
+
+NS_LOG_COMPONENT_DEFINE ("TimestampTestSuite");
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief TCP TimeStamp enabling Test.
+ */
+>>>>>>> origin
 class TimestampTestCase : public TcpGeneralTest
 {
 public:
+  /**
+   * TimeStamp configuration.
+   */
   enum Configuration
   {
     DISABLED,
@@ -37,7 +56,21 @@ public:
     ENABLED
   };
 
+  /**
+   * \brief Constructor.
+   * \param conf Test configuration.
+   */
   TimestampTestCase (TimestampTestCase::Configuration conf);
+protected:
+  virtual Ptr<TcpSocketMsgBase> CreateReceiverSocket (Ptr<Node> node);
+  virtual Ptr<TcpSocketMsgBase> CreateSenderSocket (Ptr<Node> node);
+
+<<<<<<< HEAD
+  virtual void Tx (const Ptr<const Packet> p, const TcpHeader&h, SocketWho who);
+  virtual void Rx (const Ptr<const Packet> p, const TcpHeader&h, SocketWho who);
+
+  Configuration m_configuration;
+=======
 protected:
   virtual Ptr<TcpSocketMsgBase> CreateReceiverSocket (Ptr<Node> node);
   virtual Ptr<TcpSocketMsgBase> CreateSenderSocket (Ptr<Node> node);
@@ -45,7 +78,8 @@ protected:
   virtual void Tx (const Ptr<const Packet> p, const TcpHeader&h, SocketWho who);
   virtual void Rx (const Ptr<const Packet> p, const TcpHeader&h, SocketWho who);
 
-  Configuration m_configuration;
+  Configuration m_configuration; //!< Test configuration.
+>>>>>>> origin
 };
 
 TimestampTestCase::TimestampTestCase (TimestampTestCase::Configuration conf)
@@ -187,10 +221,25 @@ TimestampTestCase::Rx (const Ptr<const Packet> p, const TcpHeader &h, SocketWho 
     }
 }
 
+<<<<<<< HEAD
 // TimestampValueTestCase
+=======
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief TCP TimeStamp values Test.
+ */
+>>>>>>> origin
 class TimestampValueTestCase : public TestCase
 {
 public:
+  /**
+   * \brief Constructor.
+   * \param startTime Start time (Seconds).
+   * \param timeToWait Time to wait (Seconds).
+   * \param name Test description.
+   */
   TimestampValueTestCase (double startTime, double timeToWait,
                           std::string name);
 
@@ -198,12 +247,18 @@ private:
   virtual void DoRun (void);
   virtual void DoTeardown (void);
 
+  /**
+   * \brief Perform the test checks.
+   */
   void Check ();
+  /**
+   * \brief Test initialization.
+   */
   void Init ();
 
-  double m_startTime;
-  double m_timeToWait;
-  double m_initValue;
+  double m_startTime;   //!< Start time (Seconds).
+  double m_timeToWait;  //!< Time to wait (Seconds).
+  double m_initValue;   //!< Initialization value (Seconds).
 };
 
 TimestampValueTestCase::TimestampValueTestCase (double startTime,
@@ -250,7 +305,13 @@ TimestampValueTestCase::Check ()
                              MilliSeconds (1), "Estimating Wrong RTT");
 }
 
-static class TcpTimestampTestSuite : public TestSuite
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief TCP TimeStamp TestSuite.
+ */
+class TcpTimestampTestSuite : public TestSuite
 {
 public:
   TcpTimestampTestSuite ()
@@ -268,6 +329,7 @@ public:
 
   }
 
-} g_tcpTimestampTestSuite;
+};
 
-} // namespace ns3
+static TcpTimestampTestSuite g_tcpTimestampTestSuite; //!< Static variable for test initialization
+

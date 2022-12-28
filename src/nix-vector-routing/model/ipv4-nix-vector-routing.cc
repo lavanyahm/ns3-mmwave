@@ -25,6 +25,7 @@
 #include "ns3/abort.h"
 #include "ns3/names.h"
 #include "ns3/ipv4-list-routing.h"
+#include "ns3/loopback-net-device.h"
 
 #include "ipv4-nix-vector-routing.h"
 
@@ -35,6 +36,7 @@ NS_LOG_COMPONENT_DEFINE ("Ipv4NixVectorRouting");
 NS_OBJECT_ENSURE_REGISTERED (Ipv4NixVectorRouting);
 
 bool Ipv4NixVectorRouting::g_isCacheDirty = false;
+Ipv4NixVectorRouting::Ipv4AddressToNodeMap Ipv4NixVectorRouting::g_ipv4AddressToNodeMap;
 
 TypeId 
 Ipv4NixVectorRouting::GetTypeId (void)
@@ -105,6 +107,10 @@ Ipv4NixVectorRouting::FlushGlobalNixRoutingCache (void) const
       rp->FlushNixCache ();
       rp->FlushIpv4RouteCache ();
     }
+
+  // IPv4 address to node mapping is potentially invalid so clear it.
+  // Will be repopulated in lazy evaluation when mapping is needed.
+  g_ipv4AddressToNodeMap.clear ();
 }
 
 void
@@ -268,7 +274,7 @@ Ipv4NixVectorRouting::BuildNixVector (const std::vector< Ptr<Node> > & parentVec
           continue;
         }
 
-      // this function takes in the local net dev, and channnel, and
+      // this function takes in the local net dev, and channel, and
       // writes to the netDeviceContainer the adjacent net devs
       NetDeviceContainer netDeviceContainer;
       GetAdjacentNetDevices (localNetDevice, channel, netDeviceContainer);
@@ -307,7 +313,7 @@ Ipv4NixVectorRouting::GetAdjacentNetDevices (Ptr<NetDevice> netDevice, Ptr<Chann
 {
   NS_LOG_FUNCTION_NOARGS ();
 
-  for (uint32_t i = 0; i < channel->GetNDevices (); i++)
+  for (std::size_t i = 0; i < channel->GetNDevices (); i++)
     {
       Ptr<NetDevice> remoteDevice = channel->GetDevice (i);
       if (remoteDevice != netDevice)
@@ -342,29 +348,68 @@ Ipv4NixVectorRouting::GetAdjacentNetDevices (Ptr<NetDevice> netDevice, Ptr<Chann
     }
 }
 
-Ptr<Node>
-Ipv4NixVectorRouting::GetNodeByIp (Ipv4Address dest)
-{ 
+void
+Ipv4NixVectorRouting::BuildIpv4AddressToNodeMap (void)
+{
   NS_LOG_FUNCTION_NOARGS ();
 
-  NodeContainer allNodes = NodeContainer::GetGlobal ();
-  Ptr<Node> destNode;
-
-  for (NodeContainer::Iterator i = allNodes.Begin (); i != allNodes.End (); ++i)
+  for (NodeList::Iterator it = NodeList::Begin (); it != NodeList::End (); ++it)
     {
-      Ptr<Node> node = *i;
+      Ptr<Node> node = *it;
       Ptr<Ipv4> ipv4 = node->GetObject<Ipv4> ();
-      if (ipv4->GetInterfaceForAddress (dest) != -1)
+
+      if(ipv4)
         {
-          destNode = node;
-          break;
+          uint32_t numberOfDevices = node->GetNDevices ();
+
+          for (uint32_t deviceId = 0; deviceId < numberOfDevices; deviceId++)
+            {
+              Ptr<NetDevice> device = node->GetDevice (deviceId);
+
+              // If this is not a loopback device add the IPv4 address to the map
+              if ( !DynamicCast<LoopbackNetDevice>(device) )
+                {
+                  int32_t interfaceIndex = (ipv4)->GetInterfaceForDevice (node->GetDevice (deviceId));
+                  if (interfaceIndex != -1)
+                    {
+                      Ipv4InterfaceAddress ifAddr = ipv4->GetAddress (interfaceIndex, 0);
+                      Ipv4Address addr = ifAddr.GetLocal ();
+
+                      NS_ABORT_MSG_IF (g_ipv4AddressToNodeMap.count (addr),
+                                       "Duplicate IPv4 address (" << addr << ") found during NIX Vector map construction for node " << node->GetId ());
+
+                      NS_LOG_LOGIC ("Adding IPv4 address " << addr << " for node " << node->GetId () << " to NIX Vector IPv4 address to node map");
+                      g_ipv4AddressToNodeMap[addr] = node;
+                    }
+                }
+            }
         }
     }
+}
 
-  if (!destNode)
+Ptr<Node>
+Ipv4NixVectorRouting::GetNodeByIp (Ipv4Address dest)
+{
+  NS_LOG_FUNCTION_NOARGS ();
+
+  // Populate lookup table if is empty.
+  if ( g_ipv4AddressToNodeMap.empty () )
+    {
+      BuildIpv4AddressToNodeMap ();
+    }
+
+  Ptr<Node> destNode;
+
+  Ipv4AddressToNodeMap::iterator iter = g_ipv4AddressToNodeMap.find(dest);
+
+  if(iter == g_ipv4AddressToNodeMap.end ())
     {
       NS_LOG_ERROR ("Couldn't find dest node given the IP" << dest);
-      return 0;
+      destNode = 0;
+    }
+  else
+    {
+      destNode = iter -> second;
     }
 
   return destNode;
@@ -390,7 +435,7 @@ Ipv4NixVectorRouting::FindTotalNeighbors (void)
           continue;
         }
 
-      // this function takes in the local net dev, and channnel, and
+      // this function takes in the local net dev, and channel, and
       // writes to the netDeviceContainer the adjacent net devs
       NetDeviceContainer netDeviceContainer;
       GetAdjacentNetDevices (localNetDevice, channel, netDeviceContainer);
@@ -462,7 +507,7 @@ Ipv4NixVectorRouting::FindNetDeviceForNixIndex (uint32_t nodeIndex, Ipv4Address 
           continue;
         }
 
-      // this function takes in the local net dev, and channnel, and
+      // this function takes in the local net dev, and channel, and
       // writes to the netDeviceContainer the adjacent net devs
       NetDeviceContainer netDeviceContainer;
       GetAdjacentNetDevices (localNetDevice, channel, netDeviceContainer);
@@ -696,7 +741,7 @@ Ipv4NixVectorRouting::RouteInput (Ptr<const Packet> p, const Ipv4Header &header,
 }
 
 void
-Ipv4NixVectorRouting::PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const
+Ipv4NixVectorRouting::PrintRoutingTable (Ptr<OutputStreamWrapper> stream, Time::Unit unit) const
 {
 
   CheckCacheStateAndFlush ();
@@ -704,8 +749,13 @@ Ipv4NixVectorRouting::PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const
   std::ostream* os = stream->GetStream ();
 
   *os << "Node: " << m_ipv4->GetObject<Node> ()->GetId ()
+<<<<<<< HEAD
       << ", Time: " << Now().As (Time::S)
       << ", Local time: " << GetObject<Node> ()->GetLocalTime ().As (Time::S)
+=======
+      << ", Time: " << Now().As (unit)
+      << ", Local time: " << GetObject<Node> ()->GetLocalTime ().As (unit)
+>>>>>>> origin
       << ", Nix Routing" << std::endl;
 
   *os << "NixCache:" << std::endl;
@@ -781,9 +831,7 @@ Ipv4NixVectorRouting::BFS (uint32_t numberOfNodes, Ptr<Node> source,
   std::queue< Ptr<Node> > greyNodeList;  // discovered nodes with unexplored children
 
   // reset the parent vector
-  parentVector.clear ();
-  parentVector.reserve (sizeof (Ptr<Node>)*numberOfNodes);
-  parentVector.insert (parentVector.begin (), sizeof (Ptr<Node>)*numberOfNodes, 0); // initialize to 0
+  parentVector.assign (numberOfNodes, 0); // initialize to 0
 
   // Add the source node to the queue, set its parent to itself 
   greyNodeList.push (source);
@@ -827,7 +875,7 @@ Ipv4NixVectorRouting::BFS (uint32_t numberOfNodes, Ptr<Node> source,
               return false;
             }
 
-          // this function takes in the local net dev, and channnel, and
+          // this function takes in the local net dev, and channel, and
           // writes to the netDeviceContainer the adjacent net devs
           NetDeviceContainer netDeviceContainer;
           GetAdjacentNetDevices (oif, channel, netDeviceContainer);
@@ -883,7 +931,7 @@ Ipv4NixVectorRouting::BFS (uint32_t numberOfNodes, Ptr<Node> source,
                   continue;
                 }
 
-              // this function takes in the local net dev, and channnel, and
+              // this function takes in the local net dev, and channel, and
               // writes to the netDeviceContainer the adjacent net devs
               NetDeviceContainer netDeviceContainer;
               GetAdjacentNetDevices (localNetDevice, channel, netDeviceContainer);

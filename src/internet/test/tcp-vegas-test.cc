@@ -30,16 +30,38 @@
 #include "ns3/tcp-socket-base.h"
 #include "ns3/tcp-vegas.h"
 
+<<<<<<< HEAD
 namespace ns3 {
+=======
+using namespace ns3;
+>>>>>>> origin
 
 NS_LOG_COMPONENT_DEFINE ("TcpVegasTestSuite");
 
 /**
+<<<<<<< HEAD
  * \brief Testing TcpVegas congestion control algorithm
+=======
+ * \brief TcpVegas congestion control algorithm test
+>>>>>>> origin
  */
 class TcpVegasTest : public TestCase
 {
 public:
+<<<<<<< HEAD
+=======
+  /**
+   * \brief Constructor.
+   * \param cWnd Congestion window.
+   * \param segmentSize Segment size.
+   * \param ssThresh Slow Start Threshold.
+   * \param rtt The RTT.
+   * \param segmentsAcked Number of segments ACKed.
+   * \param nextTxSeq Next Tx sequence number.
+   * \param lastAckedSeq Last ACKed sequence number.
+   * \param name Test description.
+   */
+>>>>>>> origin
   TcpVegasTest (uint32_t cWnd,
                 uint32_t segmentSize,
                 uint32_t ssThresh,
@@ -51,6 +73,7 @@ public:
 
 private:
   virtual void DoRun (void);
+<<<<<<< HEAD
   void IncreaseWindow (Ptr<TcpVegas> cong);
   void GetSsThresh (Ptr<TcpVegas> cong);
 
@@ -62,6 +85,28 @@ private:
   SequenceNumber32 m_nextTxSeq;
   SequenceNumber32 m_lastAckedSeq;
   Ptr<TcpSocketState> m_state;
+=======
+  /**
+   * \brief Increases the TCP window.
+   * \param cong The congestion control.
+   */
+  void IncreaseWindow (Ptr<TcpVegas> cong);
+  /**
+   * brief Get and check the SSH threshold.
+   * \param cong The congestion control.
+   */
+  void GetSsThresh (Ptr<TcpVegas> cong);
+
+  uint32_t m_cWnd;        //!< Congestion window.
+  uint32_t m_segmentSize; //!< Segment size.
+  uint32_t m_ssThresh;    //!< Slow Start Threshold.
+  Time m_rtt;             //!< RTT.
+  uint32_t m_segmentsAcked; //!< Number of segments ACKed.
+  SequenceNumber32 m_nextTxSeq; //!< Next Tx sequence number.
+  SequenceNumber32 m_lastAckedSeq;  //!< Last ACKed sequence number.
+
+  Ptr<TcpSocketState> m_state;  //!< TCP socket state.
+>>>>>>> origin
 };
 
 TcpVegasTest::TcpVegasTest (uint32_t cWnd,
@@ -93,6 +138,10 @@ TcpVegasTest::DoRun ()
   m_state->m_ssThresh = m_ssThresh;
   m_state->m_nextTxSequence = m_nextTxSeq;
   m_state->m_lastAckedSeq = m_lastAckedSeq;
+<<<<<<< HEAD
+=======
+  m_state->m_minRtt = m_rtt;
+>>>>>>> origin
 
   Ptr<TcpVegas> cong = CreateObject <TcpVegas> ();
 
@@ -177,8 +226,19 @@ TcpVegasTest::GetSsThresh (Ptr<TcpVegas> cong)
   m_ssThresh = std::max (std::min (m_ssThresh, m_cWnd - m_segmentSize), 2 * m_segmentSize);
 }
 
+<<<<<<< HEAD
 // -------------------------------------------------------------------
 static class TcpVegasTestSuite : public TestSuite
+=======
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief TCP Vegas TestSuite
+ */
+class TcpVegasTestSuite : public TestSuite
+>>>>>>> origin
 {
 public:
   TcpVegasTestSuite () : TestSuite ("tcp-vegas-test", UNIT)
@@ -199,6 +259,12 @@ public:
                                    "Vegas test on cWnd and ssThresh when alpha <= diff <= beta"),
                  TestCase::QUICK);
   }
+<<<<<<< HEAD
 } g_tcpVegasTest;
 
 } // namespace ns3
+=======
+};
+
+static TcpVegasTestSuite g_tcpVegasTest; //!< Static variable for test initialization
+>>>>>>> origin

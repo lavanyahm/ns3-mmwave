@@ -44,6 +44,10 @@ namespace ns3 {
 class VisualSimulatorImpl : public SimulatorImpl
 {
 public:
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
   static TypeId GetTypeId (void);
 
   VisualSimulatorImpl ();
@@ -65,8 +69,9 @@ public:
   virtual Time GetDelayLeft (const EventId &id) const;
   virtual Time GetMaximumSimulationTime (void) const;
   virtual void SetScheduler (ObjectFactory schedulerFactory);
-  virtual uint32_t GetSystemId (void) const; 
+  virtual uint32_t GetSystemId (void) const;
   virtual uint32_t GetContext (void) const;
+  virtual uint64_t GetEventCount (void) const;
 
   /// calls Run() in the wrapped simulator
   void RunRealSimulator (void);
@@ -76,9 +81,9 @@ protected:
   void NotifyConstructionCompleted (void);
 
 private:
-  Ptr<SimulatorImpl> GetSim ();
-  Ptr<SimulatorImpl> m_simulator;
-  ObjectFactory m_simulatorImplFactory;
+  Ptr<SimulatorImpl> GetSim (); ///< get the simulator implementation
+  Ptr<SimulatorImpl> m_simulator; ///< the simulator implementation
+  ObjectFactory m_simulatorImplFactory; ///< simulator implementation factory
 
 };
 

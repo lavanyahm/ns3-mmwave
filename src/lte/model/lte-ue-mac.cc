@@ -1,6 +1,7 @@
 /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
 /*
  * Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
+ * Copyright (c) 2016, 2018, University of Padova, Dep. of Information Engineering, SIGNET lab
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -17,6 +18,12 @@
  *
  * Author: Nicola Baldo  <nbaldo@cttc.es>
  * Author: Marco Miozzo <mmiozzo@cttc.es>
+ *
+ * Modified by: Michele Polese <michele.polese@gmail.com>
+ *          Dual Connectivity functionalities
+ *
+ * Modified by: Tommaso Zugno <tommasozugno@gmail.com>
+ *                 Integration of Carrier Aggregation for the mmWave module
  */
 
 
@@ -58,6 +65,7 @@ public:
   virtual void ConfigureRach (RachConfig rc);
   virtual void StartContentionBasedRandomAccessProcedure ();
   virtual void StartNonContentionBasedRandomAccessProcedure (uint16_t rnti, uint8_t preambleId, uint8_t prachMask);
+  virtual void SetRnti (uint16_t rnti);
   virtual void AddLc (uint8_t lcId, LteUeCmacSapProvider::LogicalChannelConfig lcConfig, LteMacSapUser* msu);
   virtual void RemoveLc (uint8_t lcId);
   virtual void Reset ();
@@ -72,24 +80,29 @@ UeMemberLteUeCmacSapProvider::UeMemberLteUeCmacSapProvider (LteUeMac* mac)
 {
 }
 
-void 
+void
 UeMemberLteUeCmacSapProvider::ConfigureRach (RachConfig rc)
 {
   m_mac->DoConfigureRach (rc);
 }
 
-  void 
+  void
 UeMemberLteUeCmacSapProvider::StartContentionBasedRandomAccessProcedure ()
 {
   m_mac->DoStartContentionBasedRandomAccessProcedure ();
 }
 
- void 
+ void
 UeMemberLteUeCmacSapProvider::StartNonContentionBasedRandomAccessProcedure (uint16_t rnti, uint8_t preambleId, uint8_t prachMask)
 {
   m_mac->DoStartNonContentionBasedRandomAccessProcedure (rnti, preambleId, prachMask);
 }
 
+void
+UeMemberLteUeCmacSapProvider::SetRnti (uint16_t rnti)
+{
+  m_mac->DoSetRnti (rnti);
+}
 
 void
 UeMemberLteUeCmacSapProvider::AddLc (uint8_t lcId, LogicalChannelConfig lcConfig, LteMacSapUser* msu)
@@ -209,7 +222,7 @@ LteUeMac::LteUeMac ()
      m_rnti (0),
      m_rachConfigured (false),
      m_waitingForRaResponse (false)
-  
+
 {
   NS_LOG_FUNCTION (this);
   m_miUlHarqProcessesPacket.resize (HARQ_PERIOD);
@@ -219,11 +232,12 @@ LteUeMac::LteUeMac ()
       m_miUlHarqProcessesPacket.at (i) = pb;
     }
   m_miUlHarqProcessesPacketTimer.resize (HARQ_PERIOD, 0);
-   
+
   m_macSapProvider = new UeMemberLteMacSapProvider (this);
   m_cmacSapProvider = new UeMemberLteUeCmacSapProvider (this);
   m_uePhySapUser = new UeMemberLteUePhySapUser (this);
   m_raPreambleUniformVariable = CreateObject<UniformRandomVariable> ();
+  m_componentCarrierId = 0;
 }
 
 
@@ -275,6 +289,11 @@ LteUeMac::GetLteUeCmacSapProvider (void)
   return m_cmacSapProvider;
 }
 
+void
+LteUeMac::SetComponentCarrierId (uint8_t index)
+{
+  m_componentCarrierId = index;
+}
 
 void
 LteUeMac::DoTransmitPdu (LteMacSapProvider::TransmitPduParameters params)
@@ -293,10 +312,10 @@ void
 LteUeMac::DoReportBufferStatus (LteMacSapProvider::ReportBufferStatusParameters params)
 {
   NS_LOG_FUNCTION (this << (uint32_t) params.lcid);
-  
+
   std::map <uint8_t, LteMacSapProvider::ReportBufferStatusParameters>::iterator it;
-  
-  
+
+
   it = m_ulBsrReceived.find (params.lcid);
   if (it != m_ulBsrReceived.end ())
     {
@@ -319,24 +338,25 @@ LteUeMac::SendReportBufferStatus (void)
   if (m_rnti == 0)
     {
       NS_LOG_INFO ("MAC not initialized, BSR deferred");
-      return; 
+      return;
     }
 
   if (m_ulBsrReceived.size () == 0)
     {
       NS_LOG_INFO ("No BSR report to transmit");
-      return; 
+      return;
     }
   MacCeListElement_s bsr;
   bsr.m_rnti = m_rnti;
   bsr.m_macCeType = MacCeListElement_s::BSR;
 
   // BSR is reported for each LCG
-  std::map <uint8_t, LteMacSapProvider::ReportBufferStatusParameters>::iterator it;  
+  std::map <uint8_t, LteMacSapProvider::ReportBufferStatusParameters>::iterator it;
   std::vector<uint32_t> queue (4, 0); // one value per each of the 4 LCGs, initialized to 0
   for (it = m_ulBsrReceived.begin (); it != m_ulBsrReceived.end (); it++)
     {
       uint8_t lcid = it->first;
+      NS_LOG_INFO("LTE lcid of BSR " << (uint16_t)lcid << " queue size " << (*it).second.txQueueSize);
       std::map <uint8_t, LcInfo>::iterator lcInfoMapIt;
       lcInfoMapIt = m_lcInfoMap.find (lcid);
       NS_ASSERT (lcInfoMapIt !=  m_lcInfoMap.end ());
@@ -361,21 +381,22 @@ LteUeMac::SendReportBufferStatus (void)
 
 }
 
-void 
+void
 LteUeMac::RandomlySelectAndSendRaPreamble ()
 {
   NS_LOG_FUNCTION (this);
-  // 3GPP 36.321 5.1.1  
+  // 3GPP 36.321 5.1.1
   NS_ASSERT_MSG (m_rachConfigured, "RACH not configured");
   // assume that there is no Random Access Preambles group B
   m_raPreambleId = m_raPreambleUniformVariable->GetInteger (0, m_rachConfig.numberOfRaPreambles - 1);
   bool contention = true;
   SendRaPreamble (contention);
 }
-   
+
 void
 LteUeMac::SendRaPreamble (bool contention)
 {
+  NS_LOG_INFO("SendRaPreamble " << (uint16_t)m_raPreambleId << " contention " << contention);
   NS_LOG_FUNCTION (this << (uint32_t) m_raPreambleId << contention);
   // Since regular UL LteControlMessages need m_ulConfigured = true in
   // order to be sent by the UE, the rach preamble needs to be sent
@@ -383,26 +404,26 @@ LteUeMac::SendRaPreamble (bool contention)
   // m_uePhySapProvider->SendLteControlMessage (msg)) so that it can
   // bypass the m_ulConfigured flag. This is reasonable, since In fact
   // the RACH preamble is sent on 6RB bandwidth so the uplink
-  // bandwidth does not need to be configured. 
+  // bandwidth does not need to be configured.
   NS_ASSERT (m_subframeNo > 0); // sanity check for subframe starting at 1
   m_raRnti = m_subframeNo - 1;
   m_uePhySapProvider->SendRachPreamble (m_raPreambleId, m_raRnti);
   NS_LOG_INFO (this << " sent preamble id " << (uint32_t) m_raPreambleId << ", RA-RNTI " << (uint32_t) m_raRnti);
-  // 3GPP 36.321 5.1.4 
-  Time raWindowBegin = MilliSeconds (3); 
+  // 3GPP 36.321 5.1.4
+  Time raWindowBegin = MilliSeconds (3);
   Time raWindowEnd = MilliSeconds (3 + m_rachConfig.raResponseWindowSize);
   Simulator::Schedule (raWindowBegin, &LteUeMac::StartWaitingForRaResponse, this);
   m_noRaResponseReceivedEvent = Simulator::Schedule (raWindowEnd, &LteUeMac::RaResponseTimeout, this, contention);
 }
 
-void 
+void
 LteUeMac::StartWaitingForRaResponse ()
 {
    NS_LOG_FUNCTION (this);
    m_waitingForRaResponse = true;
 }
 
-void 
+void
 LteUeMac::RecvRaResponse (BuildRarListElement_s raResponse)
 {
   NS_LOG_FUNCTION (this);
@@ -426,14 +447,26 @@ LteUeMac::RecvRaResponse (BuildRarListElement_s raResponse)
   if ((lc0BsrIt != m_ulBsrReceived.end ())
       && (lc0BsrIt->second.txQueueSize > 0))
     {
-      NS_ASSERT_MSG (raResponse.m_grant.m_tbSize > lc0BsrIt->second.txQueueSize, 
+      NS_ASSERT_MSG (raResponse.m_grant.m_tbSize > lc0BsrIt->second.txQueueSize,
                      "segmentation of Message 3 is not allowed");
-      lc0InfoIt->second.macSapUser->NotifyTxOpportunity (raResponse.m_grant.m_tbSize, 0, 0); 
+      // this function can be called only from primary carrier
+      if (m_componentCarrierId > 0)
+        {
+          NS_FATAL_ERROR ("Function called on wrong componentCarrier");
+        }
+      LteMacSapUser::TxOpportunityParameters txOpParams;
+      txOpParams.bytes = raResponse.m_grant.m_tbSize;
+      txOpParams.layer = 0;
+      txOpParams.harqId = 0;
+      txOpParams.componentCarrierId = m_componentCarrierId;
+      txOpParams.rnti = m_rnti;
+      txOpParams.lcid = lc0Lcid;
+      lc0InfoIt->second.macSapUser->NotifyTxOpportunity (txOpParams);
       lc0BsrIt->second.txQueueSize = 0;
     }
 }
 
-void 
+void
 LteUeMac::RaResponseTimeout (bool contention)
 {
   NS_LOG_FUNCTION (this << contention);
@@ -459,7 +492,7 @@ LteUeMac::RaResponseTimeout (bool contention)
     }
 }
 
-void 
+void
 LteUeMac::DoConfigureRach (LteUeCmacSapProvider::RachConfig rc)
 {
   NS_LOG_FUNCTION (this);
@@ -467,7 +500,7 @@ LteUeMac::DoConfigureRach (LteUeCmacSapProvider::RachConfig rc)
   m_rachConfigured = true;
 }
 
-void 
+void
 LteUeMac::DoStartContentionBasedRandomAccessProcedure ()
 {
   NS_LOG_FUNCTION (this);
@@ -479,7 +512,15 @@ LteUeMac::DoStartContentionBasedRandomAccessProcedure ()
   RandomlySelectAndSendRaPreamble ();
 }
 
-void 
+void
+LteUeMac::DoSetRnti (uint16_t rnti)
+{
+  NS_LOG_FUNCTION (this);
+  m_rnti = rnti;
+}
+
+
+void
 LteUeMac::DoStartNonContentionBasedRandomAccessProcedure (uint16_t rnti, uint8_t preambleId, uint8_t prachMask)
 {
   NS_LOG_FUNCTION (this << " rnti" << rnti);
@@ -494,8 +535,11 @@ void
 LteUeMac::DoAddLc (uint8_t lcId,  LteUeCmacSapProvider::LogicalChannelConfig lcConfig, LteMacSapUser* msu)
 {
   NS_LOG_FUNCTION (this << " lcId" << (uint32_t) lcId);
-  NS_ASSERT_MSG (m_lcInfoMap.find (lcId) == m_lcInfoMap.end (), "cannot add channel because LCID " << lcId << " is already present");
-  
+
+  // comment this assert in order to allow RLC updates
+  //NS_ASSERT_MSG (m_lcInfoMap.find (lcId) == m_lcInfoMap.end (), "cannot add channel because LCID " << lcId << " is already present");
+
+  NS_LOG_DEBUG("Add LC in " << m_rnti << " lcid " << (uint32_t)lcId);
   LcInfo lcInfo;
   lcInfo.lcConfig = lcConfig;
   lcInfo.macSapUser = msu;
@@ -508,6 +552,7 @@ LteUeMac::DoRemoveLc (uint8_t lcId)
   NS_LOG_FUNCTION (this << " lcId" << lcId);
   NS_ASSERT_MSG (m_lcInfoMap.find (lcId) != m_lcInfoMap.end (), "could not find LCID " << lcId);
   m_lcInfoMap.erase (lcId);
+  m_ulBsrReceived.erase (lcId);
 }
 
 void
@@ -519,7 +564,7 @@ LteUeMac::DoReset ()
     {
       // don't delete CCCH)
       if (it->first == 0)
-        {          
+        {
           ++it;
         }
       else
@@ -540,19 +585,28 @@ LteUeMac::DoReceivePhyPdu (Ptr<Packet> p)
 {
   LteRadioBearerTag tag;
   p->RemovePacketTag (tag);
+  NS_LOG_INFO("LteUeMac ReceivePhyPdu");
   if (tag.GetRnti () == m_rnti)
     {
       // packet is for the current user
       std::map <uint8_t, LcInfo>::const_iterator it = m_lcInfoMap.find (tag.GetLcid ());
       if (it != m_lcInfoMap.end ())
         {
-          it->second.macSapUser->ReceivePdu (p);
+          LteMacSapUser::ReceivePduParameters rxPduParams;
+          rxPduParams.p = p;
+          rxPduParams.rnti = m_rnti;
+          rxPduParams.lcid = tag.GetLcid ();
+          it->second.macSapUser->ReceivePdu (rxPduParams);
         }
       else
         {
           NS_LOG_WARN ("received packet with unknown lcid " << (uint32_t) tag.GetLcid ());
         }
     }
+  else
+  {
+    NS_LOG_WARN("received packet with unknown rnti " << (uint32_t) tag.GetRnti ());
+  }
 }
 
 
@@ -564,9 +618,11 @@ LteUeMac::DoReceiveLteControlMessage (Ptr<LteControlMessage> msg)
     {
       Ptr<UlDciLteControlMessage> msg2 = DynamicCast<UlDciLteControlMessage> (msg);
       UlDciListElement_s dci = msg2->GetDci ();
+      NS_LOG_INFO("LTE UE MAC " << (uint32_t)m_componentCarrierId << " received UL-DCI size " << (uint32_t)dci.m_tbSize);
+
       if (dci.m_ndi == 1)
         {
-          // New transmission -> emtpy pkt buffer queue (for deleting eventual pkts not acked )
+          // New transmission -> empty pkt buffer queue (for deleting eventual pkts not acked )
           Ptr<PacketBurst> pb = CreateObject <PacketBurst> ();
           m_miUlHarqProcessesPacket.at (m_harqProcessId) = pb;
           // Retrieve data from RLC
@@ -577,15 +633,19 @@ LteUeMac::DoReceiveLteControlMessage (Ptr<LteControlMessage> msg)
             {
               if (((*itBsr).second.statusPduSize > 0) || ((*itBsr).second.retxQueueSize > 0) || ((*itBsr).second.txQueueSize > 0))
                 {
-                  activeLcs++;
-                  if (((*itBsr).second.statusPduSize != 0)&&((*itBsr).second.statusPduSize < statusPduMinSize))
-                    {
-                      statusPduMinSize = (*itBsr).second.statusPduSize;
-                    }
-                  if (((*itBsr).second.statusPduSize != 0)&&(statusPduMinSize == 0))
-                    {
-                      statusPduMinSize = (*itBsr).second.statusPduSize;
-                    }
+                  // check if this LC is active in this LteUeMac instance
+                  if(m_lcInfoMap.find(itBsr->first) != m_lcInfoMap.end())
+                  {
+                    activeLcs++;
+                    if (((*itBsr).second.statusPduSize != 0)&&((*itBsr).second.statusPduSize < statusPduMinSize))
+                      {
+                        statusPduMinSize = (*itBsr).second.statusPduSize;
+                      }
+                    if (((*itBsr).second.statusPduSize != 0)&&(statusPduMinSize == 0))
+                      {
+                        statusPduMinSize = (*itBsr).second.statusPduSize;
+                      }
+                  }
                 }
             }
           if (activeLcs == 0)
@@ -607,6 +667,9 @@ LteUeMac::DoReceiveLteControlMessage (Ptr<LteControlMessage> msg)
                 }
             }
           NS_LOG_LOGIC (this << " UE " << m_rnti << ": UL-CQI notified TxOpportunity of " << dci.m_tbSize << " => " << bytesPerActiveLc << " bytes per active LC" << " statusPduMinSize " << statusPduMinSize);
+
+          LteMacSapUser::TxOpportunityParameters txOpParams;
+
           for (it = m_lcInfoMap.begin (); it != m_lcInfoMap.end (); it++)
             {
               itBsr = m_ulBsrReceived.find ((*it).first);
@@ -618,7 +681,13 @@ LteUeMac::DoReceiveLteControlMessage (Ptr<LteControlMessage> msg)
                 {
                   if ((statusPduPriority) && ((*itBsr).second.statusPduSize == statusPduMinSize))
                     {
-                      (*it).second.macSapUser->NotifyTxOpportunity ((*itBsr).second.statusPduSize, 0, 0);
+                      txOpParams.bytes = (*itBsr).second.statusPduSize;
+                      txOpParams.layer = 0;
+                      txOpParams.harqId = 0;
+                      txOpParams.componentCarrierId = m_componentCarrierId;
+                      txOpParams.rnti = m_rnti;
+                      txOpParams.lcid = (*it).first;
+                      (*it).second.macSapUser->NotifyTxOpportunity (txOpParams);
                       NS_LOG_LOGIC (this << "\t" << bytesPerActiveLc << " send  " << (*itBsr).second.statusPduSize << " status bytes to LC " << (uint32_t)(*it).first << " statusQueue " << (*itBsr).second.statusPduSize << " retxQueue" << (*itBsr).second.retxQueueSize << " txQueue" <<  (*itBsr).second.txQueueSize);
                       (*itBsr).second.statusPduSize = 0;
                       break;
@@ -629,7 +698,13 @@ LteUeMac::DoReceiveLteControlMessage (Ptr<LteControlMessage> msg)
                       NS_LOG_LOGIC (this << "\t" << bytesPerActiveLc << " bytes to LC " << (uint32_t)(*it).first << " statusQueue " << (*itBsr).second.statusPduSize << " retxQueue" << (*itBsr).second.retxQueueSize << " txQueue" <<  (*itBsr).second.txQueueSize);
                       if (((*itBsr).second.statusPduSize > 0) && (bytesForThisLc > (*itBsr).second.statusPduSize))
                         {
-                          (*it).second.macSapUser->NotifyTxOpportunity ((*itBsr).second.statusPduSize, 0, 0);
+                          txOpParams.bytes = (*itBsr).second.statusPduSize;
+                          txOpParams.layer = 0;
+                          txOpParams.harqId = 0;
+                          txOpParams.componentCarrierId = m_componentCarrierId;
+                          txOpParams.rnti = m_rnti;
+                          txOpParams.lcid = (*it).first;
+                          (*it).second.macSapUser->NotifyTxOpportunity (txOpParams);
                           bytesForThisLc -= (*itBsr).second.statusPduSize;
                           NS_LOG_DEBUG (this << " serve STATUS " << (*itBsr).second.statusPduSize);
                           (*itBsr).second.statusPduSize = 0;
@@ -641,7 +716,7 @@ LteUeMac::DoReceiveLteControlMessage (Ptr<LteControlMessage> msg)
                               NS_FATAL_ERROR ("Insufficient Tx Opportunity for sending a status message");
                             }
                         }
-                        
+
                       if ((bytesForThisLc > 7)    // 7 is the min TxOpportunity useful for Rlc
                           && (((*itBsr).second.retxQueueSize > 0)
                               || ((*itBsr).second.txQueueSize > 0)))
@@ -649,7 +724,13 @@ LteUeMac::DoReceiveLteControlMessage (Ptr<LteControlMessage> msg)
                           if ((*itBsr).second.retxQueueSize > 0)
                             {
                               NS_LOG_DEBUG (this << " serve retx DATA, bytes " << bytesForThisLc);
-                              (*it).second.macSapUser->NotifyTxOpportunity (bytesForThisLc, 0, 0);
+                              txOpParams.bytes = bytesForThisLc;
+                              txOpParams.layer = 0;
+                              txOpParams.harqId = 0;
+                              txOpParams.componentCarrierId = m_componentCarrierId;
+                              txOpParams.rnti = m_rnti;
+                              txOpParams.lcid = (*it).first;
+                              (*it).second.macSapUser->NotifyTxOpportunity (txOpParams);
                               if ((*itBsr).second.retxQueueSize >= bytesForThisLc)
                                 {
                                   (*itBsr).second.retxQueueSize -= bytesForThisLc;
@@ -668,8 +749,8 @@ LteUeMac::DoReceiveLteControlMessage (Ptr<LteControlMessage> msg)
                                   // for SRB1 (using RLC AM) it's better to
                                   // overestimate RLC overhead rather than
                                   // underestimate it and risk unneeded
-                                  // segmentation which increases delay 
-                                  rlcOverhead = 4;                                  
+                                  // segmentation which increases delay
+                                  rlcOverhead = 4;
                                 }
                               else
                                 {
@@ -677,7 +758,13 @@ LteUeMac::DoReceiveLteControlMessage (Ptr<LteControlMessage> msg)
                                   rlcOverhead = 2;
                                 }
                               NS_LOG_DEBUG (this << " serve tx DATA, bytes " << bytesForThisLc << ", RLC overhead " << rlcOverhead);
-                              (*it).second.macSapUser->NotifyTxOpportunity (bytesForThisLc, 0, 0);
+                              txOpParams.bytes = bytesForThisLc;
+                              txOpParams.layer = 0;
+                              txOpParams.harqId = 0;
+                              txOpParams.componentCarrierId = m_componentCarrierId;
+                              txOpParams.rnti = m_rnti;
+                              txOpParams.lcid = (*it).first;
+                              (*it).second.macSapUser->NotifyTxOpportunity (txOpParams);
                               if ((*itBsr).second.txQueueSize >= bytesForThisLc - rlcOverhead)
                                 {
                                   (*itBsr).second.txQueueSize -= bytesForThisLc - rlcOverhead;
@@ -690,7 +777,7 @@ LteUeMac::DoReceiveLteControlMessage (Ptr<LteControlMessage> msg)
                         }
                       else
                         {
-                          if ( ((*itBsr).second.retxQueueSize > 0) || ((*itBsr).second.txQueueSize > 0)) 
+                          if ( ((*itBsr).second.retxQueueSize > 0) || ((*itBsr).second.txQueueSize > 0))
                             {
                               // resend BSR info for updating eNB peer MAC
                               m_freshUlBsr = true;
@@ -712,7 +799,7 @@ LteUeMac::DoReceiveLteControlMessage (Ptr<LteControlMessage> msg)
               Ptr<Packet> pkt = (*j)->Copy ();
               m_uePhySapProvider->SendMacPdu (pkt);
             }
-          m_miUlHarqProcessesPacketTimer.at (m_harqProcessId) = HARQ_PERIOD;          
+          m_miUlHarqProcessesPacketTimer.at (m_harqProcessId) = HARQ_PERIOD;
         }
 
     }
@@ -780,11 +867,16 @@ LteUeMac::DoSubframeIndication (uint32_t frameNo, uint32_t subframeNo)
   RefreshHarqProcessesPacketBuffer ();
   if ((Simulator::Now () >= m_bsrLast + m_bsrPeriodicity) && (m_freshUlBsr == true))
     {
-      SendReportBufferStatus ();
+      if (m_componentCarrierId == 0)
+        {
+          //Send BSR through primary carrier
+          SendReportBufferStatus ();
+        }
       m_bsrLast = Simulator::Now ();
       m_freshUlBsr = false;
-      m_harqProcessId = (m_harqProcessId + 1) % HARQ_PERIOD;
     }
+  m_harqProcessId = (m_harqProcessId + 1) % HARQ_PERIOD;
+
 }
 
 int64_t

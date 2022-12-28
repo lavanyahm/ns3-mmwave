@@ -55,6 +55,12 @@ EventId::Cancel (void)
   NS_LOG_FUNCTION (this);
   Simulator::Cancel (*this);
 }
+void
+EventId::Remove (void)
+{
+  NS_LOG_FUNCTION (this);
+  Simulator::Remove (*this);
+}
 bool
 EventId::IsExpired (void) const
 {
@@ -73,38 +79,24 @@ EventId::PeekEventImpl (void) const
   NS_LOG_FUNCTION (this);
   return PeekPointer (m_eventImpl);
 }
-uint64_t 
+uint64_t
 EventId::GetTs (void) const
 {
   NS_LOG_FUNCTION (this);
   return m_ts;
 }
-uint32_t 
+uint32_t
 EventId::GetContext (void) const
 {
   NS_LOG_FUNCTION (this);
   return m_context;
 }
-uint32_t 
+uint32_t
 EventId::GetUid (void) const
 {
   NS_LOG_FUNCTION (this);
   return m_uid;
 }
-
-bool operator == (const EventId &a, const EventId &b)
-{
-  return 
-    a.m_uid == b.m_uid && 
-    a.m_context == b.m_context && 
-    a.m_ts == b.m_ts && 
-    a.m_eventImpl == b.m_eventImpl;
-}
-bool operator != (const EventId &a, const EventId &b)
-{
-  return !(a == b);
-}
-
 
 
 } // namespace ns3

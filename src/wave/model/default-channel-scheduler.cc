@@ -18,6 +18,7 @@
 #include "default-channel-scheduler.h"
 #include "ns3/log.h"
 #include "ns3/simulator.h"
+#include "ns3/wifi-phy.h"
 
 namespace ns3 {
 
@@ -25,9 +26,18 @@ NS_LOG_COMPONENT_DEFINE ("DefaultChannelScheduler");
 
 NS_OBJECT_ENSURE_REGISTERED (DefaultChannelScheduler);
 
+/**
+ * \ingroup wave
+ * \brief CoordinationListener class
+ */
 class CoordinationListener : public ChannelCoordinationListener
 {
 public:
+  /**
+   * Constructor
+   *
+   * \param scheduler channel scheduler
+   */
   CoordinationListener (DefaultChannelScheduler * scheduler)
     : m_scheduler (scheduler)
   {
@@ -48,7 +58,7 @@ public:
     m_scheduler->NotifyGuardSlotStart (duration, cchi);
   }
 private:
-  DefaultChannelScheduler * m_scheduler;
+  DefaultChannelScheduler * m_scheduler; ///< the scheduler
 };
 
 TypeId
@@ -101,6 +111,7 @@ DefaultChannelScheduler::DoDispose (void)
     {
       m_waitEvent.Cancel ();
     }
+  m_phy = 0;
   ChannelScheduler::DoDispose ();
 }
 
@@ -249,7 +260,7 @@ DefaultChannelScheduler::AssignExtendedAccess (uint32_t channelNumber, uint32_t 
         {
           // if current remain extends cannot fulfill the requirement for extends
           Time remainTime = Simulator::GetDelayLeft (m_extendEvent);
-          uint32_t remainExtends = remainTime / m_coordinator->GetSyncInterval ();
+          uint32_t remainExtends = (remainTime / m_coordinator->GetSyncInterval ()).GetHigh ();
           if (remainExtends > extends)
             {
               return true;
@@ -361,12 +372,12 @@ DefaultChannelScheduler::SwitchToNextChannel (uint32_t curChannelNumber, uint32_
   curMacEntity->ResetWifiPhy ();
   // third switch PHY device from current channel to next channel;
   m_phy->SetChannelNumber (nextChannelNumber);
+  // four attach next MAC entity to single PHY device
+  nextMacEntity->SetWifiPhy (m_phy);
   // Here channel switch time is required to notify next MAC entity
   // that channel access cannot be enabled in channel switch time.
   Time switchTime = m_phy->GetChannelSwitchDelay ();
   nextMacEntity->MakeVirtualBusy (switchTime);
-  // four attach next MAC entity to single PHY device
-  nextMacEntity->SetWifiPhy (m_phy);
   // finally resume next MAC entity from sleep mode
   nextMacEntity->Resume ();
 }

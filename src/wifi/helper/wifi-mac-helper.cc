@@ -18,11 +18,21 @@
  * Author: Sébastien Deronne <sebastien.deronne@gmail.com>
  */
 
+<<<<<<< HEAD
 #include "wifi-mac-helper.h"
 #include "ns3/wifi-mac.h"
 #include "ns3/pointer.h"
 #include "ns3/boolean.h"
 #include "ns3/dca-txop.h"
+=======
+#include "ns3/net-device.h"
+#include "wifi-mac-helper.h"
+#include "ns3/frame-exchange-manager.h"
+#include "ns3/wifi-protection-manager.h"
+#include "ns3/wifi-ack-manager.h"
+#include "ns3/multi-user-scheduler.h"
+#include "ns3/boolean.h"
+>>>>>>> origin
 
 namespace ns3 {
 
@@ -31,12 +41,19 @@ WifiMacHelper::WifiMacHelper ()
   //By default, we create an AdHoc MAC layer without QoS.
   SetType ("ns3::AdhocWifiMac",
            "QosSupported", BooleanValue (false));
+<<<<<<< HEAD
+=======
+
+  m_protectionManager.SetTypeId ("ns3::WifiDefaultProtectionManager");
+  m_ackManager.SetTypeId ("ns3::WifiDefaultAckManager");
+>>>>>>> origin
 }
 
 WifiMacHelper::~WifiMacHelper ()
 {
 }
 
+<<<<<<< HEAD
 void
 WifiMacHelper::SetType (std::string type,
                         std::string n0, const AttributeValue &v0,
@@ -69,6 +86,41 @@ Ptr<WifiMac>
 WifiMacHelper::Create (void) const
 {
   Ptr<WifiMac> mac = m_mac.Create<WifiMac> ();
+=======
+Ptr<WifiMac>
+WifiMacHelper::Create (Ptr<NetDevice> device, WifiStandard standard) const
+{
+  auto standardIt = wifiStandards.find (standard);
+  NS_ABORT_MSG_IF (standardIt == wifiStandards.end (), "Selected standard is not defined!");
+
+  Ptr<WifiMac> mac = m_mac.Create<WifiMac> ();
+  mac->SetDevice (device);
+  mac->SetAddress (Mac48Address::Allocate ());
+  mac->ConfigureStandard (standard);
+
+  Ptr<RegularWifiMac> wifiMac = DynamicCast<RegularWifiMac> (mac);
+  Ptr<FrameExchangeManager> fem;
+
+  if (wifiMac != 0 && (fem = wifiMac->GetFrameExchangeManager ()) != 0)
+    {
+      Ptr<WifiProtectionManager> protectionManager = m_protectionManager.Create<WifiProtectionManager> ();
+      protectionManager->SetWifiMac (wifiMac);
+      fem->SetProtectionManager (protectionManager);
+
+      Ptr<WifiAckManager> ackManager = m_ackManager.Create<WifiAckManager> ();
+      ackManager->SetWifiMac (wifiMac);
+      fem->SetAckManager (ackManager);
+
+      // create and install the Multi User Scheduler if this is an HE AP
+      Ptr<ApWifiMac> apMac = DynamicCast<ApWifiMac> (mac);
+      if (apMac != nullptr && standardIt->second.macStandard >= WIFI_MAC_STANDARD_80211ax
+          && m_muScheduler.IsTypeIdSet ())
+        {
+          Ptr<MultiUserScheduler> muScheduler = m_muScheduler.Create<MultiUserScheduler> ();
+          apMac->AggregateObject (muScheduler);
+        }
+    }
+>>>>>>> origin
   return mac;
 }
 

@@ -73,7 +73,11 @@ std::stringstream filePlotQueueDiscAvg;
 void
 CheckQueueDiscSize (Ptr<QueueDisc> queue)
 {
+<<<<<<< HEAD
   uint32_t qSize = StaticCast<PieQueueDisc> (queue)->GetQueueSize ();
+=======
+  uint32_t qSize = queue->GetCurrentSize ().GetValue ();
+>>>>>>> origin
 
   avgQueueDiscSize += qSize;
   checkTimes++;
@@ -159,7 +163,11 @@ main (int argc, char *argv[])
   // Configuration and command line parameter parsing
   // Will only save in the directory if enable opts below
   pathOut = "."; // Current directory
+<<<<<<< HEAD
   CommandLine cmd;
+=======
+  CommandLine cmd (__FILE__);
+>>>>>>> origin
   cmd.AddValue ("pathOut", "Path to save results from --writeForPlot/--writePcap/--writeFlowMonitor", pathOut);
   cmd.AddValue ("writeForPlot", "<0/1> to write results for plot (gnuplot)", writeForPlot);
   cmd.AddValue ("writePcap", "<0/1> to write results in pcapfile", writePcap);
@@ -192,12 +200,19 @@ main (int argc, char *argv[])
 
   // PIE params
   NS_LOG_INFO ("Set PIE params");
+<<<<<<< HEAD
   Config::SetDefault ("ns3::PieQueueDisc::Mode", StringValue ("QUEUE_MODE_PACKETS"));
+=======
+  Config::SetDefault ("ns3::PieQueueDisc::MaxSize", StringValue ("100p"));
+>>>>>>> origin
   Config::SetDefault ("ns3::PieQueueDisc::MeanPktSize", UintegerValue (meanPktSize));
   Config::SetDefault ("ns3::PieQueueDisc::DequeueThreshold", UintegerValue (10000));
   Config::SetDefault ("ns3::PieQueueDisc::QueueDelayReference", TimeValue (Seconds (0.02)));
   Config::SetDefault ("ns3::PieQueueDisc::MaxBurstAllowance", TimeValue (Seconds (0.1)));
+<<<<<<< HEAD
   Config::SetDefault ("ns3::PieQueueDisc::QueueLimit", UintegerValue (100));
+=======
+>>>>>>> origin
 
   NS_LOG_INFO ("Install internet stack on all nodes.");
   InternetStackHelper internet;
@@ -205,7 +220,11 @@ main (int argc, char *argv[])
 
   TrafficControlHelper tchPfifo;
   uint16_t handle = tchPfifo.SetRootQueueDisc ("ns3::PfifoFastQueueDisc");
+<<<<<<< HEAD
   tchPfifo.AddInternalQueues (handle, 3, "ns3::DropTailQueue", "MaxPackets", UintegerValue (1000));
+=======
+  tchPfifo.AddInternalQueues (handle, 3, "ns3::DropTailQueue", "MaxSize", StringValue ("1000p"));
+>>>>>>> origin
 
   TrafficControlHelper tchPie;
   tchPie.SetRootQueueDisc ("ns3::PieQueueDisc");
@@ -304,12 +323,21 @@ main (int argc, char *argv[])
   Simulator::Stop (Seconds (sink_stop_time));
   Simulator::Run ();
 
+<<<<<<< HEAD
   PieQueueDisc::Stats st = StaticCast<PieQueueDisc> (queueDiscs.Get (0))->GetStats ();
 
   if (st.forcedDrop != 0)
     {
       std::cout << "There should be no drops due to queue full." << std::endl;
       exit (-1);
+=======
+  QueueDisc::Stats st = queueDiscs.Get (0)->GetStats ();
+
+  if (st.GetNDroppedPackets (PieQueueDisc::FORCED_DROP) != 0)
+    {
+      std::cout << "There should be no drops due to queue full." << std::endl;
+      exit (1);
+>>>>>>> origin
     }
 
   if (flowMonitor)
@@ -323,8 +351,15 @@ main (int argc, char *argv[])
   if (printPieStats)
     {
       std::cout << "*** PIE stats from Node 2 queue ***" << std::endl;
+<<<<<<< HEAD
       std::cout << "\t " << st.unforcedDrop << " drops due to prob mark" << std::endl;
       std::cout << "\t " << st.forcedDrop << " drops due to queue limits" << std::endl;
+=======
+      std::cout << "\t " << st.GetNDroppedPackets (PieQueueDisc::UNFORCED_DROP)
+                << " drops due to prob mark" << std::endl;
+      std::cout << "\t " << st.GetNDroppedPackets (PieQueueDisc::FORCED_DROP)
+                << " drops due to queue limits" << std::endl;
+>>>>>>> origin
     }
 
   Simulator::Destroy ();

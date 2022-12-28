@@ -19,6 +19,7 @@
  */
 
 #include "erp-information.h"
+<<<<<<< HEAD
 #include "ns3/assert.h"
 #include "ns3/log.h"
 
@@ -26,6 +27,11 @@ namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("ErpInformation");
 
+=======
+
+namespace ns3 {
+
+>>>>>>> origin
 ErpInformation::ErpInformation ()
   : m_erpInformation (0),
     m_erpSupported (0)
@@ -83,14 +89,22 @@ ErpInformation::GetNonErpPresent (void) const
 uint8_t
 ErpInformation::GetInformationFieldSize () const
 {
+<<<<<<< HEAD
   NS_ASSERT (m_erpSupported > 0);
+=======
+  NS_ASSERT (m_erpSupported);
+>>>>>>> origin
   return 1;
 }
 
 Buffer::Iterator
 ErpInformation::Serialize (Buffer::Iterator i) const
 {
+<<<<<<< HEAD
   if (m_erpSupported < 1)
+=======
+  if (!m_erpSupported)
+>>>>>>> origin
     {
       return i;
     }
@@ -100,7 +114,11 @@ ErpInformation::Serialize (Buffer::Iterator i) const
 uint16_t
 ErpInformation::GetSerializedSize () const
 {
+<<<<<<< HEAD
   if (m_erpSupported < 1)
+=======
+  if (!m_erpSupported)
+>>>>>>> origin
     {
       return 0;
     }
@@ -110,7 +128,11 @@ ErpInformation::GetSerializedSize () const
 void
 ErpInformation::SerializeInformationField (Buffer::Iterator start) const
 {
+<<<<<<< HEAD
   if (m_erpSupported == 1)
+=======
+  if (m_erpSupported)
+>>>>>>> origin
     {
       start.WriteU8 (m_erpInformation);
     }
@@ -125,6 +147,7 @@ ErpInformation::DeserializeInformationField (Buffer::Iterator start,
   return length;
 }
 
+<<<<<<< HEAD
 ATTRIBUTE_HELPER_CPP (ErpInformation);
 
 std::ostream &
@@ -133,10 +156,19 @@ operator << (std::ostream &os, const ErpInformation &erpinformation)
   os <<  bool (erpinformation.GetBarkerPreambleMode ())
      << "|" << bool (erpinformation.GetUseProtection ())
      << "|" << bool (erpinformation.GetNonErpPresent ());
+=======
+std::ostream &
+operator << (std::ostream &os, const ErpInformation &erpInformation)
+{
+  os <<  bool (erpInformation.GetBarkerPreambleMode ())
+     << "|" << bool (erpInformation.GetUseProtection ())
+     << "|" << bool (erpInformation.GetNonErpPresent ());
+>>>>>>> origin
 
   return os;
 }
 
+<<<<<<< HEAD
 std::istream &operator >> (std::istream &is, ErpInformation &erpinformation)
 {
   bool c1, c2, c3;
@@ -148,4 +180,6 @@ std::istream &operator >> (std::istream &is, ErpInformation &erpinformation)
   return is;
 }
 
+=======
+>>>>>>> origin
 } //namespace ns3

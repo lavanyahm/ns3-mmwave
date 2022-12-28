@@ -36,9 +36,15 @@ struct ParfWifiRemoteStation;
  * Wireless Networks, Kluwer Academic Publishers, 2007, 13, 737-755
  * http://www.cs.odu.edu/~nadeem/classes/cs795-WNS-S13/papers/enter-006.pdf
  *
+<<<<<<< HEAD
  * This RAA does not support HT or VHT modes and will error exit
  * if the user tries to configure this RAA with a Wi-Fi MAC that
  * has VhtSupported or HtSupported set.
+=======
+ * This RAA does not support HT modes and will error
+ * exit if the user tries to configure this RAA with a Wi-Fi MAC
+ * that supports 802.11n or higher.
+>>>>>>> origin
  */
 class ParfWifiManager : public WifiRemoteStationManager
 {
@@ -52,6 +58,7 @@ public:
   virtual ~ParfWifiManager ();
 
   // Inherited from WifiRemoteStationManager
+<<<<<<< HEAD
   virtual void SetupPhy (Ptr<WifiPhy> phy);
   virtual void SetHtSupported (bool enable);
   virtual void SetVhtSupported (bool enable);
@@ -73,6 +80,27 @@ private:
   virtual WifiTxVector DoGetDataTxVector (WifiRemoteStation *station);
   virtual WifiTxVector DoGetRtsTxVector (WifiRemoteStation *station);
   virtual bool IsLowLatency (void) const;
+=======
+  void SetupPhy (const Ptr<WifiPhy> phy);
+
+
+private:
+  // Overridden from base class.
+  void DoInitialize (void);
+  WifiRemoteStation * DoCreateStation (void) const;
+  void DoReportRxOk (WifiRemoteStation *station,
+                     double rxSnr, WifiMode txMode);
+  void DoReportRtsFailed (WifiRemoteStation *station);
+  void DoReportDataFailed (WifiRemoteStation *station);
+  void DoReportRtsOk (WifiRemoteStation *station,
+                      double ctsSnr, WifiMode ctsMode, double rtsSnr);
+  void DoReportDataOk (WifiRemoteStation *station, double ackSnr, WifiMode ackMode,
+                       double dataSnr, uint16_t dataChannelWidth, uint8_t dataNss);
+  void DoReportFinalRtsFailed (WifiRemoteStation *station);
+  void DoReportFinalDataFailed (WifiRemoteStation *station);
+  WifiTxVector DoGetDataTxVector (WifiRemoteStation *station);
+  WifiTxVector DoGetRtsTxVector (WifiRemoteStation *station);
+>>>>>>> origin
 
   /** Check for initializations.
    *
@@ -82,28 +110,27 @@ private:
 
   uint32_t m_attemptThreshold; //!< The minimum number of transmission attempts to try a new power or rate. The 'timer' threshold in the ARF algorithm.
   uint32_t m_successThreshold; //!< The minimum number of successful transmissions to try a new power or rate.
-  
+
   /**
    * Minimal power level.
    * In contrast to rate, power levels do not depend on the remote station.
    * The levels depend only on the physical layer of the device.
    */
-  uint32_t m_minPower;
+  uint8_t m_minPower;
 
   /**
    * Maximal power level.
    */
-  uint32_t m_maxPower;
+  uint8_t m_maxPower;
 
   /**
-   * The trace source fired when the transmission power changes....
+   * The trace source fired when the transmission power changes.
    */
-  TracedCallback<uint8_t, Mac48Address> m_powerChange;
+  TracedCallback<double, double, Mac48Address> m_powerChange;
   /**
    * The trace source fired when the transmission rate changes.
    */
-  TracedCallback<uint32_t, Mac48Address> m_rateChange;
-
+  TracedCallback<DataRate, DataRate, Mac48Address> m_rateChange;
 };
 
 } //namespace ns3

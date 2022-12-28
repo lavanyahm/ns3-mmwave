@@ -17,7 +17,12 @@
  *
  * Author: Nicola Baldo <nbaldo@cttc.es>
  */
+<<<<<<< HEAD
 #include <ns3/wifi-phy-tag.h>
+=======
+
+#include "wifi-phy-tag.h"
+>>>>>>> origin
 
 namespace ns3 {
 
@@ -39,12 +44,17 @@ WifiPhyTag::GetInstanceTypeId (void) const
 uint32_t
 WifiPhyTag::GetSerializedSize (void) const
 {
+<<<<<<< HEAD
   return (4 + (6 * 1) + 4 + 2);
+=======
+  return 3;
+>>>>>>> origin
 }
 
 void
 WifiPhyTag::Serialize (TagBuffer i) const
 {
+<<<<<<< HEAD
   i.WriteU32 (m_wifiTxVector.GetMode ().GetUid ());
   i.WriteU8 (m_wifiTxVector.GetTxPowerLevel ());
   i.WriteU8 (m_wifiTxVector.GetRetries ());
@@ -54,11 +64,17 @@ WifiPhyTag::Serialize (TagBuffer i) const
   i.WriteU8 (m_wifiTxVector.IsStbc ());
   i.WriteU32 (m_wifiPreamble);
   i.WriteU16 (m_mpduType);
+=======
+  i.WriteU8 (static_cast<uint8_t> (m_preamble));
+  i.WriteU8 (static_cast<uint8_t> (m_modulation));
+  i.WriteU8 (m_frameComplete);
+>>>>>>> origin
 }
 
 void
 WifiPhyTag::Deserialize (TagBuffer i)
 {
+<<<<<<< HEAD
   m_wifiTxVector.SetMode (WifiMode (i.ReadU32 ()));
   m_wifiTxVector.SetTxPowerLevel (i.ReadU8 ());
   m_wifiTxVector.SetRetries (i.ReadU8 ());
@@ -73,12 +89,24 @@ void
 WifiPhyTag::Print (std::ostream &os) const
 {
   os << m_wifiTxVector << " " << (m_wifiPreamble ? "SP " : "LP ") << m_mpduType;
+=======
+  m_preamble = static_cast<WifiPreamble> (i.ReadU8 ());
+  m_modulation = static_cast<WifiModulationClass> (i.ReadU8 ());
+  m_frameComplete = i.ReadU8 ();
+}
+
+void
+WifiPhyTag::Print (std::ostream &os) const
+{
+  os << +m_preamble << " " << +m_modulation << " " << m_frameComplete;
+>>>>>>> origin
 }
 
 WifiPhyTag::WifiPhyTag ()
 {
 }
 
+<<<<<<< HEAD
 WifiPhyTag::WifiPhyTag (WifiTxVector txVector, WifiPreamble preamble, enum mpduType mpdutype)
   : m_wifiTxVector (txVector),
     m_wifiPreamble (preamble),
@@ -102,6 +130,31 @@ enum mpduType
 WifiPhyTag::GetMpduType (void) const
 {
   return m_mpduType;
+=======
+WifiPhyTag::WifiPhyTag (WifiPreamble preamble, WifiModulationClass modulation, uint8_t frameComplete)
+  : m_preamble (preamble),
+    m_modulation (modulation),
+    m_frameComplete (frameComplete)
+{
+}
+
+WifiPreamble
+WifiPhyTag::GetPreambleType (void) const
+{
+  return m_preamble;
+}
+
+WifiModulationClass
+WifiPhyTag::GetModulation (void) const
+{
+  return m_modulation;
+}
+
+uint8_t
+WifiPhyTag::GetFrameComplete (void) const
+{
+  return m_frameComplete;
+>>>>>>> origin
 }
 
 } // namespace ns3

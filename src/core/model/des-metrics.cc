@@ -38,8 +38,13 @@ namespace ns3 {
 /* static */
 std::string DesMetrics::m_outputDir; // = "";
 
+<<<<<<< HEAD
 void 
 DesMetrics::Initialize (int argc, char * argv[], std::string outDir /* = "" */ )
+=======
+void
+DesMetrics::Initialize (std::vector<std::string> args, std::string outDir /* = "" */ )
+>>>>>>> origin
 {
   if (m_initialized)
     {
@@ -50,9 +55,15 @@ DesMetrics::Initialize (int argc, char * argv[], std::string outDir /* = "" */ )
   m_initialized = true;
 
   std::string model_name ("desTraceFile");
+<<<<<<< HEAD
   if (argc)
     {
       std::string arg0 = argv[0];
+=======
+  if (args.size () > 0)
+    {
+      std::string arg0 = args[0];
+>>>>>>> origin
       model_name = SystemPath::Split (arg0).back ();
     }
   std::string jsonFile = model_name + ".json";
@@ -76,12 +87,24 @@ DesMetrics::Initialize (int argc, char * argv[], std::string outDir /* = "" */ )
   m_os << " \"model_name\" : \"" << model_name << "\"," << std::endl;
   m_os << " \"capture_date\" : \"" << capture_date << "\"," << std::endl;
   m_os << " \"command_line_arguments\" : \"";
+<<<<<<< HEAD
   if (argc)
     {
       for (int i = 0; i < argc; ++i) 
         {
           if (i > 0) m_os << " ";
           m_os << argv[i];
+=======
+  if (args.size () == 0)
+    {
+      for (std::size_t i = 0; i < args.size (); ++i)
+        {
+          if (i > 0)
+            {
+              m_os << " ";
+            }
+          m_os << args[i];
+>>>>>>> origin
         }
     }
   else
@@ -92,7 +115,11 @@ DesMetrics::Initialize (int argc, char * argv[], std::string outDir /* = "" */ )
   m_os << " \"events\" : [" << std::endl;
 
   m_separator = ' ';
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> origin
 }
 
 void
@@ -100,13 +127,22 @@ DesMetrics::Trace (const Time & now, const Time & delay)
 {
   TraceWithContext (Simulator::GetContext (), now, delay);
 }
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> origin
 void
 DesMetrics::TraceWithContext (uint32_t context, const Time & now, const Time & delay)
 {
   if (!m_initialized)
     {
+<<<<<<< HEAD
       Initialize (0, 0);
+=======
+      std::vector<std::string> args;
+      Initialize (args);
+>>>>>>> origin
     }
 
   std::ostringstream ss;
@@ -119,7 +155,11 @@ DesMetrics::TraceWithContext (uint32_t context, const Time & now, const Time & d
   // Force to signed so we can show NoContext as '-1'
   int32_t send = (sendCtx != Simulator::NO_CONTEXT) ? (int32_t)sendCtx : -1;
   int32_t recv = (context != Simulator::NO_CONTEXT) ? (int32_t)context : -1;
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> origin
   ss <<                                 "  [\""
      << send                         << "\",\""
      << now.GetTimeStep ()           << "\",\""
@@ -143,7 +183,11 @@ void
 DesMetrics::Close (void)
 {
   m_os << std::endl;    // Finish the last event line
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> origin
   m_os << " ]" << std::endl;
   m_os << "}" << std::endl;
   m_os.close ();

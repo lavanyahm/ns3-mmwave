@@ -152,7 +152,7 @@ Ipv4GlobalRouting::LookupGlobal (Ipv4Address dest, Ptr<NetDevice> oif)
        i++) 
     {
       NS_ASSERT ((*i)->IsHost ());
-      if ((*i)->GetDest ().IsEqual (dest)) 
+      if ((*i)->GetDest () == dest)
         {
           if (oif != 0)
             {
@@ -398,14 +398,26 @@ Ipv4GlobalRouting::DoDispose (void)
 
 // Formatted like output of "route -n" command
 void
-Ipv4GlobalRouting::PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const
+Ipv4GlobalRouting::PrintRoutingTable (Ptr<OutputStreamWrapper> stream, Time::Unit unit) const
 {
   NS_LOG_FUNCTION (this << stream);
   std::ostream* os = stream->GetStream ();
+<<<<<<< HEAD
 
   *os << "Node: " << m_ipv4->GetObject<Node> ()->GetId ()
       << ", Time: " << Now().As (Time::S)
       << ", Local time: " << GetObject<Node> ()->GetLocalTime ().As (Time::S)
+=======
+  // Copy the current ostream state
+  std::ios oldState (nullptr);
+  oldState.copyfmt (*os);
+
+  *os << std::resetiosflags (std::ios::adjustfield) << std::setiosflags (std::ios::left);
+
+  *os << "Node: " << m_ipv4->GetObject<Node> ()->GetId ()
+      << ", Time: " << Now().As (unit)
+      << ", Local time: " << m_ipv4->GetObject<Node> ()->GetLocalTime ().As (unit)
+>>>>>>> origin
       << ", Ipv4GlobalRouting table" << std::endl;
 
   if (GetNRoutes () > 0)
@@ -416,11 +428,11 @@ Ipv4GlobalRouting::PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const
           std::ostringstream dest, gw, mask, flags;
           Ipv4RoutingTableEntry route = GetRoute (j);
           dest << route.GetDest ();
-          *os << std::setiosflags (std::ios::left) << std::setw (16) << dest.str ();
+          *os << std::setw (16) << dest.str ();
           gw << route.GetGateway ();
-          *os << std::setiosflags (std::ios::left) << std::setw (16) << gw.str ();
+          *os << std::setw (16) << gw.str ();
           mask << route.GetDestNetworkMask ();
-          *os << std::setiosflags (std::ios::left) << std::setw (16) << mask.str ();
+          *os << std::setw (16) << mask.str ();
           flags << "U";
           if (route.IsHost ())
             {
@@ -430,7 +442,7 @@ Ipv4GlobalRouting::PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const
             {
               flags << "G";
             }
-          *os << std::setiosflags (std::ios::left) << std::setw (6) << flags.str ();
+          *os << std::setw (6) << flags.str ();
           // Metric not implemented
           *os << "-" << "      ";
           // Ref ct not implemented
@@ -449,6 +461,11 @@ Ipv4GlobalRouting::PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const
         }
     }
   *os << std::endl;
+<<<<<<< HEAD
+=======
+  // Restore the previous ostream state
+  (*os).copyfmt (oldState);
+>>>>>>> origin
 }
 
 Ptr<Ipv4Route>

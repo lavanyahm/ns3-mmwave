@@ -39,7 +39,7 @@
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("DsrErrorBuffer");
-  
+
 namespace dsr {
 
 uint32_t
@@ -96,13 +96,20 @@ DsrErrorBuffer::DropPacketForErrLink (Ipv4Address source, Ipv4Address nextHop)
   for (std::vector<DsrErrorBuffEntry>::iterator i = m_errorBuffer.begin (); i
        != m_errorBuffer.end (); ++i)
     {
-      if (LinkEqual (*i, link))
+      if ((i->GetSource () == link[0]) && (i->GetNextHop () == link[1]))
         {
           DropLink (*i, "DropPacketForErrLink");
         }
     }
+<<<<<<< HEAD
   m_errorBuffer.erase (std::remove_if (m_errorBuffer.begin (), m_errorBuffer.end (),
                                        std::bind2nd (std::ptr_fun (DsrErrorBuffer::LinkEqual), link)), m_errorBuffer.end ());
+=======
+
+  auto new_end = std::remove_if (m_errorBuffer.begin (), m_errorBuffer.end (), [&](const DsrErrorBuffEntry& en)
+                                 { return (en.GetSource () == link[0]) && (en.GetNextHop () == link[1]); });
+  m_errorBuffer.erase (new_end, m_errorBuffer.end ());
+>>>>>>> origin
 }
 
 bool
@@ -143,8 +150,14 @@ DsrErrorBuffer::Find (Ipv4Address dst)
   return false;
 }
 
+/// IsExpired structure
 struct IsExpired
 {
+  /**
+   * \brief comparison operator
+   * \param e entry to compare
+   * \return true if entry expired
+   */
   bool
   operator() (DsrErrorBuffEntry const & e) const
   {

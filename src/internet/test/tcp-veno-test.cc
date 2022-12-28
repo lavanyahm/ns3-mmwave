@@ -30,6 +30,7 @@
 #include "ns3/tcp-socket-base.h"
 #include "ns3/tcp-veno.h"
 
+<<<<<<< HEAD
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("TcpVenoTestSuite");
@@ -72,11 +73,34 @@ NewReno_IncreaseWindow (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked)
 }
 
 /**
+=======
+using namespace ns3;
+
+NS_LOG_COMPONENT_DEFINE ("TcpVenoTestSuite");
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+>>>>>>> origin
  * \brief Testing the additive increase and multiplicative decrease of TcpVeno
  */
 class TcpVenoTest : public TestCase
 {
 public:
+<<<<<<< HEAD
+=======
+  /**
+   * \brief Constructor.
+   * \param cWnd Congestion window.
+   * \param segmentSize Segment size.
+   * \param ssThresh Slow Start Threshold.
+   * \param rtt The RTT.
+   * \param segmentsAcked Number of segments acked.
+   * \param numRtt Number of RTTs (i.e., rounds) in the test.
+   * \param name Test description.
+   */
+>>>>>>> origin
   TcpVenoTest (uint32_t cWnd,
                uint32_t segmentSize,
                uint32_t ssThresh,
@@ -87,6 +111,7 @@ public:
 
 private:
   virtual void DoRun (void);
+<<<<<<< HEAD
   void AdditiveIncrease (Ptr<TcpSocketState> state, uint32_t diff, UintegerValue beta);
   uint32_t MultiplicativeDecrease (uint32_t diff, const UintegerValue &beta, uint32_t bytesInFlight);
 
@@ -98,6 +123,57 @@ private:
   uint32_t m_numRtt;
   bool m_inc;
   Ptr<TcpSocketState> m_state;
+=======
+
+  /**
+   * \brief TCP Veno additive increase formula.
+   * \param state The congestion control state.
+   * \param diff The difference between actual and expected throughput.
+   * \param beta TCP Veno beta param.
+   */
+  void AdditiveIncrease (Ptr<TcpSocketState> state, uint32_t diff, UintegerValue beta);
+
+  /**
+   * \brief TCP Veno multiplicative decrease formula.
+   * \param diff The difference between actual and expected throughput.
+   * \param beta TCP Veno beta param.
+   * \param bytesInFlight Bytes in flight.
+   * \returns The calculated SsThresh.
+   */
+  uint32_t MultiplicativeDecrease (uint32_t diff, const UintegerValue &beta, uint32_t bytesInFlight);
+
+  /**
+   * \brief Mimics the NewReno IncreaseWindow algorithm.
+   * \param state TCP socket state.
+   * \param segmentsAcked Number of segments acked.
+   */
+  void NewReno_IncreaseWindow (Ptr<TcpSocketState> state, uint32_t segmentsAcked);
+
+  /**
+   * \brief Mimics the NewReno SlowStart algorithm.
+   * \param state TCP socket state.
+   * \param segmentsAcked Number of segments acked.
+   * \returns The number of segments that could be sent.
+   */
+  uint32_t NewReno_SlowStart (Ptr<TcpSocketState> state, uint32_t segmentsAcked);
+
+  /**
+   * \brief Mimics the NewReno Congestion Avoidance algorithm.
+   * \param state TCP socket state.
+   * \param segmentsAcked Number of segments acked.
+   */
+  void NewReno_CongestionAvoidance (Ptr<TcpSocketState> state, uint32_t segmentsAcked);
+
+
+  uint32_t m_cWnd;        //!< Congestion window.
+  uint32_t m_segmentSize; //!< Segment size.
+  uint32_t m_ssThresh;    //!< Slow Start Threshold.
+  Time m_rtt;             //!< RTT.
+  uint32_t m_segmentsAcked; //!< Number of segments ACKed.
+  uint32_t m_numRtt;      //!< Number of RTT (i.e., rounds) of the test.
+  bool m_inc;             //!< Internal flag to increase every other round.
+  Ptr<TcpSocketState> m_state;  //!< TCP socket state.
+>>>>>>> origin
 };
 
 TcpVenoTest::TcpVenoTest (uint32_t cWnd,
@@ -126,6 +202,10 @@ TcpVenoTest::DoRun ()
   m_state->m_cWnd = m_cWnd;
   m_state->m_segmentSize = m_segmentSize;
   m_state->m_ssThresh = m_ssThresh;
+<<<<<<< HEAD
+=======
+  m_state->m_minRtt = m_rtt;
+>>>>>>> origin
 
   Ptr<TcpVeno> cong = CreateObject <TcpVeno> ();
 
@@ -240,9 +320,57 @@ TcpVenoTest::MultiplicativeDecrease (uint32_t diff, const UintegerValue &beta,
   return calculatedSsThresh;
 }
 
+<<<<<<< HEAD
 
 // -------------------------------------------------------------------
 static class TcpVenoTestSuite : public TestSuite
+=======
+void
+TcpVenoTest::NewReno_IncreaseWindow (Ptr<TcpSocketState> state, uint32_t segmentsAcked)
+{
+  if (state->m_cWnd < state->m_ssThresh)
+    {
+      segmentsAcked = NewReno_SlowStart (state, segmentsAcked);
+    }
+
+  if (state->m_cWnd >= state->m_ssThresh)
+    {
+      NewReno_CongestionAvoidance (state, segmentsAcked);
+    }
+}
+
+uint32_t
+TcpVenoTest::NewReno_SlowStart (Ptr<TcpSocketState> state, uint32_t segmentsAcked)
+{
+  if (segmentsAcked >= 1)
+    {
+      state->m_cWnd += state->m_segmentSize;
+      return segmentsAcked - 1;
+    }
+
+  return 0;
+}
+
+void
+TcpVenoTest::NewReno_CongestionAvoidance (Ptr<TcpSocketState> state, uint32_t segmentsAcked)
+{
+  if (segmentsAcked > 0)
+    {
+      double adder = static_cast<double> (state->m_segmentSize * state->m_segmentSize) / state->m_cWnd.Get ();
+      adder = std::max (1.0, adder);
+      state->m_cWnd += static_cast<uint32_t> (adder);
+    }
+}
+
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief TCP Veno TestSuite
+ */
+class TcpVenoTestSuite : public TestSuite
+>>>>>>> origin
 {
 public:
   TcpVenoTestSuite () : TestSuite ("tcp-veno-test", UNIT)
@@ -257,6 +385,14 @@ public:
                                   "Veno increment test on cWnd with diff > beta"),
                  TestCase::QUICK);
   }
+<<<<<<< HEAD
 } g_tcpVenoTest;
 
 } // namespace ns3
+=======
+};
+
+static TcpVenoTestSuite g_tcpVenoTest; //!< Static variable for test initialization
+
+
+>>>>>>> origin

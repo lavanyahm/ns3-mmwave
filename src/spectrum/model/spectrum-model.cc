@@ -38,7 +38,7 @@ bool operator== (const SpectrumModel& lhs, const SpectrumModel& rhs)
 
 SpectrumModelUid_t SpectrumModel::m_uidCount = 0;
 
-SpectrumModel::SpectrumModel (std::vector<double> centerFreqs)
+SpectrumModel::SpectrumModel (const std::vector<double>& centerFreqs)
 {
   NS_ASSERT (centerFreqs.size () > 1);
   m_uid = ++m_uidCount;
@@ -70,11 +70,18 @@ SpectrumModel::SpectrumModel (std::vector<double> centerFreqs)
     }
 }
 
-SpectrumModel::SpectrumModel (Bands bands)
+SpectrumModel::SpectrumModel (const Bands& bands)
 {
   m_uid = ++m_uidCount;
   NS_LOG_INFO ("creating new SpectrumModel, m_uid=" << m_uid);
   m_bands = bands;
+}
+
+SpectrumModel::SpectrumModel (Bands&& bands)
+  : m_bands (std::move (bands))
+{
+  m_uid = ++m_uidCount;
+  NS_LOG_INFO ("creating new SpectrumModel, m_uid=" << m_uid);
 }
 
 Bands::const_iterator
@@ -101,6 +108,25 @@ SpectrumModel::GetUid () const
   return m_uid;
 }
 
+bool
+SpectrumModel::IsOrthogonal (const SpectrumModel &other) const
+{
+  for (Bands::const_iterator myIt = Begin ();
+       myIt != End ();
+       ++myIt)
+    {
+      for (Bands::const_iterator otherIt = other.Begin ();
+           otherIt != other.End ();
+           ++otherIt)
+        {
+          if (std::max (myIt->fl, otherIt->fl) < std::min (myIt->fh, otherIt->fh))
+            {
+              return false;
+            }
+        }
+    }
+  return true;
+}
 
 
 } // namespace ns3

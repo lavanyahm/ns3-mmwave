@@ -74,7 +74,10 @@ bool AreVectorsEqual (Vector const & actual, Vector const & limit, double tol)
 }
 
 /**
- * Every test case is supposed to:
+ * \ingroup mobility-test
+ * \ingroup tests
+ *
+ * \brief Every test case is supposed to:
  *  1. Generate short mobility trace file
  *  2. Read it back using Ns2MobilityHelper
  *  3. Check initial node positions and speeds.
@@ -91,6 +94,14 @@ public:
     Vector pos;             ///< reference position
     Vector vel;             ///< reference velocity
 
+    /**
+     * Constructor
+     *
+     * \param id reference ID
+     * \param t time
+     * \param p position
+     * \param v velocity
+     */
     ReferencePoint (std::string const & id, Time t, Vector const & p, Vector const & v)
       : node (id),
         time (t),
@@ -98,7 +109,11 @@ public:
         vel (v)
     {
     }
-    /// Sort by timestamp
+    /**
+     * Less-than operator - used to sort by timestamp
+     * \param o object to compare to
+     * \returns true if the timestamp of the 1nd operand is less than the other one's
+     */
     bool operator< (ReferencePoint const & o) const
     {
       return (time < o.time);
@@ -122,17 +137,29 @@ public:
   virtual ~Ns2MobilityHelperTest ()
   {
   }
-  /// Set NS-2 trace to read as single large string (don't forget to add \\n and quote \"'s)
+  /**
+   * Set NS-2 trace to read as single large string (don't forget to add \\n and quote \"'s)
+   *  \param trace the mobility trace
+   */
   void SetTrace (std::string const & trace)
   {
     m_trace = trace;
   }
-  /// Add next reference point
+  /**
+   * Add next reference point
+   * \param r reference point to add
+   */
   void AddReferencePoint (ReferencePoint const & r)
   {
     m_reference.push_back (r);
   }
-  /// Sugar
+  /**
+   * Add next reference point
+   * \param id reference point id
+   * \param sec reference point ime (in seconds)
+   * \param p reference point position
+   * \param v reference point velocity
+   */
   void AddReferencePoint (const char * id, double sec, Vector const & p, Vector const & v)
   {
     AddReferencePoint (ReferencePoint (id, Seconds (sec), p, v));
@@ -153,7 +180,10 @@ private:
   std::string m_traceFile;
 
 private:
-  /// Dump NS-2 trace to tmp file
+  /**
+   * Dump NS-2 trace to tmp file
+   * \return true on error.
+   */
   bool WriteTrace ()
   {
     m_traceFile = CreateTempDirFilename ("Ns2MobilityHelperTest.tcl");
@@ -175,7 +205,10 @@ private:
         Names::Add (os.str (), nodes.Get (i));
       }
   }
-  /// Check that all initial positions are correct
+  /**
+   * Check that all initial positions are correct
+   * \return true on error.
+   */
   bool CheckInitialPositions ()
   {
     std::stable_sort (m_reference.begin (), m_reference.end ());
@@ -195,7 +228,11 @@ private:
       }
     return IsStatusFailure ();
   }
-  /// Listen for course change events
+  /**
+   * Listen for course change events
+   * \param context event context
+   * \param mobility a pointer to the mobility model
+   */
   void CourseChange (std::string context, Ptr<const MobilityModel> mobility)
   {
     Time time = Simulator::Now ();
@@ -255,7 +292,12 @@ private:
   }
 };
 
-/// The test suite
+/**
+ * \ingroup mobility-test
+ * \ingroup tests
+ *
+ * \brief The test suite
+ */
 class Ns2MobilityHelperTestSuite : public TestSuite
 {
 public:
@@ -517,4 +559,4 @@ public:
     AddTestCase (t, TestCase::QUICK);
 
   }
-} g_ns2TransmobilityHelperTestSuite;
+} g_ns2TransmobilityHelperTestSuite; ///< the test suite

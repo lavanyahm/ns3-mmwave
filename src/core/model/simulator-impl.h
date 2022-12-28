@@ -31,7 +31,7 @@
 /**
  * \file
  * \ingroup simulator
- * Declaration of class ns3::SimulatorImpl.
+ * ns3::SimulatorImpl declaration.
  */
 
 namespace ns3 {
@@ -48,7 +48,7 @@ class Scheduler;
 class SimulatorImpl : public Object
 {
 public:
-  
+
   /**
    * Get the registered TypeId for this class.
    * \return The object TypeId.
@@ -91,14 +91,17 @@ public:
    * \param [in] schedulerFactory A new event scheduler factory.
    *
    * The event scheduler can be set at any time: the events scheduled
-   * in the previous scheduler will be transfered to the new scheduler
+   * in the previous scheduler will be transferred to the new scheduler
    * before we start to use it.
    */
   virtual void SetScheduler (ObjectFactory schedulerFactory) = 0;
   /** \copydoc Simulator::GetSystemId */
-  virtual uint32_t GetSystemId () const = 0; 
+  virtual uint32_t GetSystemId () const = 0;
   /** \copydoc Simulator::GetContext */
   virtual uint32_t GetContext (void) const = 0;
+  /** \copydoc Simulator::GetEventCount */
+  virtual uint64_t GetEventCount (void) const = 0;
+
 };
 
 } // namespace ns3

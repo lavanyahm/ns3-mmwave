@@ -38,7 +38,7 @@ consisting of two methods:  RouteOutput () and RouteInput ().  For packets
 traveling outbound from a host, the transport protocol will query Ipv4 for the
 Ipv4RoutingProtocol object interface, and will request a route via
 Ipv4RoutingProtocol::RouteOutput ().  A Ptr to Ipv4Route object is returned.
-This is analagous to a dst_cache entry in Linux. The Ipv4Route is carried down
+This is analogous to a dst_cache entry in Linux. The Ipv4Route is carried down
 to the Ipv4L3Protocol to avoid a second lookup there. However, some cases (e.g.
 Ipv4 raw sockets) will require a call to RouteOutput()
 directly from Ipv4L3Protocol.
@@ -81,10 +81,85 @@ unicast routing capability that is intended to globally build routing
 tables at simulation time t=0 for simulation users who do not care
 about dynamic routing.
 
+.. _Unicast-routing:
+
+Unicast routing
+***************
+
+The following unicast routing protocols are defined for IPv4 and IPv6:
+
+* classes Ipv4ListRouting and Ipv6ListRouting (used to store a prioritized list of routing protocols)
+* classes Ipv4StaticRouting and Ipv6StaticRouting (covering both unicast and multicast)
+* class Ipv4GlobalRouting (used to store routes computed by the global route
+  manager, if that is used)
+* class Ipv4NixVectorRouting (a more efficient version of global routing that
+  stores source routes in a packet header field)
+* class Rip - the IPv4 RIPv2 protocol (:rfc:`2453`)
+* class RipNg - the IPv6 RIPng protocol (:rfc:`2080`)
+* IPv4 Optimized Link State Routing (OLSR) (a MANET protocol defined in 
+  :rfc:`3626`)
+* IPv4 Ad Hoc On Demand Distance Vector (AODV) (a MANET protocol defined in
+  :rfc:`3561`)
+* IPv4 Destination Sequenced Distance Vector (DSDV) (a MANET protocol)
+* IPv4 Dynamic Source Routing (DSR) (a MANET protocol)
+
+In the future, this architecture should also allow someone to implement a
+Linux-like implementation with routing cache, or a Click modular router, but
+those are out of scope for now.
+
+Ipv[4,6]ListRouting
++++++++++++++++++++
+
+This section describes the current default |ns3| Ipv[4,6]RoutingProtocol. Typically,
+multiple routing protocols are supported in user space and coordinate to write a
+single forwarding table in the kernel. Presently in |ns3|, the implementation
+instead allows for multiple routing protocols to build/keep their own routing
+state, and the IP implementation will query each one of these routing
+protocols (in some order determined by the simulation author) until a route is
+found.  
+
+We chose this approach because it may better facilitate the integration of
+disparate routing approaches that may be difficult to coordinate the writing to
+a single table, approaches where more information than destination IP address
+(e.g., source routing) is used to determine the next hop, and on-demand routing
+approaches where packets must be cached.  
+
+Ipv[4,6]ListRouting::AddRoutingProtocol
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Classes Ipv4ListRouting and Ipv6ListRouting provides a pure virtual function declaration
+for the method that allows one to add a routing protocol::
+
+  void AddRoutingProtocol (Ptr<Ipv4RoutingProtocol> routingProtocol,
+                           int16_t priority);
+
+  void AddRoutingProtocol (Ptr<Ipv6RoutingProtocol> routingProtocol,
+                           int16_t priority);
+
+These methods are implemented respectively by class Ipv4ListRoutingImpl and by class 
+Ipv6ListRoutingImpl in the internet module.
+
+The priority variable above governs the priority in which the routing protocols
+are inserted. Notice that it is a signed int.  By default in |ns3|, the helper
+classes will instantiate a Ipv[4,6]ListRoutingImpl object, and add to it an
+Ipv[4,6]StaticRoutingImpl object at priority zero.  Internally, a list of
+Ipv[4,6]RoutingProtocols is stored, and and the routing protocols are each consulted
+in decreasing order of priority to see whether a match is found. Therefore, if
+you want your Ipv4RoutingProtocol to have priority lower than the static
+routing, insert it with priority less than 0; e.g.::
+
+  Ptr<MyRoutingProtocol> myRoutingProto = CreateObject<MyRoutingProtocol> ();
+  listRoutingPtr->AddRoutingProtocol (myRoutingProto, -10);
+
+Upon calls to RouteOutput() or RouteInput(), the list routing object will search
+the list of routing protocols, in priority order, until a route is found. Such
+routing protocol will invoke the appropriate callback and no further routing
+protocols will be searched.  
+
 .. _Global-centralized-routing:
 
 Global centralized routing
-**************************
+++++++++++++++++++++++++++
 
 Global centralized routing is sometimes called "God" routing; it is a special
 implementation that walks the simulation topology and runs a shortest path
@@ -109,7 +184,7 @@ users can insert routes via Ipv4StaticRouting API and they will take precedence
 over routes found by global routing).
 
 Global Unicast Routing API
-++++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The public API is very minimal. User scripts include the following::
 
@@ -152,7 +227,7 @@ user manually calls RecomputeRoutingTables() after such events. The default is
 set to false to preserve legacy |ns3| program behavior.
 
 Global Routing Implementation
-+++++++++++++++++++++++++++++
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This section is for those readers who care about how this is implemented.  A
 singleton object (GlobalRouteManager) is responsible for populating the static
@@ -210,11 +285,11 @@ Advertisement for each router, and this link state database is
 fed into the OSPF shortest path computation logic. The Ipv4 API
 is finally used to populate the routes themselves. 
 
-.. _Unicast-routing:
 
-Unicast routing
-***************
+RIP and RIPng
++++++++++++++
 
+<<<<<<< HEAD
 There are presently eigth unicast routing protocols defined for IPv4 and three for
 IPv6:
 
@@ -338,6 +413,8 @@ over a wireless channel.
 RIP and RIPng
 +++++++++++++
 
+=======
+>>>>>>> origin
 The RIPv2 protocol for IPv4 is described in the :rfc:`2453`, and it consolidates
 a number of improvements over the base protocol defined in :rfc:`1058`.
 
@@ -365,7 +442,7 @@ are the number of vertices (routers) and edges (links) respectively.
 It should be stressed that the convergence time is the number of steps in
 the algorithm, and each step is triggered by a message.
 Since Triggered Updates (i.e., when a route is changed) have a 1-5 seconds 
-cooldown, the toplogy can require some time to be stabilized.
+cooldown, the topology can require some time to be stabilized.
 
 Users should be aware that, during routing tables construction, the routers 
 might drop packets. Data traffic should be sent only after a time long
@@ -400,17 +477,21 @@ Poison Reverse will advertise the route on the interface from which it
 was learned, but with a metric of 16 (infinity).
 For a full analysis of the three techniques, see :rfc:`1058`, section 2.2.
 
+<<<<<<< HEAD
 The examples are based on the network toplogy
+=======
+The examples are based on the network topology
+>>>>>>> origin
 described in the RFC, but it does not show the effect described there.
 
 The reason are the Triggered Updates, together with the fact that when a 
 router invalidates a route, it will immediately propagate the route 
 unreachability, thus preventing most of the issues described in the RFC.
 
-However, with complex toplogies, it is still possible to have route 
+However, with complex topologies, it is still possible to have route 
 instability phenomena similar to the one described in the RFC after a 
 link failure. As a consequence, all the considerations about Split Horizon
-remanins valid.
+remains valid.
 
 
 Default routes
@@ -439,7 +520,11 @@ selected on a per-node basis, with the choices being "no split horizon",
 and :rfc:`1058` for a complete discussion on the split horizoning strategies.
 
 Moreover, it is possible to use a non-standard value for Link Down Value (i.e.,
+<<<<<<< HEAD
 the value after which a link is considered down). The defaul is value is 16. 
+=======
+the value after which a link is considered down). The default is value is 16. 
+>>>>>>> origin
 
 Limitations
 ~~~~~~~~~~~
@@ -452,6 +537,21 @@ Support for this option may be considered in the future.
 There is no support for CIDR prefix aggregation. As a result, both routing 
 tables and route advertisements may be larger than necessary. 
 Prefix aggregation may be added in the future.
+
+
+Other routing protocols
++++++++++++++++++++++++
+
+Other routing protocols documentation can be found under the respective
+modules sections, e.g.:
+
+* AODV
+* Click
+* DSDV
+* DSR
+* NixVectorRouting
+* OLSR
+* etc.
 
 
 .. _Multicast-routing:
@@ -472,29 +572,16 @@ A multicast route must specify an origin IP address, a multicast group and an
 input network interface index as conditions and provide a vector of output
 network interface indices over which packets matching the conditions are sent.
 
-Typically there are two main types of multicast routes:  routes of the first
-kind are used during forwarding. All of the conditions must be explicitly
-provided. The second kind of routes are used to get packets off of a local node.
-The difference is in the input interface. Routes for forwarding will always
-have an explicit input interface specified. Routes off of a node will always
-set the input interface to a wildcard specified by the index
-Ipv4RoutingProtocol::IF\_INDEX\_ANY.
+Typically there are two main types of multicast routes: 
 
-For routes off of a local node wildcards may be used in the origin and multicast
-group addresses. The wildcard used for Ipv4Adresses is that address returned by
-Ipv4Address::GetAny () -- typically "0.0.0.0". Usage of a wildcard allows one to
-specify default behavior to varying degrees.
+* Routes used during forwarding, and
+* Routes used in the originator node.
 
-For example, making the origin address a wildcard, but leaving the multicast
-group specific allows one (in the case of a node with multiple interfaces) to
-create different routes using different output interfaces for each multicast
-group.
+In the first case all the conditions must be explicitly
+provided. 
 
-If the origin and multicast addresses are made wildcards, you have created
-essentially a default multicast address that can forward to multiple 
-interfaces. Compare this to the actual default multicast address that is
-limited to specifying a single output interface for compatibility with
-existing functionality in other systems.
+In the second case, the route is equivalent to a unicast route, and must be added
+through `Ipv4StaticRouting::AddHostRouteTo`.
 
 Another command sets the default multicast route::
 

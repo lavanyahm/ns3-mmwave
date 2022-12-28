@@ -23,7 +23,7 @@
 /**
  * \file
  * \ingroup simulator
- * Implementation of class ns3::SimulatorImpl.
+ * ns3::SimulatorImpl implementation.
  */
 
 namespace ns3 {
@@ -31,8 +31,8 @@ namespace ns3 {
 NS_LOG_COMPONENT_DEFINE ("SimulatorImpl");
 
 NS_OBJECT_ENSURE_REGISTERED (SimulatorImpl);
-  
-TypeId 
+
+TypeId
 SimulatorImpl::GetTypeId (void)
 {
   static TypeId tid = TypeId ("ns3::SimulatorImpl")

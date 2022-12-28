@@ -1,6 +1,8 @@
 /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
 /*
  * Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
+ * Copyright (c) 2017, NYU WIRELESS, Tandon School of Engineering, New York University
+ * Copyright (c) 2017, University of Padova, Dep. of Information Engineering, SIGNET lab
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -16,6 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * Author: Manuel Requena <manuel.requena@cttc.es>
+ *
+ * Modified by:  Russell Ford
+ *                  Low lat
+ *               Michele Polese <michele.polese@gmail.com>
+ *                  Dual Connectivity functionalities
  */
 
 #ifndef LTE_RLC_UM_LOWLAT_H
@@ -23,6 +30,7 @@
 
 #include "ns3/lte-rlc-sequence-number.h"
 #include "ns3/lte-rlc.h"
+#include <ns3/epc-x2-sap.h>
 
 #include <ns3/event-id.h>
 #include <map>
@@ -47,11 +55,22 @@ public:
   virtual void DoTransmitPdcpPdu (Ptr<Packet> p);
 
   /**
+   * RLC EPC X2 SAP
+   */
+  virtual void DoSendMcPdcpSdu(EpcX2Sap::UeDataParams params);
+
+  /**
    * MAC SAP
    */
-  virtual void DoNotifyTxOpportunity (uint32_t bytes, uint8_t layer, uint8_t harqId);
+  virtual void DoNotifyTxOpportunity (LteMacSapUser::TxOpportunityParameters params);
   virtual void DoNotifyHarqDeliveryFailure ();
-  virtual void DoReceivePdu (Ptr<Packet> p);
+  virtual void DoReceivePdu (LteMacSapUser::ReceivePduParameters params);
+
+  std::vector < Ptr<Packet> > GetTxBuffer();
+  uint32_t GetTxBufferSize()
+  {
+    return m_txBufferSize;
+  }
 
 private:
   void ExpireReorderingTimer (void);
@@ -63,6 +82,7 @@ private:
   void ReassembleSnInterval (SequenceNumber10 lowSeqNumber, SequenceNumber10 highSeqNumber);
 
   void ReassembleAndDeliver (Ptr<Packet> packet);
+  void TriggerReceivePdcpPdu(Ptr<Packet> p);
 
   void DoReportBufferStatus ();
 
@@ -112,13 +132,20 @@ private:
 
   std::deque <uint32_t> m_recentArrivalTimes;
   std::deque <uint32_t> m_recentPacketSizes;
-  uint32_t	m_currTotalPacketSize;
+  uint32_t  m_currTotalPacketSize;
   //uint64_t m_lastArrivalTime;
   double m_arrivalRate;
-  static uint32_t m_numArrivalsToAvg;				// average last N arrivals
-  //double	m_forgetFactor;
+  static uint32_t m_numArrivalsToAvg;        // average last N arrivals
+  //double  m_forgetFactor;
   Time m_reorderingTimeExpires;
+<<<<<<< HEAD
   bool m_bsrReported;
+=======
+
+  bool m_bsrReported;
+
+  bool m_sendBsrWhenPacketTx;
+>>>>>>> origin
 };
 
 

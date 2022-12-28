@@ -27,7 +27,7 @@
 //
 // - Packets flows from n0 to n1
 //
-// This example shows how to use the SimpleServer and SimpleClient
+// This example shows how to use the PacketSocketServer and PacketSocketClient
 // to send non-IP packets over a SimpleNetDevice
 
 #include "ns3/core-module.h"
@@ -40,7 +40,7 @@ int main (int argc, char *argv[])
 {
   bool verbose = false;
 
-  CommandLine cmd;
+  CommandLine cmd (__FILE__);
   cmd.AddValue ("verbose", "turn on log components", verbose);
   cmd.Parse(argc, argv);
 

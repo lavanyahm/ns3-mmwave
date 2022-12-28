@@ -39,7 +39,7 @@
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("DsrSendBuffer");
-  
+
 namespace dsr {
 
 uint32_t
@@ -91,13 +91,19 @@ DsrSendBuffer::DropPacketWithDst (Ipv4Address dst)
   for (std::vector<DsrSendBuffEntry>::iterator i = m_sendBuffer.begin (); i
        != m_sendBuffer.end (); ++i)
     {
-      if (IsEqual (*i, dst))
+      if (i->GetDestination () == dst)
         {
           Drop (*i, "DropPacketWithDst");
         }
     }
+<<<<<<< HEAD
   m_sendBuffer.erase (std::remove_if (m_sendBuffer.begin (), m_sendBuffer.end (),
                                       std::bind2nd (std::ptr_fun (DsrSendBuffer::IsEqual), dst)), m_sendBuffer.end ());
+=======
+  auto new_end = std::remove_if (m_sendBuffer.begin (), m_sendBuffer.end (), [&](const DsrSendBuffEntry& en)
+                                 { return en.GetDestination () == dst; });
+  m_sendBuffer.erase (new_end, m_sendBuffer.end ());
+>>>>>>> origin
 }
 
 bool
@@ -140,6 +146,11 @@ DsrSendBuffer::Find (Ipv4Address dst)
 
 struct IsExpired
 {
+  /**
+   * comparison operator
+   * \param e entry to compare
+   * \return true if expired
+   */
   bool
   operator() (DsrSendBuffEntry const & e) const
   {

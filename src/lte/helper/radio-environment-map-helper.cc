@@ -149,14 +149,14 @@ RadioEnvironmentMapHelper::GetTypeId (void)
 }
 
 
-uint8_t 
+uint16_t
 RadioEnvironmentMapHelper::GetBandwidth () const
 {
   return m_bandwidth;
 }
 
 void 
-RadioEnvironmentMapHelper::SetBandwidth (uint8_t bw)
+RadioEnvironmentMapHelper::SetBandwidth (uint16_t bw)
 {
   switch (bw)
     { 
@@ -170,7 +170,7 @@ RadioEnvironmentMapHelper::SetBandwidth (uint8_t bw)
       break;
 
     default:
-      NS_FATAL_ERROR ("invalid bandwidth value " << (uint16_t) bw);
+      NS_FATAL_ERROR ("invalid bandwidth value " << bw);
       break;
     }
 }
@@ -282,8 +282,8 @@ RadioEnvironmentMapHelper::RunOneIteration (double xMin, double xMax, double yMi
 {
   NS_LOG_FUNCTION (this << xMin << xMax << yMin << yMax);
   std::list<RemPoint>::iterator remIt = m_rem.begin ();
-  double x;
-  double y;
+  double x = 0.0;
+  double y = 0.0;
   for (x = xMin; x < xMax + 0.5*m_xStep; x += m_xStep)
     {
       for (y = (x == xMin) ? yMin : m_yMin;
@@ -292,7 +292,8 @@ RadioEnvironmentMapHelper::RunOneIteration (double xMin, double xMax, double yMi
         {
           NS_ASSERT (remIt != m_rem.end ());
           remIt->bmm->SetPosition (Vector (x, y, m_z));
-          BuildingsHelper::MakeConsistent (remIt->bmm);
+          Ptr <MobilityBuildingInfo> buildingInfo = (remIt->bmm)->GetObject <MobilityBuildingInfo> ();
+          buildingInfo->MakeConsistent (remIt->bmm);
           ++remIt;
         }      
     }

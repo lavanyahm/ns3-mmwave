@@ -219,7 +219,11 @@ TestDeterministicByTime (Ptr<PropagationLossModel> model,
 
 int main (int argc, char *argv[])
 {
+<<<<<<< HEAD
   CommandLine cmd;
+=======
+  CommandLine cmd (__FILE__);
+>>>>>>> origin
   cmd.Parse (argc, argv);
   
   GnuplotCollection gnuplots ("main-propagation-loss.pdf");

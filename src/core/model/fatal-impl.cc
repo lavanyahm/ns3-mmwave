@@ -31,13 +31,15 @@
 /**
  * \file
  * \ingroup fatalimpl
- * \brief Implementation of RegisterStream(), UnregisterStream(), and FlushStreams(); see Implementation note!
+ * \brief ns3::FatalImpl::RegisterStream(), ns3::FatalImpl::UnregisterStream(),
+ * and ns3::FatalImpl::FlushStreams() implementations;
+ * see Implementation note!
  *
  * \note Implementation.
  *
  * The singleton pattern we use here is tricky because we have to ensure:
  *
- *   - RegisterStream() succeeds, even if called before \c main() enters and 
+ *   - RegisterStream() succeeds, even if called before \c main() enters and
  *     before any constructor run in this file.
  *
  *   - UnregisterStream() succeeds, whether or not FlushStreams() has
@@ -51,12 +53,12 @@
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("FatalImpl");
-  
+
 namespace FatalImpl {
 
 /**
  * \ingroup fatalimpl
- * Anonymous namespace for fatal streams memory implementation
+ * Unnamed namespace for fatal streams memory implementation
  * and signal handler.
  */
 namespace {
@@ -68,7 +70,7 @@ namespace {
  *
  * \returns The address of the static pointer.
  */
-std::list<std::ostream*> **PeekStreamList (void)
+std::list<std::ostream*> ** PeekStreamList (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
   static std::list<std::ostream*> *streams = 0;
@@ -81,7 +83,7 @@ std::list<std::ostream*> **PeekStreamList (void)
  *
  * \returns The stream list.
  */
-std::list<std::ostream*> *GetStreamList (void)
+std::list<std::ostream*> * GetStreamList (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
   std::list<std::ostream*> **pstreams = PeekStreamList ();
@@ -92,7 +94,7 @@ std::list<std::ostream*> *GetStreamList (void)
   return *pstreams;
 }
 
-}  // anonymous namespace
+}  // unnamed namespace
 
 void
 RegisterStream (std::ostream* stream)
@@ -120,7 +122,7 @@ UnregisterStream (std::ostream* stream)
 
 /**
  * \ingroup fatalimpl
- * Anonymous namespace for fatal streams signal hander.
+ * Unnamed namespace for fatal streams signal handler.
  *
  * This is private to the fatal implementation.
  */
@@ -141,9 +143,9 @@ void sigHandler (int sig)
   FlushStreams ();
   std::abort ();
 }
-}  // anonymous namespace
+}  // unnamed namespace
 
-void 
+void
 FlushStreams (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
@@ -159,7 +161,7 @@ FlushStreams (void)
    * The SIGSEGV override should only be active for the
    * duration of this function. */
   struct sigaction hdl;
-  hdl.sa_handler=sigHandler;
+  hdl.sa_handler = sigHandler;
   sigaction (SIGSEGV, &hdl, 0);
 
   std::list<std::ostream*> *l = *pl;
@@ -173,7 +175,7 @@ FlushStreams (void)
     }
 
   /* Restore default SIGSEGV handler (Not that it matters anyway) */
-  hdl.sa_handler=SIG_DFL;
+  hdl.sa_handler = SIG_DFL;
   sigaction (SIGSEGV, &hdl, 0);
 
   /* Flush all opened FILE* */
@@ -189,5 +191,5 @@ FlushStreams (void)
 }
 
 } // namespace FatalImpl
-  
+
 } // namespace ns3

@@ -117,6 +117,15 @@ NS_LOG_COMPONENT_DEFINE ("Ipv4GlobalRoutingTestSuite");
 //              route to 10.1.1.0 gw 10.1.2.1
 
 
+<<<<<<< HEAD
+=======
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv4 GlobalRouting Link test
+ */
+>>>>>>> origin
 class LinkTest : public TestCase
 {
 public:
@@ -124,7 +133,11 @@ public:
   virtual void DoRun (void);
   LinkTest ();
 private:
+<<<<<<< HEAD
   NodeContainer m_nodes;
+=======
+  NodeContainer m_nodes; //!< Nodes used in the test.
+>>>>>>> origin
 };
 
 LinkTest::LinkTest ()
@@ -195,6 +208,15 @@ LinkTest::DoRun ()
   Simulator::Destroy ();
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv4 GlobalRouting LAN test
+ */
+>>>>>>> origin
 class LanTest : public TestCase
 {
 public:
@@ -202,7 +224,11 @@ public:
   virtual void DoRun (void);
   LanTest ();
 private:
+<<<<<<< HEAD
   NodeContainer m_nodes;
+=======
+  NodeContainer m_nodes; //!< Nodes used in the test.
+>>>>>>> origin
 };
 
 LanTest::LanTest ()
@@ -270,6 +296,15 @@ LanTest::DoRun ()
   Simulator::Destroy ();
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv4 GlobalRouting Two Link test
+ */
+>>>>>>> origin
 class TwoLinkTest : public TestCase
 {
 public:
@@ -277,7 +312,11 @@ public:
   virtual void DoRun (void);
   TwoLinkTest ();
 private:
+<<<<<<< HEAD
   NodeContainer m_nodes;
+=======
+  NodeContainer m_nodes; //!< Nodes used in the test.
+>>>>>>> origin
 };
 
 TwoLinkTest::TwoLinkTest ()
@@ -383,6 +422,15 @@ TwoLinkTest::DoRun ()
   Simulator::Destroy ();
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv4 GlobalRouting Two LAN test
+ */
+>>>>>>> origin
 class TwoLanTest : public TestCase
 {
 public:
@@ -390,7 +438,11 @@ public:
   virtual void DoRun (void);
   TwoLanTest ();
 private:
+<<<<<<< HEAD
   NodeContainer m_nodes;
+=======
+  NodeContainer m_nodes; //!< Nodes used in the test.
+>>>>>>> origin
 };
 
 TwoLanTest::TwoLanTest ()
@@ -477,6 +529,15 @@ TwoLanTest::DoRun ()
   Simulator::Destroy ();
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv4 GlobalRouting Bridge test
+ */
+>>>>>>> origin
 class BridgeTest : public TestCase
 {
 public:
@@ -484,7 +545,11 @@ public:
   virtual void DoRun (void);
   BridgeTest ();
 private:
+<<<<<<< HEAD
   NodeContainer m_nodes;
+=======
+  NodeContainer m_nodes; //!< Nodes used in the test.
+>>>>>>> origin
 };
 
 BridgeTest::BridgeTest ()
@@ -643,6 +708,15 @@ BridgeTest::DoRun ()
   Simulator::Destroy ();
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv4 GlobalRouting Two bridges test
+ */
+>>>>>>> origin
 class TwoBridgeTest : public TestCase
 {
 public:
@@ -650,7 +724,11 @@ public:
   virtual void DoRun (void);
   TwoBridgeTest ();
 private:
+<<<<<<< HEAD
   NodeContainer m_nodes;
+=======
+  NodeContainer m_nodes; //!< Nodes used in the test.
+>>>>>>> origin
 };
 
 TwoBridgeTest::TwoBridgeTest ()
@@ -787,6 +865,15 @@ TwoBridgeTest::DoRun ()
   Simulator::Destroy ();
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv4 Dynamic GlobalRouting test
+ */
+>>>>>>> origin
 class Ipv4DynamicGlobalRoutingTestCase : public TestCase
 {
 public:
@@ -794,17 +881,31 @@ public:
   virtual ~Ipv4DynamicGlobalRoutingTestCase ();
 
 private:
+  /**
+   * \brief Send some data
+   * \param index Index of the socket to use.
+   */
   void SendData (uint8_t index);
+
+  /**
+   * \brief Shutdown a socket
+   * \param index Index of the socket to close.
+   */
   void ShutDownSock (uint8_t index);
-  void HandleRead (Ptr<Socket>);
+
+  /**
+   * Handle an incoming packet
+   * \param socket The input socket.
+   */
+  void HandleRead (Ptr<Socket> socket);
   virtual void DoRun (void);
 
-  int m_count;
-  std::vector<std::pair<Ptr<Socket>, bool> > m_sendSocks;
-  DataRate m_dataRate;
-  uint16_t m_packetSize;
-  std::vector<uint8_t> m_firstInterface;
-  std::vector<uint8_t> m_secondInterface;
+  uint16_t m_count; //!< Number of packets received.
+  std::vector<std::pair<Ptr<Socket>, bool> > m_sendSocks; //!< Sending sockets.
+  DataRate m_dataRate;  //!< Data rate.
+  uint16_t m_packetSize;  //!< Packet size.
+  std::vector<uint8_t> m_firstInterface;  //!< Packets received on the 1st interface at a given time.
+  std::vector<uint8_t> m_secondInterface;  //!< Packets received on the 2nd interface at a given time.
 };
 
 // Add some help text to this case to describe what it is intended to test
@@ -1031,15 +1132,36 @@ Ipv4DynamicGlobalRoutingTestCase::DoRun (void)
   Simulator::Destroy ();
 }
 
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv4 Dynamic GlobalRouting /32 test
+ */
 class Ipv4GlobalRoutingSlash32TestCase : public TestCase
 {
 public:
   Ipv4GlobalRoutingSlash32TestCase ();
   virtual ~Ipv4GlobalRoutingSlash32TestCase ();
 
-  Ptr<Packet> m_receivedPacket;
+  Ptr<Packet> m_receivedPacket; //!< number of received packets
+
+  /**
+   * \brief Receive a packet.
+   * \param socket The receiving socket.
+   */
   void ReceivePkt (Ptr<Socket> socket);
+  /**
+   * \brief Send a packet.
+   * \param socket The sending socket.
+   * \param to The address of the receiver.
+   */
   void DoSendData (Ptr<Socket> socket, std::string to);
+  /**
+   * \brief Send a packet.
+   * \param socket The sending socket.
+   * \param to The address of the receiver.
+   */
   void SendData (Ptr<Socket> socket, std::string to);
 
 private:
@@ -1167,6 +1289,15 @@ Ipv4GlobalRoutingSlash32TestCase::DoRun (void)
   Simulator::Destroy ();
 }
 
+<<<<<<< HEAD
+=======
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv4 GlobalRouting TestSuite
+ */
+>>>>>>> origin
 class Ipv4GlobalRoutingTestSuite : public TestSuite
 {
 public:
@@ -1186,5 +1317,4 @@ Ipv4GlobalRoutingTestSuite::Ipv4GlobalRoutingTestSuite ()
     AddTestCase (new Ipv4GlobalRoutingSlash32TestCase, TestCase::QUICK);
   }
 
-// Do not forget to allocate an instance of this TestSuite
-static Ipv4GlobalRoutingTestSuite globalRoutingTestSuite;
+static Ipv4GlobalRoutingTestSuite g_globalRoutingTestSuite; //!< Static variable for test initialization

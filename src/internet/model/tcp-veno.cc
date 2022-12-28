@@ -25,7 +25,12 @@
  */
 
 #include "tcp-veno.h"
+<<<<<<< HEAD
 #include "ns3/tcp-socket-base.h"
+=======
+#include "tcp-socket-state.h"
+
+>>>>>>> origin
 #include "ns3/log.h"
 
 namespace ns3 {
@@ -162,7 +167,11 @@ TcpVeno::IncreaseWindow (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked)
    * target cwnd is throughput / minRtt
    */
   double tmp = m_baseRtt.GetSeconds () / m_minRtt.GetSeconds ();
+<<<<<<< HEAD
   targetCwnd = segCwnd * tmp;
+=======
+  targetCwnd = static_cast<uint32_t> (segCwnd * tmp);
+>>>>>>> origin
   NS_LOG_DEBUG ("Calculated targetCwnd = " << targetCwnd);
   NS_ASSERT (segCwnd >= targetCwnd); // implies baseRtt <= minRtt
 
@@ -192,7 +201,11 @@ TcpVeno::IncreaseWindow (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked)
       if (tcb->m_cWnd < tcb->m_ssThresh)
         { // Slow start mode. Veno employs same slow start algorithm as NewReno's.
           NS_LOG_LOGIC ("We are in slow start, behave like NewReno.");
+<<<<<<< HEAD
           segmentsAcked = TcpNewReno::SlowStart (tcb, segmentsAcked);
+=======
+          TcpNewReno::SlowStart (tcb, segmentsAcked);
+>>>>>>> origin
         }
       else
         { // Congestion avoidance mode

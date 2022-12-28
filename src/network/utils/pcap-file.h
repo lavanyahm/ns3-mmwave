@@ -110,8 +110,11 @@ public:
    *
    * \param nanosecMode Flag indicating the time resolution of the writing
    * system. Default to false.
+<<<<<<< HEAD
    *
    * \return false if the open succeeds, true otherwise.
+=======
+>>>>>>> origin
    *
    * \warning Calling this method on an existing file will result in the loss
    * any existing data.

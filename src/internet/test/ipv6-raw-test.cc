@@ -28,7 +28,6 @@
 #include "ns3/simple-channel.h"
 #include "ns3/simple-net-device.h"
 #include "ns3/simple-net-device-helper.h"
-#include "ns3/drop-tail-queue.h"
 #include "ns3/socket.h"
 
 #include "ns3/log.h"
@@ -53,20 +52,57 @@
 
 using namespace ns3;
 
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv6 RAW Socket Test
+ */
 class Ipv6RawSocketImplTest : public TestCase
 {
-  Ptr<Packet> m_receivedPacket;
-  Ptr<Packet> m_receivedPacket2;
+  Ptr<Packet> m_receivedPacket;   //!< Received packet (1).
+  Ptr<Packet> m_receivedPacket2;  //!< Received packet (2).
+
+  /**
+   * \brief Send data.
+   * \param socket The sending socket.
+   * \param to Destination address.
+   */
   void DoSendData (Ptr<Socket> socket, std::string to);
+  /**
+   * \brief Send data.
+   * \param socket The sending socket.
+   * \param to Destination address.
+   */
   void SendData (Ptr<Socket> socket, std::string to);
 
 public:
   virtual void DoRun (void);
   Ipv6RawSocketImplTest ();
 
+  /**
+   * \brief Receive data.
+   * \param socket The receiving socket.
+   * \param packet The received packet.
+   * \param from The sender.
+   */
   void ReceivePacket (Ptr<Socket> socket, Ptr<Packet> packet, const Address &from);
+  /**
+   * \brief Receive data.
+   * \param socket The receiving socket.
+   * \param packet The received packet.
+   * \param from The sender.
+   */
   void ReceivePacket2 (Ptr<Socket> socket, Ptr<Packet> packet, const Address &from);
+  /**
+   * \brief Receive data.
+   * \param socket The receiving socket.
+   */
   void ReceivePkt (Ptr<Socket> socket);
+  /**
+   * \brief Receive data.
+   * \param socket The receiving socket.
+   */
   void ReceivePkt2 (Ptr<Socket> socket);
 };
 
@@ -178,11 +214,13 @@ Ipv6RawSocketImplTest::DoRun (void)
   ifIndex = ipv6->GetInterfaceForDevice (device);
   ipv6Addr = Ipv6InterfaceAddress (Ipv6Address ("2001:db8::2"), Ipv6Prefix (64));
   ipv6->AddAddress (ifIndex, ipv6Addr);
+  ipv6->SetForwarding (ifIndex, true);
 
   device = net2.Get (1);
   ifIndex = ipv6->GetInterfaceForDevice (device);
   ipv6Addr = Ipv6InterfaceAddress (Ipv6Address ("2001:db8:1::4"), Ipv6Prefix (64));
   ipv6->AddAddress (ifIndex, ipv6Addr);
+  ipv6->SetForwarding (ifIndex, true);
 
   // Create the Ipv6 Raw sockets
   Ptr<SocketFactory> rxSocketFactory = rxNode->GetObject<Ipv6RawSocketFactory> ();
@@ -204,6 +242,7 @@ Ipv6RawSocketImplTest::DoRun (void)
 
   // Unicast test
   SendData (txSocket, "2001:db8::1");
+
   NS_TEST_EXPECT_MSG_EQ (m_receivedPacket->GetSize (), 163, "recv: 2001:db8::1");
   NS_TEST_EXPECT_MSG_EQ (m_receivedPacket2->GetSize (), 0, "second interface should not receive it");
 
@@ -255,7 +294,14 @@ Ipv6RawSocketImplTest::DoRun (void)
 
   Simulator::Destroy ();
 }
-//-----------------------------------------------------------------------------
+
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv6 RAW Socket TestSuite
+ */
 class Ipv6RawTestSuite : public TestSuite
 {
 public:
@@ -263,4 +309,7 @@ public:
   {
     AddTestCase (new Ipv6RawSocketImplTest, TestCase::QUICK);
   }
-} g_ipv6rawTestSuite;
+};
+
+static Ipv6RawTestSuite g_ipv6rawTestSuite; //!< Static variable for test initialization
+

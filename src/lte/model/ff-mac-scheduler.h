@@ -61,8 +61,7 @@ public:
   enum UlCqiFilter_t
   {
     SRS_UL_CQI,
-    PUSCH_UL_CQI,
-    ALL_UL_CQI
+    PUSCH_UL_CQI
   };
   /**
   * constructor
@@ -77,6 +76,10 @@ public:
 
   // inherited from Object
   virtual void DoDispose (void);
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
   static TypeId GetTypeId (void);
 
   /**
@@ -126,7 +129,7 @@ public:
   
 protected:
     
-  UlCqiFilter_t m_ulCqiFilter;
+  UlCqiFilter_t m_ulCqiFilter; ///< UL CQI filter
 
 };
 

@@ -35,28 +35,22 @@ namespace ns3 {
 NS_LOG_COMPONENT_DEFINE ("AttributeValue");
 
 AttributeValue::AttributeValue ()
-{
-}
+{}
 AttributeValue::~AttributeValue ()
-{
-}
+{}
 
 
 AttributeAccessor::AttributeAccessor ()
-{
-}
+{}
 AttributeAccessor::~AttributeAccessor ()
-{
-}
+{}
 
 AttributeChecker::AttributeChecker ()
-{
-}
+{}
 AttributeChecker::~AttributeChecker ()
-{
-}
+{}
 
-Ptr<AttributeValue> 
+Ptr<AttributeValue>
 AttributeChecker::CreateValidValue (const AttributeValue &value) const
 {
   NS_LOG_FUNCTION (this << &value);
@@ -109,12 +103,19 @@ EmptyAttributeValue::DeserializeFromString (std::string value, Ptr<const Attribu
 }
 
 EmptyAttributeAccessor::EmptyAttributeAccessor () : AttributeAccessor ()
+<<<<<<< HEAD
 {
 }
 
 EmptyAttributeAccessor::~EmptyAttributeAccessor ()
 {
 }
+=======
+{}
+
+EmptyAttributeAccessor::~EmptyAttributeAccessor ()
+{}
+>>>>>>> origin
 
 bool
 EmptyAttributeAccessor::Set (ObjectBase * object, const AttributeValue &value) const
@@ -145,12 +146,19 @@ EmptyAttributeAccessor::HasSetter (void) const
 }
 
 EmptyAttributeChecker::EmptyAttributeChecker () : AttributeChecker ()
+<<<<<<< HEAD
 {
 }
 
 EmptyAttributeChecker::~EmptyAttributeChecker ()
 {
 }
+=======
+{}
+
+EmptyAttributeChecker::~EmptyAttributeChecker ()
+{}
+>>>>>>> origin
 
 bool
 EmptyAttributeChecker::Check (const AttributeValue &value) const

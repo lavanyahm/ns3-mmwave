@@ -23,6 +23,7 @@
 
 #include "ns3/header.h"
 #include "ns3/ipv6-address.h"
+#include "ns3/deprecated.h"
 
 namespace ns3 {
 
@@ -145,6 +146,39 @@ public:
   std::string DscpTypeToString (DscpType dscp) const;
 
   /**
+<<<<<<< HEAD
+=======
+   * \enum EcnType
+   * \brief ECN field bits
+   */
+  enum EcnType
+   {
+     // Prefixed with "ECN" to avoid name clash
+     ECN_NotECT = 0x00,
+     ECN_ECT1 = 0x01,
+     ECN_ECT0 = 0x02,
+     ECN_CE = 0x03
+   };
+
+  /**
+   * \brief Set ECN field bits
+   * \param ecn ECN field bits
+   */
+  void SetEcn (EcnType ecn);
+
+  /**
+   * \return the ECN field bits of this packet.
+   */
+  EcnType GetEcn (void) const;
+
+  /**
+   * \param ecn the ECNType
+   * \return std::string of ECNType
+   */
+  std::string EcnTypeToString (EcnType ecn) const;
+
+  /**
+>>>>>>> origin
    * \brief Set the "Flow label" field.
    * \param flow the 20-bit value
    */
@@ -196,30 +230,61 @@ public:
    * \brief Set the "Source address" field.
    * \param src the source address
    */
+  void SetSource (Ipv6Address src);
+
+  /**
+   * \brief Set the "Source address" field.
+   * \deprecated Use SetSource () function instead (same functionality)
+   * \param src the source address
+   */
+  NS_DEPRECATED_3_35
   void SetSourceAddress (Ipv6Address src);
 
   /**
    * \brief Get the "Source address" field.
    * \return the source address
    */
+  Ipv6Address GetSource (void) const;
+
+  /**
+   * \brief Get the "Source address" field.
+   * \deprecated Use GetSource () function instead (same functionality)
+   * \return the source address
+   */
+  NS_DEPRECATED_3_35
   Ipv6Address GetSourceAddress (void) const;
 
   /**
    * \brief Set the "Destination address" field.
    * \param dst the destination address
    */
+  void SetDestination (Ipv6Address dst);
+
+  /**
+   * \brief Set the "Destination address" field.
+   * \deprecated Use SetDestination () function instead (same functionality)
+   * \param dst the destination address
+   */
+  NS_DEPRECATED_3_35
   void SetDestinationAddress (Ipv6Address dst);
 
   /**
    * \brief Get the "Destination address" field.
    * \return the destination address
    */
+  Ipv6Address GetDestination (void) const;
+
+  /**
+   * \brief Get the "Destination address" field.
+   * \deprecated Use GetDestination () function instead (same functionality)
+   * \return the destination address
+   */
+  NS_DEPRECATED_3_35
   Ipv6Address GetDestinationAddress (void) const;
 
   /**
-   * \brief Print some informations about the packet.
+   * \brief Print some information about the packet.
    * \param os output stream
-   * \return info about this packet
    */
   virtual void Print (std::ostream& os) const;
 

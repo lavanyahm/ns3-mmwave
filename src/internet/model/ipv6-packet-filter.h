@@ -51,6 +51,7 @@ private:
   virtual int32_t DoClassify (Ptr<QueueDiscItem> item) const = 0;
 };
 
+<<<<<<< HEAD
 
 /**
  * \ingroup internet
@@ -76,6 +77,8 @@ private:
   uint32_t m_perturbation; //!< hash perturbation value
 };
 
+=======
+>>>>>>> origin
 } // namespace ns3
 
 #endif /* IPV6_PACKET_FILTER */

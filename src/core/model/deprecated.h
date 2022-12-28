@@ -24,7 +24,7 @@
 /**
  * \file
  * \ingroup core
- * Definition of the NS_DEPRECATED macro.
+ * NS_DEPRECATED macro definition.
  */
 
 /**
@@ -39,8 +39,10 @@
  *
  * For example,
  * \snippet src/core/doc/deprecated-example.h doxygen snippet
+ *
+ * To ease future maintenance please use the versioned forms:
+ * `NS_DEPRECATED_3_XX`, not the generic `NS_DEPRECATED`
  */
-
 #if defined(__GNUC__)
 /* Test for GCC >= 4.1 */
 #define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100)
@@ -56,8 +58,44 @@
 #elif defined(_MSC_VER)
 #define NS_DEPRECATED __declspec(deprecated)
 
+<<<<<<< HEAD
+#if defined(__GNUC__)
+/* Test for GCC >= 4.1 */
+#define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100)
+#if (GCC_VERSION >= 40100)
+#define NS_DEPRECATED  __attribute__ ((deprecated))
+#endif
+#undef GCC_VERSION
+
+
+#elif defined(__clang__) || defined(__llvm__)
+#define NS_DEPRECATED  __attribute__ ((deprecated))
+
+#elif defined(_MSC_VER)
+#define NS_DEPRECATED __declspec(deprecated)
+
+=======
+>>>>>>> origin
 #else
 #define NS_DEPRECATED
+#endif
+
+/**
+ * \ingroup core
+ * \def NS_DEPRECATED_3_35
+ * Tag for things deprecated in version ns-3.35.
+ */
+#ifdef NS_DEPRECATED
+#define NS_DEPRECATED_3_35 NS_DEPRECATED
+#endif
+
+/**
+ * \ingroup core
+ * \def NS_DEPRECATED_3_34
+ * Tag for things deprecated in version ns-3.34.
+ */
+#ifdef NS_DEPRECATED
+#define NS_DEPRECATED_3_34 NS_DEPRECATED
 #endif
 
 #endif /* NS3_DEPRECATED_H */

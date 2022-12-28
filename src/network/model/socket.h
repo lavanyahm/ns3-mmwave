@@ -250,8 +250,11 @@ public:
    *        This callback is intended to notify a socket that would
    *        have been blocked in a blocking socket model that data
    *        is available to be read.
+   * \param receivedData Callback for the event that data is received
+   *        from the underlying transport protocol.  This callback
+   *        is passed a pointer to the socket.
    */
-  void SetRecvCallback (Callback<void, Ptr<Socket> >);
+  void SetRecvCallback (Callback<void, Ptr<Socket> > receivedData);
   /** 
    * \brief Allocate a local endpoint for this socket.
    * \param address the address to try to allocate
@@ -616,16 +619,12 @@ public:
    * is also possible to bind to mismatching device and address, even if
    * the socket can not receive any packets as a result.
    *
-   * \warning BindToNetDevice should be used \a after Bind. Otherwise
-   * it will perform a Bind itself.
-   *
-   * \param netdevice Pointer to Netdevice of desired interface
-   * \returns nothing
+   * \param netdevice Pointer to NetDevice of desired interface
    */
   virtual void BindToNetDevice (Ptr<NetDevice> netdevice);
 
   /**
-   * \brief Returns socket's bound netdevice, if any.
+   * \brief Returns socket's bound NetDevice, if any.
    *
    * This method corresponds to using getsockopt() SO_BINDTODEVICE
    * of real network or BSD sockets.
@@ -669,7 +668,6 @@ public:
    * it is enabled for all types of sockets that supports packet information
    *
    * \param flag Enable/Disable receive information
-   * \returns nothing
    */
   void SetRecvPktInfo (bool flag);
 
@@ -684,9 +682,19 @@ public:
    * \brief Manually set the socket priority
    *
    * This method corresponds to using setsockopt () SO_PRIORITY of
+<<<<<<< HEAD
    * real network or BSD sockets.
    *
    * \param priority The socket priority (in the range 0..6)
+=======
+   * real network or BSD sockets. On Linux, the socket priority can be
+   * set to a value in the range [0..6], unless the user process has the
+   * CAP_NET_ADMIN capability (see the man page for socket). ns-3 allows
+   * users to set the socket priority to any 8-bit non-negative value,
+   * which is equivalent to assuming that the CAP_NET_ADMIN capability is set.
+   *
+   * \param priority The socket priority
+>>>>>>> origin
    */
   void SetPriority (uint8_t priority);
 
@@ -1024,6 +1032,8 @@ protected:
   /**
    * \brief Notify through the callback (if set) that a new connection has been
    *        created.
+   * \param socket The socket receiving the new connection.
+   * \param from The address of the node initiating the connection.
    */
   void NotifyNewConnectionCreated (Ptr<Socket> socket, const Address &from);
 

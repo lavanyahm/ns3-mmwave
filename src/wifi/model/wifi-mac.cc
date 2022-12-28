@@ -18,132 +18,28 @@
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
 
+#include "ns3/log.h"
+#include "ns3/packet.h"
 #include "wifi-mac.h"
+<<<<<<< HEAD
 #include "dcf.h"
 #include "ns3/uinteger.h"
 #include "ns3/boolean.h"
 #include "ns3/trace-source-accessor.h"
+=======
+#include "txop.h"
+#include "ssid.h"
+#include "wifi-net-device.h"
+#include "ns3/ht-configuration.h"
+#include "ns3/vht-configuration.h"
+#include "ns3/he-configuration.h"
+>>>>>>> origin
 
 namespace ns3 {
 
+NS_LOG_COMPONENT_DEFINE ("WifiMac");
+
 NS_OBJECT_ENSURE_REGISTERED (WifiMac);
-
-
-Time
-WifiMac::GetDefaultMaxPropagationDelay (void)
-{
-  //1000m
-  return Seconds (1000.0 / 300000000.0);
-}
-
-Time
-WifiMac::GetDefaultSlot (void)
-{
-  //802.11-a specific
-  return MicroSeconds (9);
-}
-
-Time
-WifiMac::GetDefaultSifs (void)
-{
-  //802.11-a specific
-  return MicroSeconds (16);
-}
-
-Time
-WifiMac::GetDefaultRifs (void)
-{
-  //802.11n specific
-  return MicroSeconds (2);
-}
-
-Time
-WifiMac::GetDefaultEifsNoDifs (void)
-{
-  return GetDefaultSifs () + GetDefaultCtsAckDelay ();
-}
-
-Time
-WifiMac::GetDefaultCtsAckDelay (void)
-{
-  //802.11-a specific: at 6 Mbit/s
-  return MicroSeconds (44);
-}
-
-Time
-WifiMac::GetDefaultCtsAckTimeout (void)
-{
-  /* Cts_Timeout and Ack_Timeout are specified in the Annex C
-     (Formal description of MAC operation, see details on the
-     Trsp timer setting at page 346)
-  */
-  Time ctsTimeout = GetDefaultSifs ();
-  ctsTimeout += GetDefaultCtsAckDelay ();
-  ctsTimeout += MicroSeconds (GetDefaultMaxPropagationDelay ().GetMicroSeconds () * 2);
-  ctsTimeout += GetDefaultSlot ();
-  return ctsTimeout;
-}
-
-Time
-WifiMac::GetDefaultBasicBlockAckDelay (void)
-{
-  //This value must be rivisited
-  return MicroSeconds (250);
-}
-
-Time
-WifiMac::GetDefaultCompressedBlockAckDelay (void)
-{
-  //This value must be rivisited
-  //CompressedBlockAckSize 32 * 8 * time it takes to transfer at the lowest rate (at 6 Mbit/s) + aPhy-StartDelay (33)
-  return MicroSeconds (76);
-}
-
-Time
-WifiMac::GetDefaultBasicBlockAckTimeout (void)
-{
-  Time blockAckTimeout = GetDefaultSifs ();
-  blockAckTimeout += GetDefaultBasicBlockAckDelay ();
-  blockAckTimeout += MicroSeconds (GetDefaultMaxPropagationDelay ().GetMicroSeconds () * 2);
-  blockAckTimeout += GetDefaultSlot ();
-  return blockAckTimeout;
-}
-
-Time
-WifiMac::GetDefaultCompressedBlockAckTimeout (void)
-{
-  Time blockAckTimeout = GetDefaultSifs ();
-  blockAckTimeout += GetDefaultCompressedBlockAckDelay ();
-  blockAckTimeout += MicroSeconds (GetDefaultMaxPropagationDelay ().GetMicroSeconds () * 2);
-  blockAckTimeout += GetDefaultSlot ();
-  return blockAckTimeout;
-}
-
-void
-WifiMac::SetBasicBlockAckTimeout (Time blockAckTimeout)
-{
-  //this method must be implemented by QoS WifiMacs
-}
-
-Time
-WifiMac::GetBasicBlockAckTimeout (void) const
-{
-  //this method must be implemented by QoS WifiMacs
-  return MicroSeconds (0);
-}
-
-void
-WifiMac::SetCompressedBlockAckTimeout (Time blockAckTimeout)
-{
-  //this methos must be implemented by QoS WifiMacs
-}
-
-Time
-WifiMac::GetCompressedBlockAckTimeout (void) const
-{
-  //this method must be implemented by QoS WifiMacs
-  return MicroSeconds (0);
-}
 
 TypeId
 WifiMac::GetTypeId (void)
@@ -151,55 +47,6 @@ WifiMac::GetTypeId (void)
   static TypeId tid = TypeId ("ns3::WifiMac")
     .SetParent<Object> ()
     .SetGroupName ("Wifi")
-    .AddAttribute ("CtsTimeout", "When this timeout expires, the RTS/CTS handshake has failed.",
-                   TimeValue (GetDefaultCtsAckTimeout ()),
-                   MakeTimeAccessor (&WifiMac::SetCtsTimeout,
-                                     &WifiMac::GetCtsTimeout),
-                   MakeTimeChecker ())
-    .AddAttribute ("AckTimeout", "When this timeout expires, the DATA/ACK handshake has failed.",
-                   TimeValue (GetDefaultCtsAckTimeout ()),
-                   MakeTimeAccessor (&WifiMac::GetAckTimeout,
-                                     &WifiMac::SetAckTimeout),
-                   MakeTimeChecker ())
-    .AddAttribute ("BasicBlockAckTimeout", "When this timeout expires, the BASIC_BLOCK_ACK_REQ/BASIC_BLOCK_ACK handshake has failed.",
-                   TimeValue (GetDefaultBasicBlockAckTimeout ()),
-                   MakeTimeAccessor (&WifiMac::GetBasicBlockAckTimeout,
-                                     &WifiMac::SetBasicBlockAckTimeout),
-                   MakeTimeChecker ())
-    .AddAttribute ("CompressedBlockAckTimeout", "When this timeout expires, the COMPRESSED_BLOCK_ACK_REQ/COMPRESSED_BLOCK_ACK handshake has failed.",
-                   TimeValue (GetDefaultCompressedBlockAckTimeout ()),
-                   MakeTimeAccessor (&WifiMac::GetCompressedBlockAckTimeout,
-                                     &WifiMac::SetCompressedBlockAckTimeout),
-                   MakeTimeChecker ())
-    .AddAttribute ("Sifs", "The value of the SIFS constant.",
-                   TimeValue (GetDefaultSifs ()),
-                   MakeTimeAccessor (&WifiMac::SetSifs,
-                                     &WifiMac::GetSifs),
-                   MakeTimeChecker ())
-    .AddAttribute ("EifsNoDifs", "The value of EIFS-DIFS.",
-                   TimeValue (GetDefaultEifsNoDifs ()),
-                   MakeTimeAccessor (&WifiMac::SetEifsNoDifs,
-                                     &WifiMac::GetEifsNoDifs),
-                   MakeTimeChecker ())
-    .AddAttribute ("Slot", "The duration of a Slot.",
-                   TimeValue (GetDefaultSlot ()),
-                   MakeTimeAccessor (&WifiMac::SetSlot,
-                                     &WifiMac::GetSlot),
-                   MakeTimeChecker ())
-    .AddAttribute ("Pifs", "The value of the PIFS constant.",
-                   TimeValue (GetDefaultSifs () + GetDefaultSlot ()),
-                   MakeTimeAccessor (&WifiMac::SetPifs,
-                                     &WifiMac::GetPifs),
-                   MakeTimeChecker ())
-    .AddAttribute ("Rifs", "The value of the RIFS constant.",
-                   TimeValue (GetDefaultRifs ()),
-                   MakeTimeAccessor (&WifiMac::SetRifs,
-                                     &WifiMac::GetRifs),
-                   MakeTimeChecker ())
-    .AddAttribute ("MaxPropagationDelay", "The maximum propagation delay. Unused for now.",
-                   TimeValue (GetDefaultMaxPropagationDelay ()),
-                   MakeTimeAccessor (&WifiMac::m_maxPropagationDelay),
-                   MakeTimeChecker ())
     .AddAttribute ("Ssid", "The ssid we want to belong to.",
                    SsidValue (Ssid ("default")),
                    MakeSsidAccessor (&WifiMac::GetSsid,
@@ -211,7 +58,10 @@ WifiMac::GetTypeId (void)
                      MakeTraceSourceAccessor (&WifiMac::m_macTxTrace),
                      "ns3::Packet::TracedCallback")
     .AddTraceSource ("MacTxDrop",
-                     "A packet has been dropped in the MAC layer before being queued for transmission.",
+                     "A packet has been dropped in the MAC layer before being queued for transmission. "
+                     "This trace source is fired, e.g., when an AP's MAC receives from the upper layer "
+                     "a packet destined to a station that is not associated with the AP or a STA's MAC "
+                     "receives a packet from the upper layer while it is not associated with any AP.",
                      MakeTraceSourceAccessor (&WifiMac::m_macTxDropTrace),
                      "ns3::Packet::TracedCallback")
     .AddTraceSource ("MacPromiscRx",
@@ -228,32 +78,26 @@ WifiMac::GetTypeId (void)
                      "A packet has been dropped in the MAC layer after it has been passed up from the physical layer.",
                      MakeTraceSourceAccessor (&WifiMac::m_macRxDropTrace),
                      "ns3::Packet::TracedCallback")
-    //Not currently implemented in this device
-    /*
-    .AddTraceSource ("Sniffer",
-                     "Trace source simulating a non-promiscuous packet sniffer attached to the device",
-                     MakeTraceSourceAccessor (&WifiMac::m_snifferTrace))
-    */
   ;
   return tid;
 }
 
 void
-WifiMac::SetMaxPropagationDelay (Time delay)
+WifiMac::DoDispose ()
 {
-  m_maxPropagationDelay = delay;
+  m_device = 0;
 }
 
-Time
-WifiMac::GetMsduLifetime (void) const
+void
+WifiMac::SetDevice (const Ptr<NetDevice> device)
 {
-  return Seconds (10);
+  m_device = device;
 }
 
-Time
-WifiMac::GetMaxPropagationDelay (void) const
+Ptr<NetDevice>
+WifiMac::GetDevice (void) const
 {
-  return m_maxPropagationDelay;
+  return m_device;
 }
 
 void
@@ -287,8 +131,9 @@ WifiMac::NotifyRxDrop (Ptr<const Packet> packet)
 }
 
 void
-WifiMac::ConfigureStandard (enum WifiPhyStandard standard)
+WifiMac::ConfigureDcf (Ptr<Txop> dcf, uint32_t cwmin, uint32_t cwmax, bool isDsss, AcIndex ac)
 {
+<<<<<<< HEAD
   switch (standard)
     {
     case WIFI_PHY_STANDARD_80211a:
@@ -411,6 +256,10 @@ void
 WifiMac::ConfigureDcf (Ptr<Dcf> dcf, uint32_t cwmin, uint32_t cwmax, bool isDsss, enum AcIndex ac)
 {
   /* see IEE802.11 section 7.3.2.29 */
+=======
+  NS_LOG_FUNCTION (this << dcf << cwmin << cwmax << isDsss << ac);
+  /* see IEEE 802.11 section 7.3.2.29 */
+>>>>>>> origin
   switch (ac)
     {
     case AC_VO:
@@ -456,11 +305,38 @@ WifiMac::ConfigureDcf (Ptr<Dcf> dcf, uint32_t cwmin, uint32_t cwmax, bool isDsss
       dcf->SetMaxCw (cwmax);
       dcf->SetAifsn (2);
       dcf->SetTxopLimit (MicroSeconds (0));
+<<<<<<< HEAD
+=======
+      break;
+    case AC_BEACON:
+      // done by ApWifiMac
+>>>>>>> origin
       break;
     case AC_UNDEF:
       NS_FATAL_ERROR ("I don't know what to do with this");
       break;
     }
+}
+
+Ptr<HtConfiguration>
+WifiMac::GetHtConfiguration (void) const
+{
+      Ptr<WifiNetDevice> device = DynamicCast<WifiNetDevice> (GetDevice ());
+      return device->GetHtConfiguration ();
+}
+
+Ptr<VhtConfiguration>
+WifiMac::GetVhtConfiguration (void) const
+{
+      Ptr<WifiNetDevice> device = DynamicCast<WifiNetDevice> (GetDevice ());
+      return device->GetVhtConfiguration ();
+}
+
+Ptr<HeConfiguration>
+WifiMac::GetHeConfiguration (void) const
+{
+      Ptr<WifiNetDevice> device = DynamicCast<WifiNetDevice> (GetDevice ());
+      return device->GetHeConfiguration ();
 }
 
 } //namespace ns3

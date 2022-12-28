@@ -54,7 +54,7 @@ LteTestRrc::LteTestRrc ()
   m_rxPdus = 0;
   m_rxBytes = 0;
   m_txLastTime = Time (0);
-  m_rxLastTime = Time (0);;
+  m_rxLastTime = Time (0);
 
   m_pdcpSapUser = new LtePdcpSpecificLtePdcpSapUser<LteTestRrc> (this);
 //   Simulator::ScheduleNow (&LteTestRrc::Start, this);
@@ -203,14 +203,14 @@ LteTestRrc::Start ()
   p.rnti = 1111;
   p.lcid = 222;
   p.pdcpSdu = Create<Packet> (m_pduSize);
-  
+
   bool haveContext = false;
   Ptr<Node> node;
   if (m_device != 0)
     {
       node = m_device->GetNode ();
       if (node != 0)
-        {                    
+        {
           haveContext = true;
         }
     }
@@ -480,19 +480,27 @@ LteTestMac::SendTxOpportunity (Time time, uint32_t bytes)
     {
       node = m_device->GetNode ();
       if (node != 0)
-        {                    
+        {
           haveContext = true;
         }
     }
+  LteMacSapUser::TxOpportunityParameters txOpParmas;
+  txOpParmas.bytes = bytes;
+  txOpParmas.layer = 0;
+  txOpParmas.componentCarrierId = 0;
+  txOpParmas.harqId = 0;
+  txOpParmas.rnti = 0;
+  txOpParmas.lcid = 0;
+
   if (haveContext)
     {
-      Simulator::ScheduleWithContext (node->GetId (), time, &LteMacSapUser::NotifyTxOpportunity, m_macSapUser, bytes, 0, 0);
+      Simulator::ScheduleWithContext (node->GetId (), time, &LteMacSapUser::NotifyTxOpportunity, m_macSapUser, txOpParmas);
     }
   else
     {
-      Simulator::Schedule (time, &LteMacSapUser::NotifyTxOpportunity, m_macSapUser, bytes, 0, 0);
+      Simulator::Schedule (time, &LteMacSapUser::NotifyTxOpportunity, m_macSapUser, txOpParmas);
     }
-    
+
   if (m_txOpportunityMode == RANDOM_MODE)
   {
     if (m_txOppTime != Seconds (0))
@@ -558,6 +566,11 @@ LteTestMac::DoTransmitPdu (LteMacSapProvider::TransmitPduParameters params)
   m_txPdus++;
   m_txBytes += params.pdu->GetSize ();
 
+  LteMacSapUser::ReceivePduParameters rxPduParams;
+  rxPduParams.p = params.pdu;
+  rxPduParams.rnti = params.rnti;
+  rxPduParams.lcid = params.lcid;
+
   if (m_device)
     {
       m_device->Send (params.pdu, m_device->GetBroadcast (), 0);
@@ -565,7 +578,7 @@ LteTestMac::DoTransmitPdu (LteMacSapProvider::TransmitPduParameters params)
   else if (m_macLoopback)
     {
       Simulator::Schedule (Seconds (0.1), &LteMacSapUser::ReceivePdu,
-                           m_macLoopback->m_macSapUser, params.pdu);
+                           m_macLoopback->m_macSapUser, rxPduParams);
     }
   else
     {
@@ -615,18 +628,25 @@ LteTestMac::DoReportBufferStatus (LteMacSapProvider::ReportBufferStatusParameter
       for (std::list<EventId>::iterator it = m_nextTxOppList.begin ();
            it != m_nextTxOppList.end ();
            ++it)
-        {          
+        {
           it->Cancel ();
         }
       m_nextTxOppList.clear ();
 
       int32_t size = params.statusPduSize + params.txQueueSize  + params.retxQueueSize;
       Time time = m_txOppTime;
+      LteMacSapUser::TxOpportunityParameters txOpParmas;
+      txOpParmas.bytes = m_txOppSize;
+      txOpParmas.layer = 0;
+      txOpParmas.componentCarrierId = 0;
+      txOpParmas.harqId = 0;
+      txOpParmas.rnti = params.rnti;
+      txOpParmas.lcid = params.lcid;
       while (size > 0)
         {
-          EventId e = Simulator::Schedule (time, 
+          EventId e = Simulator::Schedule (time,
                                            &LteMacSapUser::NotifyTxOpportunity,
-                                           m_macSapUser, m_txOppSize, 0, 0);
+                                           m_macSapUser, txOpParmas);
           m_nextTxOppList.push_back (e);
           size -= m_txOppSize;
           time += m_txOppTime;
@@ -644,7 +664,11 @@ LteTestMac::Receive (Ptr<NetDevice> nd, Ptr<const Packet> p, uint16_t protocol, 
   m_rxBytes += p->GetSize ();
 
   Ptr<Packet> packet = p->Copy ();
-  m_macSapUser->ReceivePdu (packet);
+  LteMacSapUser::ReceivePduParameters rxPduParams;
+  rxPduParams.p = packet;
+  rxPduParams.rnti = 0;
+  rxPduParams.lcid = 0;
+  m_macSapUser->ReceivePdu (rxPduParams);
   return true;
 }
 
@@ -688,26 +712,26 @@ EpcTestRrc::GetTypeId (void)
   ;
   return tid;
 }
-void 
+void
 EpcTestRrc::SetS1SapProvider (EpcEnbS1SapProvider * s)
 {
   m_s1SapProvider = s;
 }
 
-  
-EpcEnbS1SapUser* 
+
+EpcEnbS1SapUser*
 EpcTestRrc::GetS1SapUser ()
 {
   return m_s1SapUser;
 }
 
-void 
+void
 EpcTestRrc::DoDataRadioBearerSetupRequest (EpcEnbS1SapUser::DataRadioBearerSetupRequestParameters request)
 {
 
 }
-  
-void 
+
+void
 EpcTestRrc::DoPathSwitchRequestAcknowledge (EpcEnbS1SapUser::PathSwitchRequestAcknowledgeParameters params)
 {
 
@@ -715,4 +739,3 @@ EpcTestRrc::DoPathSwitchRequestAcknowledge (EpcEnbS1SapUser::PathSwitchRequestAc
 
 
 } // namespace ns3
-

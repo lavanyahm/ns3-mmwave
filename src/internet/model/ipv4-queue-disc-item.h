@@ -20,10 +20,14 @@
 #define IPV4_QUEUE_DISC_ITEM_H
 
 #include "ns3/packet.h"
+<<<<<<< HEAD
 #include "ns3/object.h"
 #include "ns3/net-device.h"
 #include "ns3/traced-value.h"
 #include "ns3/queue-disc.h"
+=======
+#include "ns3/queue-item.h"
+>>>>>>> origin
 #include "ipv4-header.h"
 
 namespace ns3 {
@@ -52,7 +56,11 @@ public:
   /**
    * \return the correct packet size (header plus payload).
    */
+<<<<<<< HEAD
   virtual uint32_t GetPacketSize (void) const;
+=======
+  virtual uint32_t GetSize (void) const;
+>>>>>>> origin
 
   /**
    * \return the header stored in this item..
@@ -79,6 +87,28 @@ public:
    */
   virtual bool GetUint8Value (Uint8Values field, uint8_t &value) const;
 
+<<<<<<< HEAD
+=======
+  /**
+   * \brief Marks the packet by setting ECN_CE bits if the packet has
+   * ECN_ECT0 or ECN_ECT1 set.  If ECN_CE is already set, returns true.
+   * \return true if the method results in a marked packet, false otherwise
+   */
+  virtual bool Mark (void);
+
+  /**
+   * \brief Computes the hash of the packet's 5-tuple
+   *
+   * Computes the hash of the source and destination IP addresses, protocol
+   * number and, if the transport protocol is either UDP or TCP, the source
+   * and destination port
+   *
+   * \param perturbation hash perturbation value
+   * \return the hash of the packet's 5-tuple
+   */
+  virtual uint32_t Hash (uint32_t perturbation) const;
+
+>>>>>>> origin
 private:
   /**
    * \brief Default constructor

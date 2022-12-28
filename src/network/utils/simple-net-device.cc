@@ -29,7 +29,7 @@
 #include "ns3/string.h"
 #include "ns3/tag.h"
 #include "ns3/simulator.h"
-#include "ns3/drop-tail-queue.h"
+#include "ns3/queue.h"
 
 namespace ns3 {
 
@@ -202,9 +202,9 @@ SimpleNetDevice::GetTypeId (void)
                    MakeBooleanChecker ())
     .AddAttribute ("TxQueue",
                    "A queue to use as the transmit queue in the device.",
-                   StringValue ("ns3::DropTailQueue"),
+                   StringValue ("ns3::DropTailQueue<Packet>"),
                    MakePointerAccessor (&SimpleNetDevice::m_queue),
-                   MakePointerChecker<Queue> ())
+                   MakePointerChecker<Queue<Packet> > ())
     .AddAttribute ("DataRate",
                    "The default data rate for point to point links. Zero means infinite",
                    DataRateValue (DataRate ("0b/s")),
@@ -280,7 +280,7 @@ SimpleNetDevice::SetChannel (Ptr<SimpleChannel> channel)
   m_linkChangeCallbacks ();
 }
 
-Ptr<Queue>
+Ptr<Queue<Packet> >
 SimpleNetDevice::GetQueue () const
 {
   NS_LOG_FUNCTION (this);
@@ -288,7 +288,7 @@ SimpleNetDevice::GetQueue () const
 }
 
 void
-SimpleNetDevice::SetQueue (Ptr<Queue> q)
+SimpleNetDevice::SetQueue (Ptr<Queue<Packet> > q)
 {
   NS_LOG_FUNCTION (this << q);
   m_queue = q;
@@ -432,7 +432,6 @@ SimpleNetDevice::SendFrom (Ptr<Packet> p, const Address& source, const Address& 
     {
       return false;
     }
-  Ptr<Packet> packet = p->Copy ();
 
   Mac48Address to = Mac48Address::ConvertFrom (dest);
   Mac48Address from = Mac48Address::ConvertFrom (source);
@@ -446,8 +445,9 @@ SimpleNetDevice::SendFrom (Ptr<Packet> p, const Address& source, const Address& 
 
   if (m_queue->Enqueue (Create<QueueItem> (p)))
     {
-      if (m_queue->GetNPackets () == 1 && !TransmitCompleteEvent.IsRunning ())
+      if (m_queue->GetNPackets () == 1 && !FinishTransmissionEvent.IsRunning ())
         {
+<<<<<<< HEAD
           p = m_queue->Dequeue ()->GetPacket ();
           p->RemovePacketTag (tag);
           Time txTime = Time (0);
@@ -457,27 +457,54 @@ SimpleNetDevice::SendFrom (Ptr<Packet> p, const Address& source, const Address& 
             }
           m_channel->Send (p, protocolNumber, to, from, this);
           TransmitCompleteEvent = Simulator::Schedule (txTime, &SimpleNetDevice::TransmitComplete, this);
+=======
+          StartTransmission ();
+>>>>>>> origin
         }
       return true;
     }
 
-
-  m_channel->Send (packet, protocolNumber, to, from, this);
-  return true;
+  return false;
 }
 
-
 void
-SimpleNetDevice::TransmitComplete ()
+SimpleNetDevice::StartTransmission ()
 {
-  NS_LOG_FUNCTION (this);
-
   if (m_queue->GetNPackets () == 0)
     {
       return;
     }
+<<<<<<< HEAD
 
   Ptr<Packet> packet = m_queue->Dequeue ()->GetPacket ();
+=======
+  NS_ASSERT_MSG (!FinishTransmissionEvent.IsRunning (),
+                 "Tried to transmit a packet while another transmission was in progress");
+  Ptr<Packet> packet = m_queue->Dequeue ();
+>>>>>>> origin
+
+  /**
+   * SimpleChannel will deliver the packet to the far end(s) of the link as soon as Send is called
+   * (or after its fixed delay, if one is configured). So we have to handle the rate of the link here,
+   * which we do by scheduling FinishTransmission (packetSize / linkRate) time in the future. While
+   * that event is running, the transmit path of this NetDevice is busy, so we can't send other packets. 
+   * 
+   * SimpleChannel doesn't have a locking mechanism, and doesn't check for collisions, so there's nothing
+   * we need to do with the channel until the transmission has "completed" from the perspective of this
+   * NetDevice. 
+   */
+  Time txTime = Time (0);
+  if (m_bps > DataRate (0))
+    {
+      txTime = m_bps.CalculateBytesTxTime (packet->GetSize ());
+    }
+  FinishTransmissionEvent = Simulator::Schedule (txTime, &SimpleNetDevice::FinishTransmission, this, packet);
+}
+
+void
+SimpleNetDevice::FinishTransmission (Ptr<Packet> packet)
+{
+  NS_LOG_FUNCTION (this);
 
   SimpleTag tag;
   packet->RemovePacketTag (tag);
@@ -488,15 +515,7 @@ SimpleNetDevice::TransmitComplete ()
 
   m_channel->Send (packet, proto, dst, src, this);
 
-  if (m_queue->GetNPackets ())
-    {
-      Time txTime = Time (0);
-      if (m_bps > DataRate (0))
-        {
-          txTime = m_bps.CalculateBytesTxTime (packet->GetSize ());
-        }
-      TransmitCompleteEvent = Simulator::Schedule (txTime, &SimpleNetDevice::TransmitComplete, this);
-    }
+  StartTransmission ();
 
   return;
 }
@@ -537,10 +556,10 @@ SimpleNetDevice::DoDispose (void)
   m_channel = 0;
   m_node = 0;
   m_receiveErrorModel = 0;
-  m_queue->DequeueAll ();
-  if (TransmitCompleteEvent.IsRunning ())
+  m_queue->Dispose ();
+  if (FinishTransmissionEvent.IsRunning ())
     {
-      TransmitCompleteEvent.Cancel ();
+      FinishTransmissionEvent.Cancel ();
     }
   NetDevice::DoDispose ();
 }

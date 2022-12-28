@@ -25,7 +25,12 @@
  */
 
 #include "tcp-vegas.h"
+<<<<<<< HEAD
 #include "ns3/tcp-socket-base.h"
+=======
+#include "tcp-socket-state.h"
+
+>>>>>>> origin
 #include "ns3/log.h"
 
 namespace ns3 {
@@ -203,7 +208,11 @@ TcpVegas::IncreaseWindow (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked)
            * target cwnd is throughput / minRtt
            */
           double tmp = m_baseRtt.GetSeconds () / m_minRtt.GetSeconds ();
+<<<<<<< HEAD
           targetCwnd = segCwnd * tmp;
+=======
+          targetCwnd = static_cast<uint32_t> (segCwnd * tmp);
+>>>>>>> origin
           NS_LOG_DEBUG ("Calculated targetCwnd = " << targetCwnd);
           NS_ASSERT (segCwnd >= targetCwnd); // implies baseRtt <= minRtt
 
@@ -233,7 +242,11 @@ TcpVegas::IncreaseWindow (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked)
             {     // Slow start mode
               NS_LOG_LOGIC ("We are in slow start and diff < m_gamma, so we "
                             "follow NewReno slow start");
+<<<<<<< HEAD
               segmentsAcked = TcpNewReno::SlowStart (tcb, segmentsAcked);
+=======
+              TcpNewReno::SlowStart (tcb, segmentsAcked);
+>>>>>>> origin
             }
           else
             {     // Linear increase/decrease mode
@@ -274,7 +287,11 @@ TcpVegas::IncreaseWindow (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked)
     }
   else if (tcb->m_cWnd < tcb->m_ssThresh)
     {
+<<<<<<< HEAD
       segmentsAcked = TcpNewReno::SlowStart (tcb, segmentsAcked);
+=======
+      TcpNewReno::SlowStart (tcb, segmentsAcked);
+>>>>>>> origin
     }
 }
 

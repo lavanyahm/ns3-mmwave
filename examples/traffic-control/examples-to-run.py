@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #! /usr/bin/env python
+=======
+#! /usr/bin/env python3
+>>>>>>> origin
 ## -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
 # A list of C++ examples to run in order to ensure that they remain
@@ -9,6 +13,12 @@
 # See test.py for more information.
 cpp_examples = [
     ("traffic-control", "True", "True"),
+<<<<<<< HEAD
+=======
+    ("red-vs-nlred", "True", "True"),
+    ("red-vs-fengadaptive", "True", "True"),
+    ("queue-discs-benchmark --simDuration=10", "True", "True"),
+>>>>>>> origin
 ]
 
 # A list of Python examples to run in order to ensure that they remain

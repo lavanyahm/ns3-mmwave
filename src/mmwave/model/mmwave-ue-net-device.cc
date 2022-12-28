@@ -1,3 +1,4 @@
+<<<<<<< HEAD
  /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
  /*
  *   Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
@@ -24,6 +25,40 @@
  *        	 	  Russell Ford <russell.ford@nyu.edu>
  *        		  Menglei Zhang <menglei@nyu.edu>
  */
+=======
+/* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
+/*
+*   Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
+*   Copyright (c) 2015, NYU WIRELESS, Tandon School of Engineering, New York University
+*   Copyright (c) 2016, 2018, University of Padova, Dep. of Information Engineering, SIGNET lab.
+*
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License version 2 as
+*   published by the Free Software Foundation;
+*
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
+*
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+*   Author: Marco Miozzo <marco.miozzo@cttc.es>
+*           Nicola Baldo  <nbaldo@cttc.es>
+*
+*   Modified by: Marco Mezzavilla < mezzavilla@nyu.edu>
+*                         Sourjya Dutta <sdutta@nyu.edu>
+*                         Russell Ford <russell.ford@nyu.edu>
+*                         Menglei Zhang <menglei@nyu.edu>
+*
+*   Modified by: Tommaso Zugno <tommasozugno@gmail.com>
+*								 Integration of Carrier Aggregation
+*/
+
+
+>>>>>>> origin
 
 
 
@@ -44,67 +79,61 @@
 #include <ns3/ipv4.h>
 #include "mmwave-ue-phy.h"
 #include <ns3/ipv4-l3-protocol.h>
+#include <ns3/ipv6-l3-protocol.h>
 #include <ns3/log.h>
+#include <ns3/lte-ue-component-carrier-manager.h>
+#include "ns3/mmwave-component-carrier-ue.h"
 
-namespace ns3{
+
+namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("MmWaveUeNetDevice");
 
+namespace mmwave {
+
 NS_OBJECT_ENSURE_REGISTERED (MmWaveUeNetDevice);
+
 
 TypeId
 MmWaveUeNetDevice::GetTypeId (void)
 {
-	static TypeId
-	    tid =
-	    TypeId ("ns3::MmWaveUeNetDevice")
-	    .SetParent<MmWaveNetDevice> ()
-	    .AddConstructor<MmWaveUeNetDevice> ()
-		.AddAttribute ("EpcUeNas",
-		                   "The NAS associated to this UeNetDevice",
-		                   PointerValue (),
-		                   MakePointerAccessor (&MmWaveUeNetDevice::m_nas),
-		                   MakePointerChecker <EpcUeNas> ())
-		.AddAttribute ("mmWaveUeRrc",
-		                   "The RRC associated to this UeNetDevice",
-		                   PointerValue (),
-		                   MakePointerAccessor (&MmWaveUeNetDevice::m_rrc),
-		                   MakePointerChecker <LteUeRrc> ())
-		.AddAttribute ("MmWaveUePhy",
-						"The PHY associated to this UeNetDevice",
-						PointerValue (),
-						MakePointerAccessor (&MmWaveUeNetDevice::m_phy),
-						MakePointerChecker <MmWaveUePhy> ())
-		.AddAttribute ("MmWaveUeMac",
-						"The MAC associated to this UeNetDevice",
-						PointerValue (),
-						MakePointerAccessor (&MmWaveUeNetDevice::m_mac),
-						MakePointerChecker <MmWaveUeMac> ())
-		.AddAttribute ("Imsi",
-			 "International Mobile Subscriber Identity assigned to this UE",
-			 UintegerValue (0),
-			 MakeUintegerAccessor (&MmWaveUeNetDevice::m_imsi),
-			 MakeUintegerChecker<uint64_t> ())
-		.AddAttribute ("AntennaNum",
-					   "Antenna number of the device",
-					   UintegerValue (16),
-					   MakeUintegerAccessor (&MmWaveUeNetDevice::SetAntennaNum,
-											 &MmWaveUeNetDevice::GetAntennaNum),
-					   MakeUintegerChecker<uint8_t> ())
-		.AddAttribute ("LteUeRrc",
-						"The RRC layer associated with the ENB",
-						PointerValue (),
-						MakePointerAccessor (&MmWaveUeNetDevice::m_rrc),
-						MakePointerChecker <LteUeRrc> ())
-	;
-	return tid;
+  static TypeId
+    tid =
+    TypeId ("ns3::MmWaveUeNetDevice")
+    .SetParent<MmWaveNetDevice> ()
+    .AddConstructor<MmWaveUeNetDevice> ()
+    .AddAttribute ("EpcUeNas",
+                   "The NAS associated to this UeNetDevice",
+                   PointerValue (),
+                   MakePointerAccessor (&MmWaveUeNetDevice::m_nas),
+                   MakePointerChecker <EpcUeNas> ())
+    .AddAttribute ("mmWaveUeRrc",
+                   "The RRC associated to this UeNetDevice",
+                   PointerValue (),
+                   MakePointerAccessor (&MmWaveUeNetDevice::m_rrc),
+                   MakePointerChecker <LteUeRrc> ())
+    .AddAttribute ("LteUeComponentCarrierManager",
+                   "The ComponentCarrierManager associated to this UeNetDevice",
+                   PointerValue (),
+                   MakePointerAccessor (&MmWaveUeNetDevice::m_componentCarrierManager),
+                   MakePointerChecker <LteUeComponentCarrierManager> ())
+    .AddAttribute ("Imsi",
+                   "International Mobile Subscriber Identity assigned to this UE",
+                   UintegerValue (0),
+                   MakeUintegerAccessor (&MmWaveUeNetDevice::m_imsi),
+                   MakeUintegerChecker<uint64_t> ())
+    .AddAttribute ("LteUeRrc",
+                   "The RRC layer associated with the ENB",
+                   PointerValue (),
+                   MakePointerAccessor (&MmWaveUeNetDevice::m_rrc),
+                   MakePointerChecker <LteUeRrc> ())
+  ;
+  return tid;
 }
 
 MmWaveUeNetDevice::MmWaveUeNetDevice (void)
-	: m_isConstructed (false)
-
 {
-	NS_LOG_FUNCTION (this);
+  NS_LOG_FUNCTION (this);
 }
 
 MmWaveUeNetDevice::~MmWaveUeNetDevice (void)
@@ -115,16 +144,36 @@ MmWaveUeNetDevice::~MmWaveUeNetDevice (void)
 void
 MmWaveUeNetDevice::DoInitialize (void)
 {
-	m_isConstructed = true;
-	UpdateConfig ();
-	m_phy->DoInitialize ();
-	m_rrc->Initialize ();
+  NS_LOG_FUNCTION (this);
+  m_isConstructed = true;
+  UpdateConfig ();
+
+  for (auto it = m_ccMap.begin (); it != m_ccMap.end (); ++it)
+    {
+      Ptr<MmWaveComponentCarrierUe> ccUe = DynamicCast<MmWaveComponentCarrierUe> (it->second);
+      ccUe->GetPhy ()->Initialize ();
+      ccUe->GetMac ()->Initialize ();
+    }
+  m_rrc->Initialize ();
 
 }
 void
 MmWaveUeNetDevice::DoDispose ()
 {
-	m_rrc->Dispose ();
+  NS_LOG_FUNCTION (this);
+  m_targetEnb = 0;
+
+  m_rrc->Dispose ();
+  m_rrc = 0;
+
+  m_nas->Dispose ();
+  m_nas = 0;
+
+  for (uint32_t i = 0; i < m_ccMap.size (); i++)
+    {
+      m_ccMap.at (i)->Dispose ();
+    }
+  m_componentCarrierManager->Dispose ();
 }
 
 uint32_t
@@ -167,26 +216,40 @@ MmWaveUeNetDevice::UpdateConfig (void)
 bool
 MmWaveUeNetDevice::DoSend (Ptr<Packet> packet, const Address& dest, uint16_t protocolNumber)
 {
-	NS_LOG_FUNCTION (this << dest << protocolNumber);
-    if (protocolNumber != Ipv4L3Protocol::PROT_NUMBER)
-	{
-	  NS_LOG_INFO("unsupported protocol " << protocolNumber << ", only IPv4 is supported");
-	  return false;
-	}
+  NS_LOG_FUNCTION (this << dest << protocolNumber);
+  NS_ABORT_MSG_IF (protocolNumber != Ipv4L3Protocol::PROT_NUMBER
+  		             && protocolNumber != Ipv6L3Protocol::PROT_NUMBER,
+  		             "unsupported protocol " << protocolNumber << ", only IPv4 and IPv6 are supported");
 
-    return m_nas->Send (packet);
+  return m_nas->Send (packet, protocolNumber);
 }
 
 Ptr<MmWaveUePhy>
 MmWaveUeNetDevice::GetPhy (void) const
 {
-	return m_phy; //Inherited from mmwaveNetDevice
+  NS_LOG_FUNCTION (this);
+  return DynamicCast<MmWaveComponentCarrierUe> (m_ccMap.at (0))->GetPhy ();
+}
+
+Ptr<MmWaveUePhy>
+MmWaveUeNetDevice::GetPhy (uint8_t index) const
+{
+  NS_LOG_FUNCTION (this);
+  return DynamicCast<MmWaveComponentCarrierUe> (m_ccMap.at (index))->GetPhy ();
+}
+
+Ptr<LteUeComponentCarrierManager>
+MmWaveUeNetDevice::GetComponentCarrierManager (void) const
+{
+  NS_LOG_FUNCTION (this);
+  return m_componentCarrierManager;
 }
 
 Ptr<MmWaveUeMac>
 MmWaveUeNetDevice::GetMac (void) const
 {
-	return m_mac;
+  NS_LOG_FUNCTION (this);
+  return DynamicCast<MmWaveComponentCarrierUe> (m_ccMap.at (0))->GetMac ();
 }
 
 Ptr<EpcUeNas>
@@ -207,43 +270,23 @@ MmWaveUeNetDevice::GetRrc (void) const
 uint64_t
 MmWaveUeNetDevice::GetImsi () const
 {
-	return m_imsi;
-}
-
-uint16_t
-MmWaveUeNetDevice::GetEarfcn () const
-{
-	return m_earfcn;
-}
-
-void
-MmWaveUeNetDevice::SetEarfcn (uint16_t earfcn)
-{
-	m_earfcn = earfcn;
+  NS_LOG_FUNCTION (this);
+  return m_imsi;
 }
 
 void
 MmWaveUeNetDevice::SetTargetEnb (Ptr<MmWaveEnbNetDevice> enb)
 {
-	m_targetEnb = enb;
+  NS_LOG_FUNCTION (this << enb);
+  m_targetEnb = enb;
 }
 
 Ptr<MmWaveEnbNetDevice>
 MmWaveUeNetDevice::GetTargetEnb (void)
 {
-	return m_targetEnb;
+  NS_LOG_FUNCTION (this);
+  return m_targetEnb;
 }
 
-uint8_t
-MmWaveUeNetDevice::GetAntennaNum () const
-{
-	return m_antennaNum;
 }
-
-void
-MmWaveUeNetDevice::SetAntennaNum (uint8_t antennaNum)
-{
-	m_antennaNum = antennaNum;
-}
-
 }

@@ -39,6 +39,7 @@
 #include "ns3/double.h"
 #include "ns3/string.h"
 #include "ns3/rng-seed-manager.h"
+#include "ns3/queue.h"
 
 using namespace ns3;
 
@@ -54,6 +55,14 @@ static void SendPacket (int num, Ptr<NetDevice> device, Address& addr)
 // Two nodes, two devices, one channel
 static void BuildSimpleTopology (Ptr<Node> a, Ptr<Node> b, Ptr<SimpleNetDevice> input, Ptr<SimpleNetDevice> output, Ptr<SimpleChannel> channel)
 {
+  ObjectFactory queueFactory;
+  queueFactory.SetTypeId("ns3::DropTailQueue<Packet>");
+  queueFactory.Set("MaxSize", StringValue("100000p")); // Much larger than we need
+  Ptr<Queue<Packet> > queueA = queueFactory.Create<Queue<Packet> > ();
+  Ptr<Queue<Packet> > queueB = queueFactory.Create<Queue<Packet> > ();
+
+  input->SetQueue(queueA);
+  output->SetQueue(queueB);
   a->AddDevice (input);
   b->AddDevice (output);
   input->SetAddress (Mac48Address::Allocate ());
@@ -64,6 +73,12 @@ static void BuildSimpleTopology (Ptr<Node> a, Ptr<Node> b, Ptr<SimpleNetDevice> 
   output->SetAddress (Mac48Address::Allocate ());
 }
 
+/**
+ * \ingroup network-test
+ * \ingroup tests
+ *
+ * ErrorModel unit tests.
+ */
 class ErrorModelSimple : public TestCase
 {
 public:
@@ -72,10 +87,23 @@ public:
 
 private:
   virtual void DoRun (void);
+  /**
+   * Receive form a NetDevice
+   * \param nd The NetDevice.
+   * \param p The received packet.
+   * \param protocol The protocol received.
+   * \param addr The sender address.
+   * \return True on success.
+   */
   bool Receive (Ptr<NetDevice> nd, Ptr<const Packet> p, uint16_t protocol, const Address& addr);
+  /**
+   * Register a Drop
+   * \param p The dropped packet
+   */
   void DropEvent (Ptr<const Packet> p);
-  uint32_t m_count;
-  uint32_t m_drops;
+
+  uint32_t m_count; //!< The received packets counter.
+  uint32_t m_drops; //!< The dropped packets counter.
 };
 
 // Add some help text to this case to describe what it is intended to test
@@ -142,6 +170,12 @@ ErrorModelSimple::DoRun (void)
   NS_TEST_ASSERT_MSG_EQ (m_drops, 9, "Wrong number of drops.");
 }
 
+/**
+ * \ingroup network-test
+ * \ingroup tests
+ *
+ * BurstErrorModel unit tests.
+ */
 class BurstErrorModelSimple : public TestCase
 {
 public:
@@ -150,10 +184,23 @@ public:
 
 private:
   virtual void DoRun (void);
+  /**
+   * Receive form a NetDevice
+   * \param nd The NetDevice.
+   * \param p The received packet.
+   * \param protocol The protocol received.
+   * \param addr The sender address.
+   * \return True on success.
+   */
   bool Receive (Ptr<NetDevice> nd, Ptr<const Packet> p, uint16_t protocol, const Address& addr);
+  /**
+   * Register a Drop
+   * \param p The dropped packet
+   */
   void DropEvent (Ptr<const Packet> p);
-  uint32_t m_count;
-  uint32_t m_drops;
+
+  uint32_t m_count; //!< The received packets counter.
+  uint32_t m_drops; //!< The dropped packets counter.
 };
 
 // Add some help text to this case to describe what it is intended to test
@@ -224,9 +271,16 @@ BurstErrorModelSimple::DoRun (void)
   NS_TEST_ASSERT_MSG_EQ (m_drops, 260 , "Wrong number of drops.");
 }
 
-// This is the start of an error model test suite.  For starters, this is
-// just testing that the SimpleNetDevice is working but this can be
-// extended to many more test cases in the future
+/**
+ * \ingroup network-test
+ * \ingroup tests
+ *
+ * \brief ErrorModel TestSuite
+ *
+ *  This is the start of an error model test suite.  For starters, this is
+ *  just testing that the SimpleNetDevice is working but this can be
+ *  extended to many more test cases in the future
+ */
 class ErrorModelTestSuite : public TestSuite
 {
 public:
@@ -241,4 +295,4 @@ ErrorModelTestSuite::ErrorModelTestSuite ()
 }
 
 // Do not forget to allocate an instance of this TestSuite
-static ErrorModelTestSuite errorModelTestSuite;
+static ErrorModelTestSuite errorModelTestSuite; //!< Static variable for test initialization

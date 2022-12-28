@@ -21,7 +21,6 @@
 #ifndef CONSTANT_RATE_WIFI_MANAGER_H
 #define CONSTANT_RATE_WIFI_MANAGER_H
 
-#include <stdint.h>
 #include "wifi-remote-station-manager.h"
 
 namespace ns3 {
@@ -36,12 +35,17 @@ namespace ns3 {
 class ConstantRateWifiManager : public WifiRemoteStationManager
 {
 public:
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
   static TypeId GetTypeId (void);
   ConstantRateWifiManager ();
   virtual ~ConstantRateWifiManager ();
 
 
 private:
+<<<<<<< HEAD
   //overriden from base class
   virtual WifiRemoteStation* DoCreateStation (void) const;
   virtual void DoReportRxOk (WifiRemoteStation *station,
@@ -57,8 +61,24 @@ private:
   virtual WifiTxVector DoGetDataTxVector (WifiRemoteStation *station);
   virtual WifiTxVector DoGetRtsTxVector (WifiRemoteStation *station);
   virtual bool IsLowLatency (void) const;
+=======
+  //overridden from base class
+  WifiRemoteStation* DoCreateStation (void) const;
+  void DoReportRxOk (WifiRemoteStation *station,
+                     double rxSnr, WifiMode txMode);
+  void DoReportRtsFailed (WifiRemoteStation *station);
+  void DoReportDataFailed (WifiRemoteStation *station);
+  void DoReportRtsOk (WifiRemoteStation *station,
+                      double ctsSnr, WifiMode ctsMode, double rtsSnr);
+  void DoReportDataOk (WifiRemoteStation *station, double ackSnr, WifiMode ackMode,
+                       double dataSnr, uint16_t dataChannelWidth, uint8_t dataNss);
+  void DoReportFinalRtsFailed (WifiRemoteStation *station);
+  void DoReportFinalDataFailed (WifiRemoteStation *station);
+  WifiTxVector DoGetDataTxVector (WifiRemoteStation *station);
+  WifiTxVector DoGetRtsTxVector (WifiRemoteStation *station);
+>>>>>>> origin
 
-  WifiMode m_dataMode; //!< Wifi mode for unicast DATA frames
+  WifiMode m_dataMode; //!< Wifi mode for unicast Data frames
   WifiMode m_ctlMode;  //!< Wifi mode for RTS frames
 };
 

@@ -188,6 +188,18 @@ private:
 std::ostream& operator<< (std::ostream& os, Ipv4RoutingTableEntry const& route);
 
 /**
+<<<<<<< HEAD
+=======
+ * \brief Equality operator.
+ *
+ * \param a lhs
+ * \param b rhs
+ * \returns true if operands are equal, false otherwise
+ */
+bool operator== (const Ipv4RoutingTableEntry a, const Ipv4RoutingTableEntry b);
+
+/**
+>>>>>>> origin
  * \ingroup ipv4Routing
  *
  * \brief A record of an IPv4 multicast route for Ipv4GlobalRouting and Ipv4StaticRouting
@@ -270,6 +282,15 @@ private:
  * \returns the reference to the output stream
  */
 std::ostream& operator<< (std::ostream& os, Ipv4MulticastRoutingTableEntry const& route);
+
+/**
+ * \brief Equality operator.
+ *
+ * \param a lhs
+ * \param b rhs
+ * \returns true if operands are equal, false otherwise
+ */
+bool operator== (const Ipv4MulticastRoutingTableEntry a, const Ipv4MulticastRoutingTableEntry b);
 
 } // namespace ns3
 

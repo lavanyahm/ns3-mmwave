@@ -20,10 +20,19 @@
 #ifndef TCPHIGHSPEED_H
 #define TCPHIGHSPEED_H
 
+<<<<<<< HEAD
 #include "ns3/tcp-congestion-ops.h"
 
 namespace ns3 {
 
+=======
+#include "tcp-congestion-ops.h"
+
+namespace ns3 {
+
+class TcpSocketState;
+
+>>>>>>> origin
 /**
  * \ingroup congestionOps
  *
@@ -73,20 +82,36 @@ public:
   virtual Ptr<TcpCongestionOps> Fork ();
 
   /**
+<<<<<<< HEAD
    * \brief Lookup table for the coefficent a (from RFC 3649)
    *
    * \param w Window value (in packets)
    *
    * \return the coefficent a
+=======
+   * \brief Lookup table for the coefficient a (from RFC 3649)
+   *
+   * \param w Window value (in packets)
+   *
+   * \return the coefficient a
+>>>>>>> origin
    */
   static uint32_t  TableLookupA (uint32_t w);
 
   /**
+<<<<<<< HEAD
    * \brief Lookup table for the coefficent b (from RFC 3649)
    *
    * \param w Window value (in packets)
    *
    * \return the coefficent b
+=======
+   * \brief Lookup table for the coefficient b (from RFC 3649)
+   *
+   * \param w Window value (in packets)
+   *
+   * \return the coefficient b
+>>>>>>> origin
    */
   static double    TableLookupB (uint32_t w);
 
@@ -94,7 +119,11 @@ protected:
   virtual void CongestionAvoidance (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked);
 
 private:
+<<<<<<< HEAD
   uint32_t m_ackCnt; //!< Number of received ACK, corrected with the coefficent a
+=======
+  uint32_t m_ackCnt; //!< Number of received ACK, corrected with the coefficient a
+>>>>>>> origin
 };
 
 } // namespace ns3

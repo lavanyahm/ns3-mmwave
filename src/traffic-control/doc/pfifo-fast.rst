@@ -41,12 +41,21 @@ together, in which packets from higher priority bands are always
 dequeued before a packet from a lower priority band is dequeued.
 
 The queue disc capacity, i.e., the maximum number of packets that can
+<<<<<<< HEAD
 be enqueued in the queue disc, is set through the limit attribute, which
 plays the same role as txqueuelen in Linux. If no internal queue is
 provided, three DropTail queues having each a capacity equal to limit are
 created by default. User is allowed to provide queues, but they must be
 three, operate in packet mode and each have a capacity not less
 than limit. No packet filter can be added to a PfifoFastQueueDisc.
+=======
+be enqueued in the queue disc, is set through the MaxSize attribute, which
+plays the same role as txqueuelen in Linux. If no internal queue is
+provided, three DropTail queues having each a capacity equal to MaxSize are
+created by default. User is allowed to provide queues, but they must be
+three, operate in packet mode and each have a capacity not less
+than MaxSize. No packet filter can be added to a PfifoFastQueueDisc.
+>>>>>>> origin
 
 
 Attributes
@@ -54,7 +63,11 @@ Attributes
 
 The PfifoFastQueueDisc class holds a single attribute:
 
+<<<<<<< HEAD
 * ``Limit:`` The maximum number of packets accepted by the queue disc. The default value is 1000.
+=======
+* ``MaxSize:`` The maximum number of packets accepted by the queue disc. The default value is 1000.
+>>>>>>> origin
 
 Examples
 ========

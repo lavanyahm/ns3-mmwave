@@ -25,6 +25,10 @@ NS_LOG_COMPONENT_DEFINE ("ChannelScheduler");
 
 NS_OBJECT_ENSURE_REGISTERED (ChannelScheduler);
 
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
 TypeId
 ChannelScheduler::GetTypeId (void)
 {
@@ -154,6 +158,13 @@ ChannelScheduler::StopSch (uint32_t channelNumber)
       return true;
     }
   return ReleaseAccess (channelNumber);
+}
+
+void
+ChannelScheduler::DoDispose (void)
+{
+  NS_LOG_FUNCTION (this);
+  m_device = 0;
 }
 
 } // namespace ns3

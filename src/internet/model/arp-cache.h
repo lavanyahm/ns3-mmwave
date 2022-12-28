@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <list>
+#include <unordered_map>
 #include "ns3/simulator.h"
 #include "ns3/callback.h"
 #include "ns3/packet.h"
@@ -32,7 +33,6 @@
 #include "ns3/ptr.h"
 #include "ns3/object.h"
 #include "ns3/traced-callback.h"
-#include "ns3/sgi-hashmap.h"
 #include "ns3/output-stream-wrapper.h"
 
 namespace ns3 {
@@ -156,6 +156,8 @@ public:
   std::list<ArpCache::Entry *> LookupInverse (Address destination);
   /**
    * \brief Add an Ipv4Address to this ARP cache
+   * \param to the destination address of the ARP entry.
+   * \returns A pointer to a new ARP Entry.
    */
   ArpCache::Entry *Add (Ipv4Address to);
   /**
@@ -241,7 +243,7 @@ public:
     /**
      * \param macAddress The MacAddress for this entry
      */
-    void SetMacAddresss (Address macAddress);
+    void SetMacAddress (Address macAddress);
     /**
      * \param destination The Ipv4Address for this entry
      */
@@ -311,11 +313,11 @@ private:
   /**
    * \brief ARP Cache container
    */
-  typedef sgi::hash_map<Ipv4Address, ArpCache::Entry *, Ipv4AddressHash> Cache;
+  typedef std::unordered_map<Ipv4Address, ArpCache::Entry *, Ipv4AddressHash> Cache;
   /**
    * \brief ARP Cache container iterator
    */
-  typedef sgi::hash_map<Ipv4Address, ArpCache::Entry *, Ipv4AddressHash>::iterator CacheI;
+  typedef std::unordered_map<Ipv4Address, ArpCache::Entry *, Ipv4AddressHash>::iterator CacheI;
 
   virtual void DoDispose (void);
 

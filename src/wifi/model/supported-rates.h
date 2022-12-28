@@ -21,10 +21,7 @@
 #ifndef SUPPORTED_RATES_H
 #define SUPPORTED_RATES_H
 
-#include <stdint.h>
-#include <ostream>
-#include "ns3/buffer.h"
-#include "ns3/wifi-information-element.h"
+#include "wifi-information-element.h"
 
 namespace ns3 {
 
@@ -50,37 +47,31 @@ public:
    * Create an extended supported rates information element
    * from the given rates.
    *
-   * \param rates
+   * \param rates the extended supported rates
    */
   ExtendedSupportedRatesIE (SupportedRates *rates);
 
+  // Implementations of pure virtual methods of WifiInformationElement
+  WifiInformationElementId ElementId () const override;
+  uint8_t GetInformationFieldSize () const override;
+  void SerializeInformationField (Buffer::Iterator start) const override;
+  uint8_t DeserializeInformationField (Buffer::Iterator start,
+                                       uint8_t length) override;
+  /* This information element is a bit special in that it is only
+    included if there are more than 8 rates. To support this we
+    override the Serialize and GetSerializedSize methods of
+    WifiInformationElement. */
+  Buffer::Iterator Serialize (Buffer::Iterator start) const override;
+  uint16_t GetSerializedSize () const override;
+
+  /**
+   * Set supported rates.
+   *
+   * \param rates the supported rates
+   */
   void SetSupportedRates (SupportedRates *rates);
 
-  WifiInformationElementId ElementId () const;
-  uint8_t GetInformationFieldSize () const;
-  void SerializeInformationField (Buffer::Iterator start) const;
-  uint8_t DeserializeInformationField (Buffer::Iterator start,
-                                       uint8_t length);
 
-  /**
-   * This information element is a bit special in that it is only
-   * included if there are more than 8 rates. To support this we
-   * override the Serialize and GetSerializedSize methods of
-   * WifiInformationElement.
-   *
-   * \param start
-   *
-   * \return an iterator
-   */
-  Buffer::Iterator Serialize (Buffer::Iterator start) const;
-  /**
-   * Return the serialized size of this supported rates
-   * information element.
-   *
-   * \return the serialized size of this supported rates
-   *         information element
-   */
-  uint16_t GetSerializedSize () const;
 private:
   /**
    * This member points to the SupportedRates object that contains the
@@ -106,28 +97,48 @@ class SupportedRates : public WifiInformationElement
 public:
   SupportedRates ();
 
-  SupportedRates (const SupportedRates &);
-  SupportedRates& operator= (const SupportedRates&);
+  /**
+   * Type conversion operator
+   *
+   * \param rates the reference const SupportedRates
+   */
+  SupportedRates (const SupportedRates & rates);
 
-/**
- * This defines the maximum number of supported rates that a STA is
- * allowed to have. Currently this number is set for IEEE 802.11b/g and SISO IEE 802.11n
- * stations which need 2 rates each from Clauses 15 and 18, and then 8
- * from Clause 19.
- */
+  // Implementations of pure virtual methods of WifiInformationElement
+  WifiInformationElementId ElementId () const;
+  uint8_t GetInformationFieldSize () const;
+  void SerializeInformationField (Buffer::Iterator start) const;
+  uint8_t DeserializeInformationField (Buffer::Iterator start,
+                                       uint8_t length);
+
+  /**
+   * Assignment operator
+   *
+   * \param rates the rates to assign
+   * \returns the assigned value
+   */
+  SupportedRates& operator= (const SupportedRates& rates);
+
+  /**
+   * This defines the maximum number of supported rates that a STA is
+   * allowed to have. Currently this number is set for IEEE 802.11b/g and SISO IEEE 802.11n
+   * stations which need 2 rates each from Clauses 15 and 18, and then 8
+   * from Clause 19.
+   */
   static const uint8_t MAX_SUPPORTED_RATES = 32;
 
   /**
    * Add the given rate to the supported rates.
    *
-   * \param bs the rate to be added
+   * \param bs the rate to be added in bps
    */
-  void AddSupportedRate (uint32_t bs);
+  void AddSupportedRate (uint64_t bs);
   /**
    * Set the given rate to basic rates.
    *
-   * \param bs the rate to be set
+   * \param bs the rate to be set in bps
    */
+<<<<<<< HEAD
   void SetBasicRate (uint32_t bs);
   /**
    * Add a special value to the supported rate set, corresponding to
@@ -140,32 +151,58 @@ public:
    * Check if the given rate is supported.  The rate is encoded as it is
    * serialized to the Supported Rates Information Element (i.e. as a
    * multiple of 500 Kbits/sec, possibly with MSB set to 1).
+=======
+  void SetBasicRate (uint64_t bs);
+  /**
+   * Add a special value to the supported rate set, corresponding to
+   * a BSS membership selector
+>>>>>>> origin
    *
-   * \param bs the rate to be checked
+   * \param bs the special membership selector value (not a valid rate)
+   */
+  void AddBssMembershipSelectorRate (uint64_t bs);
+  /**
+   * Check if the given rate is supported.  The rate is encoded as it is
+   * serialized to the Supported Rates Information Element (i.e. as a
+   * multiple of 500 Kbits/sec, possibly with MSB set to 1).
+   *
+   * \param bs the rate to be checked in bps
    *
    * \return true if the rate is supported, false otherwise
    */
-  bool IsSupportedRate (uint32_t bs) const;
+  bool IsSupportedRate (uint64_t bs) const;
   /**
    * Check if the given rate is a basic rate.  The rate is encoded as it is
    * serialized to the Supported Rates Information Element (i.e. as a
    * multiple of 500 Kbits/sec, with MSB set to 1).
    *
-   * \param bs the rate to be checked
+   * \param bs the rate to be checked in bps
    *
    * \return true if the rate is a basic rate, false otherwise
    */
+<<<<<<< HEAD
   bool IsBasicRate (uint32_t bs) const;
+=======
+  bool IsBasicRate (uint64_t bs) const;
+>>>>>>> origin
   /**
    * Check if the given rate is a BSS membership selector value.  The rate
    * is encoded as it is serialized to the Supporting Rates Information
    * Element (i.e. with the MSB set to 1).
    *
+<<<<<<< HEAD
    * \param bs the rate to be checked
    *
    * \return true if the rate is a BSS membership selector, false otherwise
    */
   bool IsBssMembershipSelectorRate (uint32_t bs) const;
+=======
+   * \param bs the rate to be checked in bps
+   *
+   * \return true if the rate is a BSS membership selector, false otherwise
+   */
+  bool IsBssMembershipSelectorRate (uint64_t bs) const;
+>>>>>>> origin
   /**
    * Return the number of supported rates.
    *
@@ -177,17 +214,11 @@ public:
    * Return the rate (converted back to raw value) at the given index.
    *
    * \param i the given index
-   * \return the rate
+   * \return the rate in bps
    */
   uint32_t GetRate (uint8_t i) const;
 
-  WifiInformationElementId ElementId () const;
-  uint8_t GetInformationFieldSize () const;
-  void SerializeInformationField (Buffer::Iterator start) const;
-  uint8_t DeserializeInformationField (Buffer::Iterator start,
-                                       uint8_t length);
-
-  /*
+  /**
    * We support the Extended Supported Rates Information Element
    * through the ExtendedSupportedRatesIE object which is declared
    * above. We allow this class to be a friend so that it can access
@@ -195,14 +226,22 @@ public:
    * extended.
    */
   friend class ExtendedSupportedRatesIE;
-  ExtendedSupportedRatesIE extended;
+  ExtendedSupportedRatesIE extended; //!< extended supported rates info element
 
 
 private:
   uint8_t m_nRates;                      //!< Number of supported rates
-  uint8_t m_rates[MAX_SUPPORTED_RATES];  //!< List of supported bitrate (divided by 500000)
+  uint8_t m_rates[MAX_SUPPORTED_RATES];  //!< List of supported bit rates (divided by 500000)
 };
 
+/**
+ * Serialize SupportedRates to the given ostream.
+ *
+ * \param os output stream
+ * \param rates the SupportedRates
+ *
+ * \return std::ostream
+ */
 std::ostream &operator << (std::ostream &os, const SupportedRates &rates);
 
 } //namespace ns3

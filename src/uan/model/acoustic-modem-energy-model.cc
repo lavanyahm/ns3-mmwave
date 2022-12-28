@@ -269,6 +269,26 @@ AcousticModemEnergyModel::HandleEnergyDepletion (void)
   Ptr<UanNetDevice> dev = m_node->GetDevice (0)->GetObject<UanNetDevice> ();
   dev->GetPhy ()->EnergyDepletionHandler ();
   SetMicroModemState(UanPhy::DISABLED);
+<<<<<<< HEAD
+}
+
+void
+AcousticModemEnergyModel::HandleEnergyRecharged (void)
+{
+  NS_LOG_FUNCTION (this);
+  NS_LOG_DEBUG ("AcousticModemEnergyModel:Energy is recharged at node #" <<
+                m_node->GetId ());
+  // invoke energy recharge callback, if set.
+  if (!m_energyRechargeCallback.IsNull ())
+    {
+      m_energyRechargeCallback ();
+    }
+  // invoke the phy energy recharge handler
+  Ptr<UanNetDevice> dev = m_node->GetDevice (0)->GetObject<UanNetDevice> ();
+  dev->GetPhy ()->EnergyRechargeHandler ();
+  SetMicroModemState(UanPhy::IDLE);
+=======
+>>>>>>> origin
 }
 
 void
@@ -287,6 +307,14 @@ AcousticModemEnergyModel::HandleEnergyRecharged (void)
   dev->GetPhy ()->EnergyRechargeHandler ();
   SetMicroModemState(UanPhy::IDLE);
 }
+
+void
+AcousticModemEnergyModel::HandleEnergyChanged (void)
+{
+  NS_LOG_FUNCTION (this);
+  //Not implemented
+}
+
 
 /*
  * Private functions start here.

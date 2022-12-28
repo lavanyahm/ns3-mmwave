@@ -18,7 +18,12 @@
  */
 
 #include "tcp-highspeed.h"
+<<<<<<< HEAD
 #include "ns3/tcp-socket-base.h"
+=======
+#include "tcp-socket-state.h"
+
+>>>>>>> origin
 #include "ns3/log.h"
 
 namespace ns3 {
@@ -39,14 +44,22 @@ TcpHighSpeed::GetTypeId (void)
 
 TcpHighSpeed::TcpHighSpeed (void)
   : TcpNewReno (),
+<<<<<<< HEAD
   m_ackCnt (0)
+=======
+    m_ackCnt (0)
+>>>>>>> origin
 {
   NS_LOG_FUNCTION (this);
 }
 
 TcpHighSpeed::TcpHighSpeed (const TcpHighSpeed& sock)
   : TcpNewReno (sock),
+<<<<<<< HEAD
   m_ackCnt (sock.m_ackCnt)
+=======
+    m_ackCnt (sock.m_ackCnt)
+>>>>>>> origin
 {
   NS_LOG_FUNCTION (this);
 }
@@ -87,7 +100,11 @@ TcpHighSpeed::Fork (void)
  * For instance, when it is equal to 2, we need to increase the window by the
  * quantity 2/w. But, this means that one segment acked is equivalent (from
  * the point of view of incrementing cWnd) to two segments acked in NewReno
+<<<<<<< HEAD
  * (1/w + 1/w). That a coefficent is, in other word, the weight of each segment
+=======
+ * (1/w + 1/w). That a coefficient is, in other word, the weight of each segment
+>>>>>>> origin
  * acked. More weight, less ACK are necessary to increment cWnd, which is
  * exactly the Highspeed principle.
  *
@@ -145,7 +162,11 @@ TcpHighSpeed::GetSsThresh (Ptr<const TcpSocketState> tcb,
   uint32_t segCwnd = bytesInFlight / tcb->m_segmentSize;
 
   double b = 1.0 - TableLookupB (segCwnd);
+<<<<<<< HEAD
   uint32_t ssThresh = std::max (2.0, segCwnd * b);
+=======
+  uint32_t ssThresh = static_cast<uint32_t> (std::max (2.0, segCwnd * b));
+>>>>>>> origin
 
   NS_LOG_DEBUG ("Calculated b(w) = " << b <<
                 " resulting (in segment) ssThresh=" << ssThresh);

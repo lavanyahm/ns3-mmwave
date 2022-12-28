@@ -18,6 +18,7 @@
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
 
+<<<<<<< HEAD
 #include "wifi-net-device.h"
 #include "regular-wifi-mac.h"
 #include "wifi-phy.h"
@@ -28,10 +29,20 @@
 #include "ns3/packet.h"
 #include "ns3/socket.h"
 #include "ns3/uinteger.h"
+=======
+#include "ns3/llc-snap-header.h"
+#include "ns3/channel.h"
+>>>>>>> origin
 #include "ns3/pointer.h"
-#include "ns3/node.h"
-#include "ns3/trace-source-accessor.h"
 #include "ns3/log.h"
+#include "ns3/node.h"
+#include "ns3/uinteger.h"
+#include "wifi-net-device.h"
+#include "wifi-phy.h"
+#include "wifi-mac.h"
+#include "ns3/ht-configuration.h"
+#include "ns3/vht-configuration.h"
+#include "ns3/he-configuration.h"
 
 namespace ns3 {
 
@@ -53,8 +64,8 @@ WifiNetDevice::GetTypeId (void)
                    MakeUintegerChecker<uint16_t> (1,MAX_MSDU_SIZE - LLC_SNAP_HEADER_LENGTH))
     .AddAttribute ("Channel", "The channel attached to this device",
                    PointerValue (),
-                   MakePointerAccessor (&WifiNetDevice::DoGetChannel),
-                   MakePointerChecker<WifiChannel> ())
+                   MakePointerAccessor (&WifiNetDevice::GetChannel),
+                   MakePointerChecker<Channel> ())
     .AddAttribute ("Phy", "The PHY layer attached to this device.",
                    PointerValue (),
                    MakePointerAccessor (&WifiNetDevice::GetPhy,
@@ -70,6 +81,21 @@ WifiNetDevice::GetTypeId (void)
                    MakePointerAccessor (&WifiNetDevice::SetRemoteStationManager,
                                         &WifiNetDevice::GetRemoteStationManager),
                    MakePointerChecker<WifiRemoteStationManager> ())
+    .AddAttribute ("HtConfiguration",
+                   "The HtConfiguration object.",
+                   PointerValue (),
+                   MakePointerAccessor (&WifiNetDevice::GetHtConfiguration),
+                   MakePointerChecker<HtConfiguration> ())
+    .AddAttribute ("VhtConfiguration",
+                   "The VhtConfiguration object.",
+                   PointerValue (),
+                   MakePointerAccessor (&WifiNetDevice::GetVhtConfiguration),
+                   MakePointerChecker<VhtConfiguration> ())
+    .AddAttribute ("HeConfiguration",
+                   "The HeConfiguration object.",
+                   PointerValue (),
+                   MakePointerAccessor (&WifiNetDevice::GetHeConfiguration),
+                   MakePointerChecker<HeConfiguration> ())
   ;
   return tid;
 }
@@ -90,6 +116,7 @@ WifiNetDevice::DoDispose (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
   m_node = 0;
+<<<<<<< HEAD
   m_mac->Dispose ();
   m_phy->Dispose ();
   m_stationManager->Dispose ();
@@ -97,15 +124,57 @@ WifiNetDevice::DoDispose (void)
   m_phy = 0;
   m_stationManager = 0;
   m_queueInterface = 0;
+=======
+  if (m_mac)
+    {
+      m_mac->Dispose ();
+      m_mac = 0;
+    }
+  if (m_phy)
+    {
+      m_phy->Dispose ();
+      m_phy = 0;
+    }
+  if (m_stationManager)
+    {
+      m_stationManager->Dispose ();
+      m_stationManager = 0;
+    }
+  if (m_htConfiguration)
+    {
+      m_htConfiguration->Dispose ();
+      m_htConfiguration = 0;
+    }
+  if (m_vhtConfiguration)
+    {
+      m_vhtConfiguration->Dispose ();
+      m_vhtConfiguration = 0;
+    }
+  if (m_heConfiguration)
+    {
+      m_heConfiguration->Dispose ();
+      m_heConfiguration = 0;
+    }
+>>>>>>> origin
   NetDevice::DoDispose ();
 }
 
 void
 WifiNetDevice::DoInitialize (void)
 {
-  m_phy->Initialize ();
-  m_mac->Initialize ();
-  m_stationManager->Initialize ();
+  NS_LOG_FUNCTION_NOARGS ();
+  if (m_phy)
+    {
+      m_phy->Initialize ();
+    }
+  if (m_mac)
+    {
+      m_mac->Initialize ();
+    }
+  if (m_stationManager)
+    {
+      m_stationManager->Initialize ();
+    }
   NetDevice::DoInitialize ();
 }
 
@@ -131,6 +200,7 @@ WifiNetDevice::CompleteConfig (void)
 }
 
 void
+<<<<<<< HEAD
 WifiNetDevice::NotifyNewAggregate (void)
 {
   NS_LOG_FUNCTION (this);
@@ -168,20 +238,23 @@ WifiNetDevice::NotifyNewAggregate (void)
 
 void
 WifiNetDevice::SetMac (Ptr<WifiMac> mac)
+=======
+WifiNetDevice::SetMac (const Ptr<WifiMac> mac)
+>>>>>>> origin
 {
   m_mac = mac;
   CompleteConfig ();
 }
 
 void
-WifiNetDevice::SetPhy (Ptr<WifiPhy> phy)
+WifiNetDevice::SetPhy (const Ptr<WifiPhy> phy)
 {
   m_phy = phy;
   CompleteConfig ();
 }
 
 void
-WifiNetDevice::SetRemoteStationManager (Ptr<WifiRemoteStationManager> manager)
+WifiNetDevice::SetRemoteStationManager (const Ptr<WifiRemoteStationManager> manager)
 {
   m_stationManager = manager;
   CompleteConfig ();
@@ -219,12 +292,6 @@ WifiNetDevice::GetIfIndex (void) const
 
 Ptr<Channel>
 WifiNetDevice::GetChannel (void) const
-{
-  return m_phy->GetChannel ();
-}
-
-Ptr<WifiChannel>
-WifiNetDevice::DoGetChannel (void) const
 {
   return m_phy->GetChannel ();
 }
@@ -335,7 +402,7 @@ WifiNetDevice::GetNode (void) const
 }
 
 void
-WifiNetDevice::SetNode (Ptr<Node> node)
+WifiNetDevice::SetNode (const Ptr<Node> node)
 {
   m_node = node;
   CompleteConfig ();
@@ -354,11 +421,15 @@ WifiNetDevice::SetReceiveCallback (NetDevice::ReceiveCallback cb)
 }
 
 void
-WifiNetDevice::ForwardUp (Ptr<Packet> packet, Mac48Address from, Mac48Address to)
+WifiNetDevice::ForwardUp (Ptr<const Packet> packet, Mac48Address from, Mac48Address to)
 {
   NS_LOG_FUNCTION (this << packet << from << to);
   LlcSnapHeader llc;
+<<<<<<< HEAD
   enum NetDevice::PacketType type;
+=======
+  NetDevice::PacketType type;
+>>>>>>> origin
   if (to.IsBroadcast ())
     {
       type = NetDevice::PACKET_BROADCAST;
@@ -376,11 +447,21 @@ WifiNetDevice::ForwardUp (Ptr<Packet> packet, Mac48Address from, Mac48Address to
       type = NetDevice::PACKET_OTHERHOST;
     }
 
+  Ptr<Packet> copy = packet->Copy ();
   if (type != NetDevice::PACKET_OTHERHOST)
     {
       m_mac->NotifyRx (packet);
+<<<<<<< HEAD
       packet->RemoveHeader (llc);
       m_forwardUp (this, packet, llc.GetType (), from);
+=======
+      copy->RemoveHeader (llc);
+      m_forwardUp (this, copy, llc.GetType (), from);
+    }
+  else
+    {
+      copy->RemoveHeader (llc);
+>>>>>>> origin
     }
   else
     {
@@ -389,8 +470,8 @@ WifiNetDevice::ForwardUp (Ptr<Packet> packet, Mac48Address from, Mac48Address to
     
   if (!m_promiscRx.IsNull ())
     {
-      m_mac->NotifyPromiscRx (packet);
-      m_promiscRx (this, packet, llc.GetType (), from, to, type);
+      m_mac->NotifyPromiscRx (copy);
+      m_promiscRx (this, copy, llc.GetType (), from, to, type);
     }
 }
 
@@ -441,6 +522,7 @@ WifiNetDevice::SupportsSendFrom (void) const
   return m_mac->SupportsSendFrom ();
 }
 
+<<<<<<< HEAD
 uint8_t
 WifiNetDevice::SelectQueue (Ptr<QueueItem> item) const
 {
@@ -471,6 +553,42 @@ WifiNetDevice::SelectQueue (Ptr<QueueItem> item) const
   // the access category assigned to the packet should be downgraded
 
   return QosUtilsMapTidToAc (priority);
+=======
+void
+WifiNetDevice::SetHtConfiguration (Ptr<HtConfiguration> htConfiguration)
+{
+  m_htConfiguration = htConfiguration;
+}
+
+Ptr<HtConfiguration>
+WifiNetDevice::GetHtConfiguration (void) const
+{
+  return m_htConfiguration;
+}
+
+void
+WifiNetDevice::SetVhtConfiguration (Ptr<VhtConfiguration> vhtConfiguration)
+{
+  m_vhtConfiguration = vhtConfiguration;
+}
+
+Ptr<VhtConfiguration>
+WifiNetDevice::GetVhtConfiguration (void) const
+{
+  return m_vhtConfiguration;
+}
+
+void
+WifiNetDevice::SetHeConfiguration (Ptr<HeConfiguration> heConfiguration)
+{
+  m_heConfiguration = heConfiguration;
+}
+
+Ptr<HeConfiguration>
+WifiNetDevice::GetHeConfiguration (void) const
+{
+  return m_heConfiguration;
+>>>>>>> origin
 }
 
 } //namespace ns3

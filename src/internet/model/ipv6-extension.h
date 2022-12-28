@@ -23,6 +23,7 @@
 
 #include <map>
 #include <list>
+#include <tuple>
 
 #include "ns3/object.h"
 #include "ns3/node.h"
@@ -316,7 +317,25 @@ protected:
   virtual void DoDispose ();
 
 private:
+
   /**
+<<<<<<< HEAD
+=======
+   * Key identifying a fragmented packet
+   */
+  typedef std::pair<Ipv6Address, uint32_t> FragmentKey_t;
+
+  /**
+   * Container for fragment timeouts.
+   */
+  typedef std::list< std::tuple <Time, FragmentKey_t, Ipv6Header > > FragmentsTimeoutsList_t;
+  /**
+   * Container Iterator for fragment timeouts.
+   */
+  typedef std::list< std::tuple <Time, FragmentKey_t, Ipv6Header > >::iterator FragmentsTimeoutsListI_t;
+
+  /**
+>>>>>>> origin
    * \ingroup ipv6HeaderExt
    *
    * \brief This class stores the fragments of a packet waiting to be rebuilt.
@@ -367,14 +386,16 @@ public:
     Ptr<Packet> GetPartialPacket () const;
 
     /**
-     * \brief Set the Timeout EventId.
+     * \brief Set the Timeout iterator.
+     * \param iter The iterator.
      */
-    void SetTimeoutEventId (EventId event);
+    void SetTimeoutIter (FragmentsTimeoutsListI_t iter);
 
     /**
-     * \brief Cancel the timeout event
+     * \brief Get the Timeout iterator.
+     * \returns The iterator.
      */
-    void CancelTimeout ();
+    FragmentsTimeoutsListI_t GetTimeoutIter ();
 
 private:
     /**
@@ -393,9 +414,9 @@ private:
     Ptr<Packet> m_unfragmentable;
 
     /**
-     * \brief Timeout handler event
+     * \brief Timeout iterator to "event" handler
      */
-    EventId m_timeoutEventId;
+    FragmentsTimeoutsListI_t m_timeoutIter;
   };
 
   /**
@@ -403,7 +424,7 @@ private:
    * \param key representing the packet fragments
    * \param ipHeader the IP header of the original packet
    */
-  void HandleFragmentsTimeout (std::pair<Ipv6Address, uint32_t> key, Ipv6Header ipHeader);
+  void HandleFragmentsTimeout (FragmentKey_t key, Ipv6Header ipHeader);
 
   /**
    * \brief Get the packet parts so far received.
@@ -413,6 +434,7 @@ private:
 
   /**
    * \brief Set the Timeout EventId.
+   * \param event The event.
    */
   void SetTimeoutEventId (EventId event);
 
@@ -424,12 +446,29 @@ private:
   /**
    * \brief Container for the packet fragments.
    */
-  typedef std::map<std::pair<Ipv6Address, uint32_t>, Ptr<Fragments> > MapFragments_t;
+  typedef std::map<FragmentKey_t, Ptr<Fragments> > MapFragments_t;
 
   /**
    * \brief The hash of fragmented packets.
    */
   MapFragments_t m_fragments;
+
+  /**
+   * \brief Set a new timeout "event" for a fragmented packet
+   * \param key the fragment identification
+   * \param ipHeader the IPv6 header of the fragmented packet
+   * \return an iterator to the inserted "event"
+   */
+  FragmentsTimeoutsListI_t SetTimeout (FragmentKey_t key, Ipv6Header ipHeader);
+
+  /**
+   * \brief Handles a fragmented packet timeout
+   */
+  void HandleTimeout (void);
+
+  FragmentsTimeoutsList_t m_timeoutEventList;  //!< Timeout "events" container
+  EventId m_timeoutEvent;  //!< Event for the next scheduled timeout
+  Time m_fragmentExpirationTimeout; //!< Expiration timeout
 };
 
 /**

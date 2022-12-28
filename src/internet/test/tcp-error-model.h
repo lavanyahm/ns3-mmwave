@@ -26,7 +26,14 @@
 namespace ns3 {
 
 /**
+<<<<<<< HEAD
  * \brief A general (TCP-aware) error model
+=======
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief A general (TCP-aware) error model.
+>>>>>>> origin
  *
  * The class is responsible to take away the IP and TCP header from the packet,
  * and then to interrogate the method ShouldDrop, dropping the packet accordingly
@@ -35,32 +42,74 @@ namespace ns3 {
 class TcpGeneralErrorModel : public ErrorModel
 {
 public:
+<<<<<<< HEAD
   static TypeId GetTypeId (void);
   TcpGeneralErrorModel ();
 
+=======
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
+  static TypeId GetTypeId (void);
+  TcpGeneralErrorModel ();
+
+  /**
+   * \brief Set the drop callback.
+   * \param cb The callback to be set.
+   */
+>>>>>>> origin
   void SetDropCallback (Callback<void, const Ipv4Header&, const TcpHeader&, Ptr<const Packet> > cb)
   {
     m_dropCallback = cb;
   }
 
 protected:
+<<<<<<< HEAD
+=======
+  /**
+   * \brief Check if the packet should be dropped.
+   * \param ipHeader The packet IPv4 header.
+   * \param tcpHeader The packet TCP header.
+   * \param packetSize The packet size.
+   * \returns True if the packet should be dropped.
+   */
+>>>>>>> origin
   virtual bool ShouldDrop (const Ipv4Header &ipHeader, const TcpHeader &tcpHeader,
                            uint32_t packetSize) = 0;
 
 
 private:
   virtual bool DoCorrupt (Ptr<Packet> p);
+<<<<<<< HEAD
   Callback<void, const Ipv4Header&, const TcpHeader&, Ptr<const Packet> > m_dropCallback;
 };
 
 /**
  * \brief An error model TCP aware: it drops the sequence number declared
+=======
+  Callback<void, const Ipv4Header&, const TcpHeader&, Ptr<const Packet> > m_dropCallback; //!< Drop callback.
+};
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief An error model TCP aware: it drops the sequence number declared.
+>>>>>>> origin
  *
  * \see AddSeqToKill
  */
 class TcpSeqErrorModel : public TcpGeneralErrorModel
 {
 public:
+<<<<<<< HEAD
+=======
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
+>>>>>>> origin
   static TypeId GetTypeId (void);
   TcpSeqErrorModel () : TcpGeneralErrorModel () { }
 
@@ -82,14 +131,25 @@ protected:
                            uint32_t packetSize);
 
 protected:
+<<<<<<< HEAD
   std::list<SequenceNumber32> m_seqToKill;
+=======
+  std::list<SequenceNumber32> m_seqToKill; //!< List of the sequence numbers to be dropped.
+>>>>>>> origin
 
 private:
   virtual void DoReset (void);
 };
 
 /**
+<<<<<<< HEAD
  * \brief Error model which drop packets with specified TCP flags
+=======
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief Error model which drop packets with specified TCP flags.
+>>>>>>> origin
  *
  * Set the flags with SetFlagToKill and the number of the packets with such flags
  * which should be killed.
@@ -101,6 +161,13 @@ private:
 class TcpFlagErrorModel : public TcpGeneralErrorModel
 {
 public:
+<<<<<<< HEAD
+=======
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
+>>>>>>> origin
   static TypeId GetTypeId (void);
   TcpFlagErrorModel ();
 
@@ -125,7 +192,11 @@ public:
    *
    * \param killNumber Specifies the number of times the packet should be killed
    */
+<<<<<<< HEAD
   void SetKillRepeat (int killNumber)
+=======
+  void SetKillRepeat (int16_t killNumber)
+>>>>>>> origin
   {
     m_killNumber = killNumber;
   }
@@ -135,8 +206,13 @@ protected:
                            uint32_t packetSize);
 
 protected:
+<<<<<<< HEAD
   TcpHeader::Flags_t m_flagsToKill;
   int m_killNumber;
+=======
+  TcpHeader::Flags_t m_flagsToKill; //!< Flags a packet should have to be dropped.
+  int16_t m_killNumber;  //!< The number of times the packet should be killed.
+>>>>>>> origin
 
 private:
   virtual void DoReset (void);

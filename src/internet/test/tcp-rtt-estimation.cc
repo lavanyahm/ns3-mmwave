@@ -20,13 +20,26 @@
 #include "tcp-general-test.h"
 #include "ns3/node.h"
 #include "ns3/log.h"
+<<<<<<< HEAD
 #include "tcp-error-model.h"
 
 namespace ns3 {
+=======
+#include "ns3/rtt-estimator.h"
+#include "tcp-error-model.h"
+
+using namespace ns3;
+>>>>>>> origin
 
 NS_LOG_COMPONENT_DEFINE ("TcpRttEstimationTestSuite");
 
 /**
+<<<<<<< HEAD
+=======
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+>>>>>>> origin
  * \brief Check Rtt calculations
  *
  * First check is that, for each ACK, we have a valid estimation of the RTT.
@@ -37,7 +50,17 @@ NS_LOG_COMPONENT_DEFINE ("TcpRttEstimationTestSuite");
 class TcpRttEstimationTest : public TcpGeneralTest
 {
 public:
+<<<<<<< HEAD
   TcpRttEstimationTest (const std::string &desc, bool enableTs, uint32_t dataPkt);
+=======
+  /**
+   * \brief Constructor.
+   * \param desc Test description.
+   * \param enableTs Enable TimeStamp option.
+   * \param pktCount Packet number.
+   */
+  TcpRttEstimationTest (const std::string &desc, bool enableTs, uint32_t pktCount);
+>>>>>>> origin
 
 protected:
   virtual Ptr<TcpSocketMsgBase> CreateReceiverSocket (Ptr<Node> node);
@@ -53,11 +76,19 @@ protected:
   virtual void ConfigureEnvironment ();
 
 private:
+<<<<<<< HEAD
   bool m_enableTs;
   bool m_rttChanged;
   SequenceNumber32 m_highestTxSeq;
   uint32_t m_pktCount;
   uint32_t m_dataCount;
+=======
+  bool m_enableTs;      //!< Enable TimeStamp option
+  bool m_rttChanged;    //!< True if RTT has changed.
+  SequenceNumber32 m_highestTxSeq;  //!< Highest sequence number sent.
+  uint32_t m_pktCount;  //!< Packet counter.
+  uint32_t m_dataCount; //!< Data counter.
+>>>>>>> origin
 };
 
 TcpRttEstimationTest::TcpRttEstimationTest (const std::string &desc, bool enableTs,
@@ -173,10 +204,32 @@ TcpRttEstimationTest::FinalChecks ()
   NS_TEST_ASSERT_MSG_EQ (m_rttChanged, true, "Rtt was not updated");
 }
 
+<<<<<<< HEAD
 //-----------------------------------------------------------------------------
 class TcpRttEstimationWithLossTest : public TcpRttEstimationTest
 {
 public:
+=======
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief Check Rtt calculations with packet losses.
+ *
+ * \see TcpRttEstimationTest
+ */
+class TcpRttEstimationWithLossTest : public TcpRttEstimationTest
+{
+public:
+  /**
+   * \brief Constructor.
+   * \param desc Test description.
+   * \param enableTs Enable TimeStamp option.
+   * \param pktCount Packet number.
+   * \param toDrop List of packet to drop.
+   */
+>>>>>>> origin
   TcpRttEstimationWithLossTest (const std::string &desc, bool enableTs,
                                 uint32_t pktCount, std::vector<uint32_t> toDrop);
 
@@ -184,7 +237,11 @@ protected:
   Ptr<ErrorModel> CreateReceiverErrorModel ();
 
 private:
+<<<<<<< HEAD
   std::vector<uint32_t> m_toDrop;
+=======
+  std::vector<uint32_t> m_toDrop; //!< Packets to drop.
+>>>>>>> origin
 };
 
 TcpRttEstimationWithLossTest::TcpRttEstimationWithLossTest (const std::string &desc,
@@ -212,9 +269,21 @@ TcpRttEstimationWithLossTest::CreateReceiverErrorModel ()
   return errorModel;
 }
 
+<<<<<<< HEAD
 //-----------------------------------------------------------------------------
 
 static class TcpRttEstimationTestSuite : public TestSuite
+=======
+
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief TCP RTT estimation TestSuite
+ */
+class TcpRttEstimationTestSuite : public TestSuite
+>>>>>>> origin
 {
 public:
   TcpRttEstimationTestSuite () : TestSuite ("tcp-rtt-estimation-test", UNIT)
@@ -265,7 +334,14 @@ public:
                  TestCase::QUICK);
   }
 
+<<<<<<< HEAD
 } g_tcpRttEstimationTestSuite;
 
 } // namespace ns3
+=======
+};
+
+static TcpRttEstimationTestSuite g_tcpRttEstimationTestSuite; //!< Static variable for test initialization
+
+>>>>>>> origin
 

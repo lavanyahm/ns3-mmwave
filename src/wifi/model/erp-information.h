@@ -21,10 +21,14 @@
 #ifndef ERP_INFORMATION_H
 #define ERP_INFORMATION_H
 
+<<<<<<< HEAD
 #include <stdint.h>
 #include <ostream>
 #include "ns3/buffer.h"
 #include "ns3/wifi-information-element.h"
+=======
+#include "wifi-information-element.h"
+>>>>>>> origin
 
 namespace ns3 {
 
@@ -38,8 +42,33 @@ class ErpInformation : public WifiInformationElement
 {
 public:
   ErpInformation ();
+<<<<<<< HEAD
   void SetErpSupported (uint8_t erpSupported);
   
+=======
+
+  // Implementations of pure virtual methods of WifiInformationElement
+  WifiInformationElementId ElementId () const;
+  uint8_t GetInformationFieldSize () const;
+  void SerializeInformationField (Buffer::Iterator start) const;
+  uint8_t DeserializeInformationField (Buffer::Iterator start,
+                                       uint8_t length);
+
+  /* This information element is a bit special in that it is only
+     included if the STA is an ERP STA. To support this we
+     override the Serialize and GetSerializedSize methods of
+     WifiInformationElement. */
+  Buffer::Iterator Serialize (Buffer::Iterator start) const;
+  uint16_t GetSerializedSize () const;
+
+  /**
+   * Set the ERP supported field.
+   *
+   * \param erpSupported the ERP supported field in the ErpInformation information element
+   */
+  void SetErpSupported (uint8_t erpSupported);
+
+>>>>>>> origin
   /**
    * Set the Barker_Preamble_Mode field in the ErpInformation information element.
    *
@@ -59,25 +88,38 @@ public:
    */
   void SetNonErpPresent (uint8_t nonErpPresent);
 
+<<<<<<< HEAD
   /*
+=======
+  /**
+>>>>>>> origin
    * Return the Barker_Preamble_Mode field in the ErpInformation information element.
    *
    * \return the Barker_Preamble_Mode field in the ErpInformation information element
    */
   uint8_t GetBarkerPreambleMode (void) const;
+<<<<<<< HEAD
   /*
+=======
+  /**
+>>>>>>> origin
    * Return the Use_Protection field in the ErpInformation information element.
    *
    * \return the Use_Protection field in the ErpInformation information element
    */
   uint8_t GetUseProtection (void) const;
+<<<<<<< HEAD
   /*
+=======
+  /**
+>>>>>>> origin
    * Return the Non_Erp_Present field in the ErpInformation information element.
    *
    * \return the Non_Erp_Present field in the ErpInformation information element
    */
   uint8_t GetNonErpPresent (void) const;
 
+<<<<<<< HEAD
   WifiInformationElementId ElementId () const;
   uint8_t GetInformationFieldSize () const;
   void SerializeInformationField (Buffer::Iterator start) const;
@@ -113,6 +155,25 @@ std::ostream &operator << (std::ostream &os, const ErpInformation &erpinformatio
 std::istream &operator >> (std::istream &is, ErpInformation &erpinformation);
 
 ATTRIBUTE_HELPER_HEADER (ErpInformation);
+=======
+
+private:
+  uint8_t m_erpInformation; ///< ERP information
+
+  /// This is used to decide whether this element should be added to the frame or not
+  bool m_erpSupported;
+};
+
+/**
+ * output stream output operator
+ *
+ * \param os output stream
+ * \param erpInformation the ERP Information
+ *
+ * \returns output stream
+ */
+std::ostream &operator << (std::ostream &os, const ErpInformation &erpInformation);
+>>>>>>> origin
 
 } //namespace ns3
 

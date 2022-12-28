@@ -18,6 +18,7 @@
  * Author: Nicola Baldo <nbaldo@cttc.es>
  */
 
+<<<<<<< HEAD
 #include <ns3/ptr.h>
 #include <ns3/object.h>
 #include <ns3/net-device.h>
@@ -29,6 +30,12 @@
 #include <ns3/spectrum-value.h>
 #include <ns3/antenna-model.h>
 
+=======
+#include "ns3/log.h"
+#include "ns3/spectrum-value.h"
+#include "ns3/mobility-model.h"
+#include "ns3/net-device.h"
+>>>>>>> origin
 #include "wifi-spectrum-phy-interface.h"
 #include "spectrum-wifi-phy.h"
 
@@ -61,7 +68,11 @@ WifiSpectrumPhyInterface::DoDispose (void)
   m_channel = 0;
 }
 
+<<<<<<< HEAD
 void WifiSpectrumPhyInterface::SetSpectrumWifiPhy (Ptr<SpectrumWifiPhy> spectrumWifiPhy)
+=======
+void WifiSpectrumPhyInterface::SetSpectrumWifiPhy (const Ptr<SpectrumWifiPhy> spectrumWifiPhy)
+>>>>>>> origin
 {
   m_spectrumWifiPhy = spectrumWifiPhy;
 }
@@ -73,25 +84,41 @@ WifiSpectrumPhyInterface::GetDevice () const
 }
 
 Ptr<MobilityModel>
+<<<<<<< HEAD
 WifiSpectrumPhyInterface::GetMobility ()
+=======
+WifiSpectrumPhyInterface::GetMobility () const
+>>>>>>> origin
 {
   return m_spectrumWifiPhy->GetMobility ();
 }
 
 void
+<<<<<<< HEAD
 WifiSpectrumPhyInterface::SetDevice (Ptr<NetDevice> d)
+=======
+WifiSpectrumPhyInterface::SetDevice (const Ptr<NetDevice> d)
+>>>>>>> origin
 {
   m_netDevice = d;
 }
 
 void
+<<<<<<< HEAD
 WifiSpectrumPhyInterface::SetMobility (Ptr<MobilityModel> m)
+=======
+WifiSpectrumPhyInterface::SetMobility (const Ptr<MobilityModel> m)
+>>>>>>> origin
 {
   m_spectrumWifiPhy->SetMobility (m);
 }
 
 void
+<<<<<<< HEAD
 WifiSpectrumPhyInterface::SetChannel (Ptr<SpectrumChannel> c)
+=======
+WifiSpectrumPhyInterface::SetChannel (const Ptr<SpectrumChannel> c)
+>>>>>>> origin
 {
   NS_LOG_FUNCTION (this << c);
   m_channel = c;
@@ -104,7 +131,11 @@ WifiSpectrumPhyInterface::GetRxSpectrumModel () const
 }
 
 Ptr<AntennaModel>
+<<<<<<< HEAD
 WifiSpectrumPhyInterface::GetRxAntenna (void)
+=======
+WifiSpectrumPhyInterface::GetRxAntenna (void) const
+>>>>>>> origin
 {
   NS_LOG_FUNCTION (this);
   return m_spectrumWifiPhy->GetRxAntenna ();
@@ -116,5 +147,8 @@ WifiSpectrumPhyInterface::StartRx (Ptr<SpectrumSignalParameters> params)
   m_spectrumWifiPhy->StartRx (params);
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin
 } //namespace ns3

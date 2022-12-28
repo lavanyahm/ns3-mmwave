@@ -21,20 +21,17 @@
 #ifndef ATHSTATS_HELPER_H
 #define ATHSTATS_HELPER_H
 
-#include <string>
-#include "ns3/object.h"
-#include "ns3/attribute.h"
-#include "ns3/object-factory.h"
-#include "ns3/node-container.h"
-#include "ns3/net-device-container.h"
-#include "ns3/nstime.h"
-#include "ns3/wifi-phy.h"
-#include "ns3/double.h"
-#include "ns3/mac48-address.h"
+#include "ns3/wifi-phy-state.h"
+#include "ns3/wifi-phy-common.h"
 
 namespace ns3 {
 
 class NetDevice;
+class NodeContainer;
+class NetDeviceContainer;
+class Packet;
+class Mac48Address;
+class WifiMode;
 
 /**
  * @brief create AthstatsWifiTraceSink instances and connect them to wifi devices
@@ -45,13 +42,34 @@ class AthstatsHelper
 {
 public:
   AthstatsHelper ();
+  /**
+   * Enable athstats
+   * \param filename the file name
+   * \param nodeid the node ID
+   * \param deviceid the device ID
+   */
   void EnableAthstats (std::string filename,  uint32_t nodeid, uint32_t deviceid);
+  /**
+   * Enable athstats
+   * \param filename the file name
+   * \param nd the device
+   */
   void EnableAthstats (std::string filename, Ptr<NetDevice> nd);
+  /**
+   * Enable athstats
+   * \param filename the file name
+   * \param d the collection of devices
+   */
   void EnableAthstats (std::string filename, NetDeviceContainer d);
+  /**
+   * Enable athstats
+   * \param filename the file name
+   * \param n the collection of nodes
+   */
   void EnableAthstats (std::string filename, NodeContainer n);
 
 private:
-  Time m_interval;
+  Time m_interval; ///< interval
 };
 
 
@@ -60,7 +78,7 @@ private:
  *
  * The AthstatsWifiTraceSink class is a trace sink to be connected to several of the traces
  * available within a wifi device. The purpose of AthstatsWifiTraceSink is to
- * mimic the behavior of the athstats tool distributed wih the madwifi
+ * mimic the behavior of the athstats tool distributed with the madwifi
  * driver. In particular, the reproduced behavior is that obtained
  * when executing athstats without parameters: a report written in
  * text format is produced every fixed interval, based on the events
@@ -79,6 +97,10 @@ private:
 class AthstatsWifiTraceSink  : public Object
 {
 public:
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
   static TypeId GetTypeId (void);
   AthstatsWifiTraceSink ();
   virtual ~AthstatsWifiTraceSink ();
@@ -86,7 +108,7 @@ public:
   /**
    * function to be called when the net device transmits a packet
    *
-   * @param context
+   * @param context the calling context
    * @param p the packet being transmitted
    */
   void DevTxTrace (std::string context, Ptr<const Packet> p);
@@ -94,7 +116,7 @@ public:
   /**
    * function to be called when the net device receives a packet
    *
-   * @param context
+   * @param context the calling context
    * @param p the packet being received
    */
   void DevRxTrace (std::string context, Ptr<const Packet> p);
@@ -103,7 +125,7 @@ public:
    * Function to be called when a RTS frame transmission by the considered
    * device has failed
    *
-   * @param context
+   * @param context the calling context
    * @param address the MAC address of the remote station
    */
   void TxRtsFailedTrace (std::string context, Mac48Address address);
@@ -112,7 +134,7 @@ public:
    * Function to be called when a data frame transmission by the considered
    * device has failed
    *
-   * @param context
+   * @param context the calling context
    * @param address the MAC address of the remote station
    */
   void TxDataFailedTrace (std::string context, Mac48Address address);
@@ -121,7 +143,7 @@ public:
    * Function to be called when the transmission of a RTS frame has
    * exceeded the retry limit
    *
-   * @param context
+   * @param context the calling context
    * @param address the MAC address of the remote station
    */
   void TxFinalRtsFailedTrace (std::string context, Mac48Address address);
@@ -130,7 +152,7 @@ public:
    * Function to be called when the transmission of a data frame has
    * exceeded the retry limit
    *
-   * @param context
+   * @param context the calling context
    * @param address the MAC address of the remote station
    */
   void TxFinalDataFailedTrace (std::string context, Mac48Address address);
@@ -139,22 +161,22 @@ public:
    * Function to be called when the PHY layer  of the considered
    * device receives a frame
    *
-   * @param context
-   * @param packet
-   * @param snr
-   * @param mode
-   * @param preamble
+   * @param context the calling context
+   * @param packet the packet
+   * @param snr the SNR in linear scale
+   * @param mode the WifiMode
+   * @param preamble the wifi preamble
    */
-  void PhyRxOkTrace (std::string context, Ptr<const Packet> packet, double snr, WifiMode mode, enum WifiPreamble preamble);
+  void PhyRxOkTrace (std::string context, Ptr<const Packet> packet, double snr, WifiMode mode, WifiPreamble preamble);
 
   /**
    * Function to be called when a frame reception by the PHY
    * layer  of the considered device resulted in an error due to a failure in the CRC check of
    * the frame
    *
-   * @param context
-   * @param packet
-   * @param snr
+   * @param context the calling context
+   * @param packet the packet
+   * @param snr the SNR in linear scale
    */
   void PhyRxErrorTrace (std::string context, Ptr<const Packet> packet, double snr);
 
@@ -162,11 +184,11 @@ public:
    * Function to be called when a frame is being transmitted by the
    * PHY layer of the considered device
    *
-   * @param context
-   * @param packet
-   * @param mode
-   * @param preamble
-   * @param txPower
+   * @param context the calling context
+   * @param packet the packet
+   * @param mode the WifiMode
+   * @param preamble the wifi preamble
+   * @param txPower the transmit power level
    */
   void PhyTxTrace (std::string context, Ptr<const Packet> packet, WifiMode mode, WifiPreamble preamble, uint8_t txPower);
 
@@ -174,12 +196,12 @@ public:
    * Function to be called when the PHY layer of the considered device
    * changes state
    *
-   * @param context
-   * @param start
-   * @param duration
-   * @param state
+   * @param context the calling context
+   * @param start the time at which the state changed
+   * @param duration the duration of the state
+   * @param state the PHY layer state
    */
-  void PhyStateTrace (std::string context, Time start, Time duration, enum WifiPhy::State state);
+  void PhyStateTrace (std::string context, Time start, Time duration, WifiPhyState state);
 
   /**
    * Open a file for output
@@ -190,21 +212,23 @@ public:
 
 
 private:
+  /// Write status function
   void WriteStats ();
+  /// Reset counters function
   void ResetCounters ();
 
-  uint32_t m_txCount;
-  uint32_t m_rxCount;
-  uint32_t m_shortRetryCount;
-  uint32_t m_longRetryCount;
-  uint32_t m_exceededRetryCount;
-  uint32_t m_phyRxOkCount;
-  uint32_t m_phyRxErrorCount;
-  uint32_t m_phyTxCount;
+  uint32_t m_txCount;            ///< transmit count
+  uint32_t m_rxCount;            ///< receive count
+  uint32_t m_shortRetryCount;    ///< short retry count
+  uint32_t m_longRetryCount;     ///< long retry count
+  uint32_t m_exceededRetryCount; ///< exceeded retry count
+  uint32_t m_phyRxOkCount;       ///< PHY receive OK count
+  uint32_t m_phyRxErrorCount;    ///< PHY receive error count
+  uint32_t m_phyTxCount;         ///< PHY transmit count
 
-  std::ofstream *m_writer;
+  std::ofstream *m_writer; ///< output stream
 
-  Time m_interval;
+  Time m_interval; ///< interval
 
 }; //class AthstatsWifiTraceSink
 

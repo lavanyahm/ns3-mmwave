@@ -23,6 +23,7 @@
 
 #include <stdint.h>
 #include <list>
+#include <unordered_map>
 
 #include "ns3/packet.h"
 #include "ns3/nstime.h"
@@ -30,7 +31,6 @@
 #include "ns3/ipv6-address.h"
 #include "ns3/ptr.h"
 #include "ns3/timer.h"
-#include "ns3/sgi-hashmap.h"
 #include "ns3/output-stream-wrapper.h"
 
 namespace ns3
@@ -39,6 +39,10 @@ namespace ns3
 class NetDevice;
 class Ipv6Interface;
 class Ipv6Header;
+<<<<<<< HEAD
+=======
+class Icmpv6L4Protocol;
+>>>>>>> origin
 
 /**
  * \ingroup ipv6
@@ -79,6 +83,7 @@ public:
 
   /**
    * \brief Get the Ipv6Interface associated with this cache.
+   * \returns The Ipv6Interface.
    */
   Ptr<Ipv6Interface> GetInterface () const;
 
@@ -87,7 +92,14 @@ public:
    * \param dst destination address.
    * \return the entry if found, 0 otherwise.
    */
-  NdiscCache::Entry* Lookup (Ipv6Address dst);
+  virtual NdiscCache::Entry* Lookup (Ipv6Address dst);
+
+  /**
+   * \brief Lookup in the cache for a MAC address.
+   * \param dst destination MAC address.
+   * \return a list of matching entries.
+   */
+  std::list<NdiscCache::Entry*> LookupInverse (Address dst);
 
   /**
    * \brief Lookup in the cache for a MAC address.
@@ -101,7 +113,7 @@ public:
    * \param to address to add
    * \return an new Entry
    */
-  NdiscCache::Entry* Add (Ipv6Address to);
+  virtual NdiscCache::Entry* Add (Ipv6Address to);
 
   /**
    * \brief Delete an entry.
@@ -130,8 +142,9 @@ public:
    * \brief Set the device and interface.
    * \param device the device
    * \param interface the IPv6 interface
+   * \param icmpv6 the ICMPv6 protocol
    */
-  void SetDevice (Ptr<NetDevice> device, Ptr<Ipv6Interface> interface);
+  void SetDevice (Ptr<NetDevice> device, Ptr<Ipv6Interface> interface, Ptr<Icmpv6L4Protocol> icmpv6);
 
   /**
    * \brief Print the NDISC cache entries
@@ -158,6 +171,8 @@ public:
      * \param nd The NdiscCache this entry belongs to.
      */
     Entry (NdiscCache* nd);
+
+    virtual ~Entry() = default;
 
     /**
      * \brief Changes the state to this entry to INCOMPLETE.
@@ -338,6 +353,25 @@ public:
      * \param ipv6Address IPv6 address
      */
     void SetIpv6Address (Ipv6Address ipv6Address);
+    
+    /**
+     * \brief Get the IPv6 address.
+     * \returns The IPv6 address
+     */
+    Ipv6Address GetIpv6Address (void) const;
+
+    /**
+     * \brief Print this entry to the given output stream.
+     *
+     * \param os the output stream to which this Ipv6Address is printed
+     */
+    void Print (std::ostream &os) const;
+
+protected:
+    /**
+     * \brief the NdiscCache associated.
+     */
+    NdiscCache* m_ndCache;
 
 private:
     /**
@@ -362,11 +396,6 @@ private:
      * \brief The state of the entry.
      */
     NdiscCacheEntryState_e m_state;
-
-    /**
-     * \brief the NdiscCache associated.
-     */
-    NdiscCache* m_ndCache;
 
     /**
      * \brief The MAC address.
@@ -399,15 +428,28 @@ private:
     uint8_t m_nsRetransmit;
   };
 
-private:
+protected:
+  /**
+   * \brief Dispose this object.
+   */
+  void DoDispose ();
+
   /**
    * \brief Neighbor Discovery Cache container
    */
-  typedef sgi::hash_map<Ipv6Address, NdiscCache::Entry *, Ipv6AddressHash> Cache;
+  typedef std::unordered_map<Ipv6Address, NdiscCache::Entry *, Ipv6AddressHash> Cache;
   /**
    * \brief Neighbor Discovery Cache container iterator
    */
-  typedef sgi::hash_map<Ipv6Address, NdiscCache::Entry *, Ipv6AddressHash>::iterator CacheI;
+  typedef std::unordered_map<Ipv6Address, NdiscCache::Entry *, Ipv6AddressHash>::iterator CacheI;
+
+  /**
+   * \brief A list of Entry.
+   */
+  Cache m_ndCache;
+
+
+private:
 
   /**
    * \brief Copy constructor.
@@ -425,11 +467,6 @@ private:
   NdiscCache& operator= (NdiscCache const &);
 
   /**
-   * \brief Dispose this object.
-   */
-  void DoDispose ();
-
-  /**
    * \brief The NetDevice.
    */
   Ptr<NetDevice> m_device;
@@ -440,15 +477,25 @@ private:
   Ptr<Ipv6Interface> m_interface;
 
   /**
-   * \brief A list of Entry.
+   * \brief the icmpv6 L4 protocol for this cache.
    */
-  Cache m_ndCache;
+  Ptr<Icmpv6L4Protocol> m_icmpv6;
 
   /**
    * \brief Max number of packet stored in m_waiting.
    */
   uint32_t m_unresQlen;
 };
+
+/**
+ * \brief Stream insertion operator.
+ *
+ * \param os the reference to the output stream
+ * \param entry the NdiscCache::Entry
+ * \returns the reference to the output stream
+ */
+std::ostream & operator << (std::ostream& os, NdiscCache::Entry const& entry);
+
 
 } /* namespace ns3 */
 

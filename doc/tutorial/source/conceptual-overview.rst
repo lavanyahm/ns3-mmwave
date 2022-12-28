@@ -1,6 +1,8 @@
 .. include:: replace.txt
 .. highlight:: cpp
 
+.. _Conceptual Overview:
+
 Conceptual Overview
 -------------------
 
@@ -797,7 +799,7 @@ in the first example program will schedule an explicit stop at 11 seconds:
      return 0;
    }
 
-The above wil not actually change the behavior of this program, since
+The above will not actually change the behavior of this program, since
 this particular simulation naturally ends after 10 seconds.  But if you 
 were to change the stop time in the above statement from 11 seconds to 1 
 second, you would notice that the simulation stops before any output is 
@@ -869,7 +871,7 @@ Ns-3 Source Code
 Now that you have used some of the |ns3| helpers you may want to 
 have a look at some of the source code that implements that functionality.
 The most recent code can be browsed on our web server at the following link:
-http://code.nsnam.org/ns-3-dev.  There, you will see the Mercurial
+https://gitlab.com/nsnam/ns-3-dev.git.  There, you will see the Git/GitLab
 summary page for our |ns3| development tree.
 
 At the top of the page, you will see a number of links,

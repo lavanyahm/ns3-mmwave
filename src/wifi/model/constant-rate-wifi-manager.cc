@@ -18,10 +18,11 @@
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
 
-#include "constant-rate-wifi-manager.h"
 #include "ns3/string.h"
-#include "ns3/assert.h"
 #include "ns3/log.h"
+#include "constant-rate-wifi-manager.h"
+#include "wifi-tx-vector.h"
+#include "wifi-utils.h"
 
 #define Min(a,b) ((a < b) ? a : b)
 
@@ -95,10 +96,10 @@ ConstantRateWifiManager::DoReportRtsOk (WifiRemoteStation *st,
 }
 
 void
-ConstantRateWifiManager::DoReportDataOk (WifiRemoteStation *st,
-                                         double ackSnr, WifiMode ackMode, double dataSnr)
+ConstantRateWifiManager::DoReportDataOk (WifiRemoteStation *st, double ackSnr, WifiMode ackMode,
+                                         double dataSnr, uint16_t dataChannelWidth, uint8_t dataNss)
 {
-  NS_LOG_FUNCTION (this << st << ackSnr << ackMode << dataSnr);
+  NS_LOG_FUNCTION (this << st << ackSnr << ackMode << dataSnr << dataChannelWidth << +dataNss);
 }
 
 void
@@ -117,21 +118,23 @@ WifiTxVector
 ConstantRateWifiManager::DoGetDataTxVector (WifiRemoteStation *st)
 {
   NS_LOG_FUNCTION (this << st);
+<<<<<<< HEAD
   return WifiTxVector (m_dataMode, GetDefaultTxPowerLevel (), GetLongRetryCount (st), GetShortGuardInterval (st), Min(GetNumberOfTransmitAntennas (), GetNumberOfSupportedRxAntennas (st)), 0, GetChannelWidth (st), GetAggregation (st), false);
+=======
+  uint8_t nss = Min (GetMaxNumberOfTransmitStreams (), GetNumberOfSupportedStreams (st));
+  if (m_dataMode.GetModulationClass () == WIFI_MOD_CLASS_HT)
+    {
+      nss = 1 + (m_dataMode.GetMcsValue () / 8);
+    }
+  return WifiTxVector (m_dataMode, GetDefaultTxPowerLevel (), GetPreambleForTransmission (m_dataMode.GetModulationClass (), GetShortPreambleEnabled (), UseGreenfieldForDestination (GetAddress (st))), ConvertGuardIntervalToNanoSeconds (m_dataMode, GetShortGuardIntervalSupported (st), NanoSeconds (GetGuardInterval (st))), GetNumberOfAntennas (), nss, 0, GetChannelWidthForTransmission (m_dataMode, GetChannelWidth (st)), GetAggregation (st));
+>>>>>>> origin
 }
 
 WifiTxVector
 ConstantRateWifiManager::DoGetRtsTxVector (WifiRemoteStation *st)
 {
   NS_LOG_FUNCTION (this << st);
-  return WifiTxVector (m_ctlMode, GetDefaultTxPowerLevel (), GetShortRetryCount (st), GetShortGuardInterval (st), 1, 0, GetChannelWidth (st), GetAggregation (st), false);
-}
-
-bool
-ConstantRateWifiManager::IsLowLatency (void) const
-{
-  NS_LOG_FUNCTION (this);
-  return true;
+  return WifiTxVector (m_ctlMode, GetDefaultTxPowerLevel (), GetPreambleForTransmission (m_ctlMode.GetModulationClass (), GetShortPreambleEnabled (), UseGreenfieldForDestination (GetAddress (st))), ConvertGuardIntervalToNanoSeconds (m_ctlMode, GetShortGuardIntervalSupported (st), NanoSeconds (GetGuardInterval (st))), 1, 1, 0, GetChannelWidthForTransmission (m_ctlMode, GetChannelWidth (st)), GetAggregation (st));
 }
 
 } //namespace ns3

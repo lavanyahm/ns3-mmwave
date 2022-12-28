@@ -49,7 +49,7 @@ int main (int argc, char *argv[])
   std::string bottleNeckLinkBw = "1Mbps";
   std::string bottleNeckLinkDelay = "50ms";
 
-  CommandLine cmd;
+  CommandLine cmd (__FILE__);
   cmd.AddValue ("nLeaf",     "Number of left and right side leaf nodes", nLeaf);
   cmd.AddValue ("maxPackets","Max Packets allowed in the device queue", maxPackets);
   cmd.AddValue ("queueDiscLimitPackets","Max Packets allowed in the queue disc", queueDiscLimitPackets);
@@ -70,6 +70,7 @@ int main (int argc, char *argv[])
   Config::SetDefault ("ns3::OnOffApplication::PacketSize", UintegerValue (pktSize));
   Config::SetDefault ("ns3::OnOffApplication::DataRate", StringValue (appDataRate));
 
+<<<<<<< HEAD
   Config::SetDefault ("ns3::Queue::Mode", StringValue ("QUEUE_MODE_PACKETS"));
   Config::SetDefault ("ns3::Queue::MaxPackets", UintegerValue (maxPackets));
 
@@ -83,6 +84,22 @@ int main (int argc, char *argv[])
   {
     Config::SetDefault ("ns3::RedQueueDisc::Mode", StringValue ("QUEUE_MODE_BYTES"));
     Config::SetDefault ("ns3::RedQueueDisc::QueueLimit", UintegerValue (queueDiscLimitPackets * pktSize));
+=======
+  Config::SetDefault ("ns3::DropTailQueue<Packet>::MaxSize",
+                      QueueSizeValue (QueueSize (QueueSizeUnit::PACKETS, maxPackets)));
+
+  if (!modeBytes)
+  {
+    Config::SetDefault ("ns3::RedQueueDisc::MaxSize",
+                        QueueSizeValue (QueueSize (QueueSizeUnit::PACKETS, queueDiscLimitPackets)));
+    Config::SetDefault ("ns3::PfifoFastQueueDisc::MaxSize",
+                        QueueSizeValue (QueueSize (QueueSizeUnit::PACKETS, queueDiscLimitPackets)));
+  }
+  else 
+  {
+    Config::SetDefault ("ns3::RedQueueDisc::MaxSize",
+                        QueueSizeValue (QueueSize (QueueSizeUnit::BYTES, queueDiscLimitPackets * pktSize)));
+>>>>>>> origin
     minTh *= pktSize;
     maxTh *= pktSize;
   }
@@ -166,7 +183,7 @@ int main (int argc, char *argv[])
   std::cout << "Running the simulation" << std::endl;
   Simulator::Run ();
 
-  uint32_t totalRxBytesCounter = 0;
+  uint64_t totalRxBytesCounter = 0;
   for (uint32_t i = 0; i < sinkApps.GetN (); i++)
     {
       Ptr <Application> app = sinkApps.Get (i);

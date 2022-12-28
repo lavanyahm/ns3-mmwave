@@ -24,13 +24,19 @@
 #include <ns3/mac16-address.h>
 #include <ns3/mac64-address.h>
 #include <ns3/log.h>
+#include <vector>
 
 
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("lr-wpan-packet-test");
 
-// This is an example TestCase.
+/**
+ * \ingroup lr-wpan-test
+ * \ingroup tests
+ *
+ * \brief LrWpan header and trailer Test
+ */
 class LrWpanPacketTestCase : public TestCase
 {
 public:
@@ -79,9 +85,9 @@ LrWpanPacketTestCase::DoRun (void)
 
   // Test serialization and deserialization
   uint32_t size = p->GetSerializedSize ();
-  uint8_t buffer[size];
-  p->Serialize (buffer, size);
-  Ptr<Packet> p2 = Create<Packet> (buffer, size, true);
+  std::vector<uint8_t> buffer (size);
+  p->Serialize (buffer.data (), size);
+  Ptr<Packet> p2 = Create<Packet> (buffer.data (), size, true);
 
 
   p2->Print (std::cout);
@@ -104,7 +110,12 @@ LrWpanPacketTestCase::DoRun (void)
 
 }
 
-// ==============================================================================
+/**
+ * \ingroup lr-wpan-test
+ * \ingroup tests
+ *
+ * \brief LrWpan header and trailer TestSuite
+ */
 class LrWpanPacketTestSuite : public TestSuite
 {
 public:
@@ -117,4 +128,4 @@ LrWpanPacketTestSuite::LrWpanPacketTestSuite ()
   AddTestCase (new LrWpanPacketTestCase, TestCase::QUICK);
 }
 
-static LrWpanPacketTestSuite lrWpanPacketTestSuite;
+static LrWpanPacketTestSuite g_lrWpanPacketTestSuite; //!< Static variable for test initialization

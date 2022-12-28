@@ -22,11 +22,19 @@
 #ifndef WIFI_SPECTRUM_SIGNAL_PARAMETERS_H
 #define WIFI_SPECTRUM_SIGNAL_PARAMETERS_H
 
+<<<<<<< HEAD
 #include <ns3/spectrum-signal-parameters.h>
 
 namespace ns3 {
 
 class Packet;
+=======
+#include "ns3/spectrum-signal-parameters.h"
+
+namespace ns3 {
+
+class WifiPpdu;
+>>>>>>> origin
 
 /**
  * \ingroup wifi
@@ -36,8 +44,12 @@ class Packet;
 struct WifiSpectrumSignalParameters : public SpectrumSignalParameters
 {
 
+<<<<<<< HEAD
   // inherited from SpectrumSignalParameters
   virtual Ptr<SpectrumSignalParameters> Copy ();
+=======
+  Ptr<SpectrumSignalParameters> Copy () override;
+>>>>>>> origin
 
   /**
    * default constructor
@@ -46,6 +58,7 @@ struct WifiSpectrumSignalParameters : public SpectrumSignalParameters
 
   /**
    * copy constructor
+<<<<<<< HEAD
    */
   WifiSpectrumSignalParameters (const WifiSpectrumSignalParameters& p);
 
@@ -53,6 +66,14 @@ struct WifiSpectrumSignalParameters : public SpectrumSignalParameters
    * The packet being transmitted with this signal
    */
   Ptr<Packet> packet;
+=======
+   *
+   * \param p the wifi spectrum signal parameters
+   */
+  WifiSpectrumSignalParameters (const WifiSpectrumSignalParameters& p);
+
+  Ptr<WifiPpdu> ppdu;                  ///< The PPDU being transmitted
+>>>>>>> origin
 };
 
 }  // namespace ns3

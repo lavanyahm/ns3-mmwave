@@ -76,7 +76,11 @@ int main (int argc, char **argv)
   bool showPings = false;
   std::string SplitHorizon ("PoisonReverse");
 
+<<<<<<< HEAD
   CommandLine cmd;
+=======
+  CommandLine cmd (__FILE__);
+>>>>>>> origin
   cmd.AddValue ("verbose", "turn on log components", verbose);
   cmd.AddValue ("printRoutingTables", "Print routing tables at 30, 60 and 90 seconds", printRoutingTables);
   cmd.AddValue ("showPings", "Show Ping6 reception", showPings);

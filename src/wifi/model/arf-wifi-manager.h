@@ -21,6 +21,7 @@
 #ifndef ARF_WIFI_MANAGER_H
 #define ARF_WIFI_MANAGER_H
 
+#include "ns3/traced-value.h"
 #include "wifi-remote-station-manager.h"
 
 namespace ns3 {
@@ -40,13 +41,23 @@ namespace ns3 {
  * the time-based timer could be easily replaced with a packet-based
  * timer.)
  *
+<<<<<<< HEAD
  * This RAA does not support HT or VHT modes and will error exit
  * if the user tries to configure this RAA with a Wi-Fi MAC that
  * has VhtSupported or HtSupported set.
+=======
+ * This RAA does not support HT modes and will error
+ * exit if the user tries to configure this RAA with a Wi-Fi MAC
+ * that supports 802.11n or higher.
+>>>>>>> origin
  */
 class ArfWifiManager : public WifiRemoteStationManager
 {
 public:
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
   static TypeId GetTypeId (void);
   ArfWifiManager ();
   virtual ~ArfWifiManager ();
@@ -56,6 +67,7 @@ public:
   virtual void SetVhtSupported (bool enable);
 
 private:
+<<<<<<< HEAD
   //overriden from base class
   virtual WifiRemoteStation * DoCreateStation (void) const;
   virtual void DoReportRxOk (WifiRemoteStation *station,
@@ -71,9 +83,28 @@ private:
   virtual WifiTxVector DoGetDataTxVector (WifiRemoteStation *station);
   virtual WifiTxVector DoGetRtsTxVector (WifiRemoteStation *station);
   virtual bool IsLowLatency (void) const;
+=======
+  // Overridden from base class.
+  void DoInitialize (void);
+  WifiRemoteStation * DoCreateStation (void) const;
+  void DoReportRxOk (WifiRemoteStation *station,
+                     double rxSnr, WifiMode txMode);
+  void DoReportRtsFailed (WifiRemoteStation *station);
+  void DoReportDataFailed (WifiRemoteStation *station);
+  void DoReportRtsOk (WifiRemoteStation *station,
+                      double ctsSnr, WifiMode ctsMode, double rtsSnr);
+  void DoReportDataOk (WifiRemoteStation *station, double ackSnr, WifiMode ackMode,
+                       double dataSnr, uint16_t dataChannelWidth, uint8_t dataNss);
+  void DoReportFinalRtsFailed (WifiRemoteStation *station);
+  void DoReportFinalDataFailed (WifiRemoteStation *station);
+  WifiTxVector DoGetDataTxVector (WifiRemoteStation *station);
+  WifiTxVector DoGetRtsTxVector (WifiRemoteStation *station);
+>>>>>>> origin
 
-  uint32_t m_timerThreshold;
-  uint32_t m_successThreshold;
+  uint32_t m_timerThreshold;   ///< timer threshold
+  uint32_t m_successThreshold; ///< success threshold
+
+  TracedValue<uint64_t> m_currentRate; //!< Trace rate changes
 };
 
 } //namespace ns3

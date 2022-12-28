@@ -18,9 +18,8 @@
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
 
-#include "supported-rates.h"
-#include "ns3/assert.h"
 #include "ns3/log.h"
+#include "supported-rates.h"
 
 namespace ns3 {
 
@@ -28,6 +27,10 @@ NS_LOG_COMPONENT_DEFINE ("SupportedRates");
 
 #define BSS_MEMBERSHIP_SELECTOR_HT_PHY 127
 #define BSS_MEMBERSHIP_SELECTOR_VHT_PHY 126
+<<<<<<< HEAD
+=======
+#define BSS_MEMBERSHIP_SELECTOR_HE_PHY 125
+>>>>>>> origin
 
 SupportedRates::SupportedRates ()
   : extended (this),
@@ -56,7 +59,7 @@ SupportedRates::operator= (const SupportedRates& rates)
 }
 
 void
-SupportedRates::AddSupportedRate (uint32_t bs)
+SupportedRates::AddSupportedRate (uint64_t bs)
 {
   NS_LOG_FUNCTION (this << bs);
   NS_ASSERT_MSG (IsBssMembershipSelectorRate (bs) == false, "Invalid rate");
@@ -85,14 +88,24 @@ SupportedRates::AddSupportedRate (uint32_t bs)
       m_nRates++;
       NS_LOG_DEBUG ("add rate=" << bs << ", n rates=" << (uint32_t)m_nRates);
     }
+<<<<<<< HEAD
+=======
+  m_rates[m_nRates] = static_cast<uint8_t> (bs / 500000);
+  m_nRates++;
+  NS_LOG_DEBUG ("add rate=" << bs << ", n rates=" << +m_nRates);
+>>>>>>> origin
 }
 
 void
-SupportedRates::SetBasicRate (uint32_t bs)
+SupportedRates::SetBasicRate (uint64_t bs)
 {
   NS_LOG_FUNCTION (this << bs);
   NS_ASSERT_MSG (IsBssMembershipSelectorRate (bs) == false, "Invalid rate");
+<<<<<<< HEAD
   uint8_t rate = bs / 500000;
+=======
+  uint8_t rate = static_cast<uint8_t> (bs / 500000);
+>>>>>>> origin
   for (uint8_t i = 0; i < m_nRates; i++)
     {
       if ((rate | 0x80) == m_rates[i])
@@ -101,7 +114,7 @@ SupportedRates::SetBasicRate (uint32_t bs)
         }
       if (rate == m_rates[i])
         {
-          NS_LOG_DEBUG ("set basic rate=" << bs << ", n rates=" << (uint32_t)m_nRates);
+          NS_LOG_DEBUG ("set basic rate=" << bs << ", n rates=" << +m_nRates);
           m_rates[i] |= 0x80;
           return;
         }
@@ -111,6 +124,7 @@ SupportedRates::SetBasicRate (uint32_t bs)
 }
 
 void
+<<<<<<< HEAD
 SupportedRates::AddBssMembershipSelectorRate (uint32_t bs)
 {
   NS_LOG_FUNCTION (this << bs);
@@ -136,6 +150,33 @@ SupportedRates::IsBasicRate (uint32_t bs) const
 {
   NS_LOG_FUNCTION (this << bs);
   uint8_t rate = (bs / 500000) | 0x80;
+=======
+SupportedRates::AddBssMembershipSelectorRate (uint64_t bs)
+{
+  NS_LOG_FUNCTION (this << bs);
+  NS_ASSERT_MSG (bs == BSS_MEMBERSHIP_SELECTOR_HT_PHY ||
+ 	         bs == BSS_MEMBERSHIP_SELECTOR_VHT_PHY ||
+ 	         bs == BSS_MEMBERSHIP_SELECTOR_HE_PHY,
+                 "Value " << bs << " not a BSS Membership Selector");
+  uint8_t rate = static_cast<uint8_t> (bs / 500000);
+  for (uint8_t i = 0; i < m_nRates; i++)
+    {
+      if (rate == m_rates[i])
+        {
+          return;
+        }
+    }
+  m_rates[m_nRates] = rate;
+  NS_LOG_DEBUG ("add BSS membership selector rate " << bs << " as rate " << +rate);
+  m_nRates++;
+}
+
+bool
+SupportedRates::IsBasicRate (uint64_t bs) const
+{
+  NS_LOG_FUNCTION (this << bs);
+  uint8_t rate = static_cast<uint8_t> (bs / 500000) | 0x80;
+>>>>>>> origin
   for (uint8_t i = 0; i < m_nRates; i++)
     {
       if (rate == m_rates[i])
@@ -147,10 +188,14 @@ SupportedRates::IsBasicRate (uint32_t bs) const
 }
 
 bool
-SupportedRates::IsSupportedRate (uint32_t bs) const
+SupportedRates::IsSupportedRate (uint64_t bs) const
 {
   NS_LOG_FUNCTION (this << bs);
+<<<<<<< HEAD
   uint8_t rate = bs / 500000;
+=======
+  uint8_t rate = static_cast<uint8_t> (bs / 500000);
+>>>>>>> origin
   for (uint8_t i = 0; i < m_nRates; i++)
     {
       if (rate == m_rates[i]
@@ -163,10 +208,19 @@ SupportedRates::IsSupportedRate (uint32_t bs) const
 }
 
 bool
+<<<<<<< HEAD
 SupportedRates::IsBssMembershipSelectorRate (uint32_t bs) const
 {
   NS_LOG_FUNCTION (this << bs);
   if ( (bs & 0x7f) == BSS_MEMBERSHIP_SELECTOR_HT_PHY || (bs & 0x7f) == BSS_MEMBERSHIP_SELECTOR_VHT_PHY)
+=======
+SupportedRates::IsBssMembershipSelectorRate (uint64_t bs) const
+{
+  NS_LOG_FUNCTION (this << bs);
+  if ((bs & 0x7f) == BSS_MEMBERSHIP_SELECTOR_HT_PHY
+      || (bs & 0x7f) == BSS_MEMBERSHIP_SELECTOR_VHT_PHY
+      || (bs & 0x7f) == BSS_MEMBERSHIP_SELECTOR_HE_PHY)
+>>>>>>> origin
     {
       return true;
     }
@@ -309,14 +363,6 @@ ExtendedSupportedRatesIE::DeserializeInformationField (Buffer::Iterator start,
   return length;
 }
 
-/**
- * Serialize SupportedRates to the given ostream.
- *
- * \param os
- * \param rates
- *
- * \return std::ostream
- */
 std::ostream &operator << (std::ostream &os, const SupportedRates &rates)
 {
   os << "[";

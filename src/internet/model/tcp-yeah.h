@@ -27,8 +27,13 @@
 #ifndef TCPYEAH_H
 #define TCPYEAH_H
 
+<<<<<<< HEAD
 #include "ns3/tcp-congestion-ops.h"
 #include "ns3/tcp-scalable.h"
+=======
+#include "ns3/tcp-scalable.h"
+#include "ns3/tcp-recovery-ops.h"
+>>>>>>> origin
 
 namespace ns3 {
 

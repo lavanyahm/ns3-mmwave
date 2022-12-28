@@ -6,9 +6,9 @@ model a variety of underwater network scenarios.  The UAN model
 is broken into four main parts:  The channel, PHY, MAC and
 Autonomous Underwater Vehicle (AUV) models.
 
-The need for underwater wireless communications exists in applications such as remote control in offshore oil industry [1]_, pollution monitoring in environmental systems, speech transmission between divers, mapping of the ocean floor, mine counter measures [4]_, seismic monitoring of ocean faults as well as climate changes monitoring. Unfortunately, making on-field measurements is very expensive and there are no commonly accepted standard to base on. Hence, the priority to make research work going on, it is to realize a complete simulation framework that researchers can use to experiment, make tests and make performance evaluation and comparison.
+The need for underwater wireless communications exists in applications such as remote control in offshore oil industry [1]_, pollution monitoring in environmental systems, speech transmission between divers, mapping of the ocean floor, mine counter measures [2]_ [4]_, seismic monitoring of ocean faults as well as climate changes monitoring. Unfortunately, making on-field measurements is very expensive and there are no commonly accepted standard to base on. Hence, the priority to make research work going on, it is to realize a complete simulation framework that researchers can use to experiment, make tests and make performance evaluation and comparison.
 
-The NS-3 UAN module is a first step in this direction, trying to offer a reliable and realistic tool. In fact, the UAN module offers accurate modelling of the underwater acoustic channel, a model of the WHOI acoustic modem (one of the widely used acoustic modems)[6]_ and its communications performance, and some MAC protocols.
+The NS-3 UAN module is a first step in this direction, trying to offer a reliable and realistic tool. In fact, the UAN module offers accurate modelling of the underwater acoustic channel, a model of the WHOI acoustic modem (one of the widely used acoustic modems) [6]_ and its communications performance, and some MAC protocols.
 
 
 Model Description
@@ -80,7 +80,7 @@ Acoustic Ray Tracing software (http://oalib.hlsresearch.com/).
 
 The create-dat utility requires a Bellhop installation to run.  Bellhop takes
 environment information about the channel, such as sound speed profile, surface height
-bottom type, water depth, and uses a gaussian ray tracing algorithm to determine
+bottom type, water depth, and uses a Gaussian ray tracing algorithm to determine
 propagation information.  Arrivals from Bellhop are grouped together into equal length
 taps (the arrivals in a tap duration are coherently summed).  The maximum taps are then
 aligned to take the same position in the PDP.  The create-dat utility averages together
@@ -229,7 +229,7 @@ The user will be able to:
 * use a specific power profile for the acoustic modem
 * use a specific energy model for the AUV
 * trace the power consumption of AUV navigation, through AUV's energy model
-* trace the power consumprion underwater acoustic communications, through acoustic modem power profile
+* trace the power consumption underwater acoustic communications, through acoustic modem power profile
 
 We have integrated the Energy Model with the UAN module, to implement energy handling. We have implemented a specific energy model for the two AUV classes and, an energy source for Lithium batteries. This will be really useful for researchers to keep trace of the AUV operational life.
 We have implemented also an acoustic modem power profile, to keep trace of its power consumption. This can be used to compare protocols specific power performance. In order to use such power profile, the acoustic transducer physical layer has been modified to use the modem power profile. We have decoupled the physical layer from the transducer specific energy model, to let the users change the different energy models without changing the physical layer.
@@ -259,9 +259,9 @@ AUV energy sources
 Acoustic modem energy model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Basing on the Device Energy Model interface, has been implemented a generic energy model for acoustic modem. The model allows to trace four modem's power-states: Sleep, Idle, Receiving, Transmitting. The default parameters for the energy model are set to fit those of the WHOI μmodem. The class follows pretty closely the RadioEnergyModel class as the transducer behaviour is pretty close to that of a wifi radio.
+Basing on the Device Energy Model interface, has been implemented a generic energy model for acoustic modem. The model allows to trace four modem's power-states: Sleep, Idle, Receiving, Transmitting. The default parameters for the energy model are set to fit those of the WHOI :math:`\mu`-modem. The class follows pretty closely the RadioEnergyModel class as the transducer behaviour is pretty close to that of a Wi-Fi radio.
 
-The default power consumption values implemented into the model are as follows [6]:
+The default power consumption values implemented into the model are as follows [6]_:
 
 +--------------+---------------------+
 | Modem State  | Power Consumption   |
@@ -281,16 +281,16 @@ UAN module energy modifications
 
 The UAN module has been modified in order to utilize the implemented energy classes. Specifically, it has been modified the physical layer of the UAN module. It Has been implemented an UpdatePowerConsumption method that takes the modem's state as parameter. It checks if an energy source is installed into the node and, in case, it then use the AcousticModemEnergyModel to update the power consumption with the current modem's state. The modem power consumption's update takes place whenever the modem changes its state.
 
-A user should take into account that, if the the power consumption handling is enabled (if the node has an energy source installed), all the communications processes will terminate whether the node depletes all the energy source.
+A user should take into account that, if the power consumption handling is enabled (if the node has an energy source installed), all the communications processes will terminate whether the node depletes all the energy source.
 
 
 Li-Ion batteries model
 ^^^^^^^^^^^^^^^^^^^^^^
 
-A generic Li-Ion battery model has been implemented based on [7][8]. The model can be fitted to any type of Li-Ion battery simply changing the model's parameters The default values are fitted for the Panasonic CGR18650DA Li-Ion Battery [9].
+A generic Li-Ion battery model has been implemented based on [7]_ [8]_. The model can be fitted to any type of Li-Ion battery simply changing the model's parameters The default values are fitted for the Panasonic CGR18650DA Li-Ion Battery [9]_.
 [TODO insert figure]
 As shown in figure the model approximates very well the Li-Ion cells.
-Regarding Seagliders, the batteries used into the AUV are Electrochem 3B36 Lithium / Sulfuryl Chloride cells [10]. Also with this cell type, the model seems to approximates the different discharge curves pretty well, as shown in the figure.
+Regarding Seagliders, the batteries used into the AUV are Electrochem 3B36 Lithium / Sulfuryl Chloride cells [10]_. Also with this cell type, the model seems to approximates the different discharge curves pretty well, as shown in the figure.
 
 .. note::
 
@@ -304,8 +304,8 @@ The communications stack, associated with the AUV, can be modified depending on 
 
 Regarding the AUV energy consumption, the user should be aware that the level of accuracy differs for the two classes:
 
-* Seaglider, high level of accuracy, thanks to the availability of detailed information on AUV's components and behaviour [5] [10]. Have been modeled both the navigation power consumption and the Li battery packs (according to [5]).
-* REMUS, medium level of accuracy, due to the lack of publicly available information on AUV's components. We have approximated the power consumption of the AUV's motor with a linear behaviour and, the energy source uses an ideal model (BasicEnergySource) with a power capacity equal to that specified in [4].
+* Seaglider, high level of accuracy, thanks to the availability of detailed information on AUV's components and behaviour [5]_ [10]_. Have been modeled both the navigation power consumption and the Li battery packs (according to [5]_).
+* REMUS, medium level of accuracy, due to the lack of publicly available information on AUV's components. We have approximated the power consumption of the AUV's motor with a linear behaviour and, the energy source uses an ideal model (BasicEnergySource) with a power capacity equal to that specified in [4]_.
 
 Future Work
 ===========
@@ -315,7 +315,7 @@ Some ideas could be :
 * insert a data logging capability
 * modify the framework to use sockets (enabling the possibility to use applications)
 * introduce some more MAC protocols
-* modify the physical layer to let it consider the doppler spread (problematic in underwater environments)
+* modify the physical layer to let it consider the Doppler spread (problematic in underwater environments)
 * introduce OFDM modulations
 
 References
@@ -355,7 +355,7 @@ further examples can be found into the Unit tests in ``src/uan/test/...cc``
 Examples
 ========
 
-Examples of the Framework's usage can be found into the examples folder. There are mobility related examples and uan related ones.
+Examples of the Framework's usage can be found into the examples folder. There are mobility related examples and UAN related ones.
 
 Mobility Model Examples
 #######################
@@ -392,7 +392,7 @@ UAN Examples
 * ``li-ion-energy-source``
     In this simple example, we show how to create and drain energy from a LiIonEnergySource.
     We make a series of discharge calls to the energy source class, with different current drain and durations, until all the energy is depleted from the cell (i.e. the voltage of the cell goes below the threshold level).
-    Every 20 seconds we print out the actual cell voltage to verify that it follows the discharge curve [9].
+    Every 20 seconds we print out the actual cell voltage to verify that it follows the discharge curve [9]_.
     At the end of the example it is verified that after the energy depletion call, the cell voltage is below the threshold voltage.
 
 
@@ -435,7 +435,7 @@ The glider mobility model is the GliderMobilityModel with default parameters.
 The glider energy model is the GliderEnergyModel with default parameters.
 
 Regarding the energy source, the Seaglider features two battery packs, one for motor power and one for digital-analog power.
-Each pack is composed of 12 (10V) and 42 (24V) lithium chloride DD-cell batteries, respectively [5]. The total power capacity is around 17.5 MJ (3.9 MJ + 13.6 MJ).
+Each pack is composed of 12 (10V) and 42 (24V) lithium chloride DD-cell batteries, respectively [5]_. The total power capacity is around 17.5 MJ (3.9 MJ + 13.6 MJ).
 In the original version of the Seaglider there was 18 + 63 D-cell with a total power capacity of 10MJ.
 
 The packs design is as follows:
@@ -465,7 +465,7 @@ Install into a node (or set of nodes) the REMUS features:
 The REMUS mobility model is the RemusMobilityModel with default parameters.
 The REMUS energy model is the RemusEnergyModel with default parameters.
 
-Regarding the energy source, the REMUS features a rechargeable lithium ion battery pack rated 1.1 kWh @ 27 V (40 Ah) in operating conditions (specifications from [3] and Hydroinc European salesman).
+Regarding the energy source, the REMUS features a rechargeable lithium ion battery pack rated 1.1 kWh @ 27 V (40 Ah) in operating conditions (specifications from [3]_ and Hydroinc European salesman).
 Since more detailed information about battery pack were not publicly available, the energy source used is a BasicEnergySource.
 
 The micro modem energy model is the MicroModemEnergyModel with default parameters.
@@ -517,7 +517,7 @@ The unit test can be found in ``src/uan/test/auv-energy-model-test.cc``.
 The single packet energy consumption test do the following:
 
 * creates a two node network, one surface gateway and one fixed node at -500 m of depth
-* install the acoustic communication stack with energy consuption support into the nodes
+* install the acoustic communication stack with energy consumption support into the nodes
 * a packet is sent from the underwater node to the gateway
 * it is verified that both, the gateway and the fixed node, have consumed the expected amount of energy from their sources
 
@@ -566,5 +566,5 @@ Li-Ion Energy Source
 Includes test case for Li-Ion energy source.
 The unit test can be found in ``src/energy/test/li-ion-energy-source-test.cc``.
 
-The test case verify that after a well-known discharge time with constant current drain, the cell voltage has followed the datasheet discharge curve [9].
+The test case verify that after a well-known discharge time with constant current drain, the cell voltage has followed the datasheet discharge curve [9]_.
 

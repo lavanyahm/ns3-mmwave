@@ -26,11 +26,18 @@
 #include "ns3/object-factory.h"
 #include "ns3/net-device-container.h"
 #include "ns3/queue-disc-container.h"
+<<<<<<< HEAD
 
 namespace ns3 {
 
 class QueueDisc;
 
+=======
+#include "ns3/queue.h"
+
+namespace ns3 {
+
+>>>>>>> origin
 /**
  * \ingroup traffic-control
  *
@@ -130,16 +137,25 @@ public:
   /**
    * \returns a new TrafficControlHelper with a default configuration
    *
+<<<<<<< HEAD
    * The default configuration is a PfifoFastQueueDisc with three internal queues
    * of type DropTailQueue and size 1000 packets.
    */
   static TrafficControlHelper Default (void);
+=======
+   * The default configuration is an FqCoDelQueueDisc, if the device has a single
+   * queue, or an MqQueueDisc with as many FqCoDelQueueDiscs as the number of
+   * device queues, otherwise.
+   */
+  static TrafficControlHelper Default (std::size_t nTxQueues = 1);
+>>>>>>> origin
 
   /**
    * Helper function used to set a root queue disc of the given type and with the
    * given attributes. To set the InternalQueueList, PacketFilterList and ChildQueueDiscList
    * attributes, use the AddInternalQueue, AddPacketFilter and AddChildQueueDisc methods.
    *
+<<<<<<< HEAD
    * \param type the type of queue disc
    * \param n01 the name of the attribute to set on the queue disc
    * \param v01 the value of the attribute to set on the queue disc
@@ -189,11 +205,21 @@ public:
                              std::string n13 = "", const AttributeValue &v13 = EmptyAttributeValue (),
                              std::string n14 = "", const AttributeValue &v14 = EmptyAttributeValue (),
                              std::string n15 = "", const AttributeValue &v15 = EmptyAttributeValue ());
+=======
+   * \tparam Args \deduced Template type parameter pack for the sequence of name-value pairs.
+   * \param type the type of queue disc
+   * \param args A sequence of name-value pairs of the attributes to set.
+   * \return the handle of the root queue disc (zero)
+   */
+  template <typename... Args>
+  uint16_t SetRootQueueDisc (const std::string& type, Args&&... args);
+>>>>>>> origin
 
   /**
    * Helper function used to add the given number of internal queues (of the given
    * type and with the given attributes) to the queue disc having the given handle.
    *
+<<<<<<< HEAD
    * \param handle the handle of the parent queue disc
    * \param count the number of queues to add
    * \param type the type of queue
@@ -223,11 +249,22 @@ public:
                           std::string n06 = "", const AttributeValue &v06 = EmptyAttributeValue (),
                           std::string n07 = "", const AttributeValue &v07 = EmptyAttributeValue (),
                           std::string n08 = "", const AttributeValue &v08 = EmptyAttributeValue ());
+=======
+   * \tparam Args \deduced Template type parameter pack for the sequence of name-value pairs.
+   * \param handle the handle of the parent queue disc
+   * \param count the number of queues to add
+   * \param type the type of queue
+   * \param args A sequence of name-value pairs of the attributes to set.
+   */
+  template <typename... Args>
+  void AddInternalQueues (uint16_t handle, uint16_t count, std::string type, Args&&... args);
+>>>>>>> origin
 
   /**
    * Helper function used to add a packet filter (of the given type and with
    * the given attributes) to the queue disc having the given handle.
    *
+<<<<<<< HEAD
    * \param handle the handle of the parent queue disc
    * \param type the type of packet filter
    * \param n01 the name of the attribute to set on the packet filter
@@ -256,6 +293,15 @@ public:
                         std::string n06 = "", const AttributeValue &v06 = EmptyAttributeValue (),
                         std::string n07 = "", const AttributeValue &v07 = EmptyAttributeValue (),
                         std::string n08 = "", const AttributeValue &v08 = EmptyAttributeValue ());
+=======
+   * \tparam Args \deduced Template type parameter pack for the sequence of name-value pairs.
+   * \param handle the handle of the parent queue disc
+   * \param type the type of packet filter
+   * \param args A sequence of name-value pairs of the attributes to set.
+   */
+  template <typename... Args>
+  void AddPacketFilter (uint16_t handle, const std::string& type, Args&&... args);
+>>>>>>> origin
 
   /**
    * Container type for Class IDs
@@ -266,6 +312,7 @@ public:
    * Helper function used to add the given number of queue disc classes (of the given
    * type and with the given attributes) to the queue disc having the given handle.
    *
+<<<<<<< HEAD
    * \param handle the handle of the parent queue disc
    * \param count the number of queue disc classes to add
    * \param type the type of queue disc class
@@ -296,12 +343,24 @@ public:
                                    std::string n06 = "", const AttributeValue &v06 = EmptyAttributeValue (),
                                    std::string n07 = "", const AttributeValue &v07 = EmptyAttributeValue (),
                                    std::string n08 = "", const AttributeValue &v08 = EmptyAttributeValue ());
+=======
+   * \tparam Args \deduced Template type parameter pack for the sequence of name-value pairs.
+   * \param handle the handle of the parent queue disc
+   * \param count the number of queue disc classes to add
+   * \param type the type of queue disc class
+   * \param args A sequence of name-value pairs of the attributes to set.
+   * \return the list of class IDs
+   */
+  template <typename... Args>
+  ClassIdList AddQueueDiscClasses (uint16_t handle, uint16_t count, const std::string& type, Args&&... args);
+>>>>>>> origin
 
   /**
    * Helper function used to attach a child queue disc (of the given type and with
    * the given attributes) to a given class (included in the queue disc
    * having the given handle).
    *
+<<<<<<< HEAD
    * \param handle the handle of the parent queue disc
    * \param classId the class ID of the class to attach the queue disc to
    * \param type the type of queue disc
@@ -353,6 +412,17 @@ public:
                               std::string n13 = "", const AttributeValue &v13 = EmptyAttributeValue (),
                               std::string n14 = "", const AttributeValue &v14 = EmptyAttributeValue (),
                               std::string n15 = "", const AttributeValue &v15 = EmptyAttributeValue ());
+=======
+   * \tparam Args \deduced Template type parameter pack for the sequence of name-value pairs.
+   * \param handle the handle of the parent queue disc
+   * \param classId the class ID of the class to attach the queue disc to
+   * \param type the type of queue disc
+   * \param args A sequence of name-value pairs of the attributes to set.
+   * \return the handle of the created child queue disc
+   */
+  template <typename... Args>
+  uint16_t AddChildQueueDisc (uint16_t handle, uint16_t classId, const std::string& type, Args&&... args);
+>>>>>>> origin
 
   /**
    * Container type for Handlers
@@ -364,6 +434,7 @@ public:
    * the given attributes) to each of the given classes (included in the queue disc
    * having the given handle).
    *
+<<<<<<< HEAD
    * \param handle the handle of the parent queue disc
    * \param classes the class IDs of the classes to attach a queue disc to
    * \param type the type of queue disc
@@ -415,11 +486,24 @@ public:
                                  std::string n13 = "", const AttributeValue &v13 = EmptyAttributeValue (),
                                  std::string n14 = "", const AttributeValue &v14 = EmptyAttributeValue (),
                                  std::string n15 = "", const AttributeValue &v15 = EmptyAttributeValue ());
+=======
+   * \tparam Args \deduced Template type parameter pack for the sequence of name-value pairs.
+   * \param handle the handle of the parent queue disc
+   * \param classes the class IDs of the classes to attach a queue disc to
+   * \param type the type of queue disc
+   * \param args A sequence of name-value pairs of the attributes to set.
+   * \return the list of handles of the created child queue discs
+   */
+  template <typename... Args>
+  HandleList AddChildQueueDiscs (uint16_t handle, const ClassIdList &classes,
+                                 const std::string& type, Args&&... args);
+>>>>>>> origin
 
   /**
    * Helper function used to add a queue limits object to the transmission
    * queues of the devices
    *
+<<<<<<< HEAD
    * \param type the type of queue
    * \param n01 the name of the attribute to set on the queue limits object
    * \param v01 the value of the attribute to set on the queue limits object
@@ -451,6 +535,18 @@ public:
   /**
    * \param c set of devices
    * \returns a QueueDisc container with the queue discs installed on the devices
+=======
+   * \tparam Args \deduced Template type parameter pack for the sequence of name-value pairs.
+   * \param type the type of queue
+   * \param args A sequence of name-value pairs of the attributes to set.
+   */
+  template <typename... Args>
+  void SetQueueLimits (std::string type, Args&&... args);
+
+  /**
+   * \param c set of devices
+   * \returns a QueueDisc container with the root queue discs installed on the devices
+>>>>>>> origin
    *
    * This method creates a QueueDisc object of the type and with the
    * attributes configured by TrafficControlHelper::SetQueueDisc for
@@ -467,7 +563,11 @@ public:
 
   /**
    * \param d device
+<<<<<<< HEAD
    * \returns a QueueDisc container with the queue discs installed on the device
+=======
+   * \returns a QueueDisc container with the root queue disc installed on the device
+>>>>>>> origin
    *
    * This method creates the queue discs (along with their packet filters,
    * internal queues, classes) configured with the methods provided by this
@@ -493,6 +593,63 @@ public:
   void Uninstall (Ptr<NetDevice> d);
 
 private:
+<<<<<<< HEAD
+=======
+  /**
+   * Actual implementation of the SetRootQueueDisc method.
+   *
+   * \param factory the factory used to create the root queue disc
+   */
+  uint16_t DoSetRootQueueDisc (ObjectFactory factory);
+
+  /**
+   * Actual implementation of the AddInternalQueues method.
+   *
+   * \param handle the handle of the parent queue disc
+   * \param count the number of queues to add
+   * \param factory the factory used to add internal queues
+   */
+  void DoAddInternalQueues (uint16_t handle, uint16_t count, ObjectFactory factory);
+
+  /**
+   * Actual implementation of the AddPacketFilter method.
+   *
+   * \param handle the handle of the parent queue disc
+   * \param factory the factory used to add a packet filter
+   */
+  void DoAddPacketFilter (uint16_t handle, ObjectFactory factory);
+
+  /**
+   * Actual implementation of the AddQueueDiscClasses method.
+   *
+   * \param handle the handle of the parent queue disc
+   * \param count the number of queue disc classes to add
+   * \param factory the factory used to add queue disc classes
+   * \return the list of class IDs
+   */
+  ClassIdList DoAddQueueDiscClasses (uint16_t handle, uint16_t count, ObjectFactory factory);
+
+  /**
+   * Actual implementation of the AddChildQueueDisc method.
+   *
+   * \param handle the handle of the parent queue disc
+   * \param classId the class ID of the class to attach the queue disc to
+   * \param factory the factory used to add a child queue disc
+   * \return the handle of the created child queue disc
+   */
+  uint16_t DoAddChildQueueDisc (uint16_t handle, uint16_t classId, ObjectFactory factory);
+
+  /**
+   * Actual implementation of the AddChildQueueDiscs method.
+   *
+   * \param handle the handle of the parent queue disc
+   * \param classes the class IDs of the classes to attach a queue disc to
+   * \param factory the factory used to add child queue discs
+   * \return the list of handles of the created child queue discs
+   */
+  HandleList DoAddChildQueueDiscs (uint16_t handle, const ClassIdList &classes, ObjectFactory factory);
+
+>>>>>>> origin
   /// QueueDisc factory, stores the configuration of all the queue discs
   std::vector<QueueDiscFactory> m_queueDiscFactory;
   /// Vector of all the created queue discs
@@ -503,4 +660,71 @@ private:
 
 } // namespace ns3
 
+<<<<<<< HEAD
+=======
+
+/***************************************************************
+ *  Implementation of the templates declared above.
+ ***************************************************************/
+
+namespace ns3 {
+
+template <typename... Args>
+uint16_t
+TrafficControlHelper::SetRootQueueDisc (const std::string& type, Args&&... args)
+{
+  return DoSetRootQueueDisc (ObjectFactory (type, args...));
+}
+
+template <typename... Args>
+void
+TrafficControlHelper::AddInternalQueues (uint16_t handle, uint16_t count,
+                                         std::string type, Args&&... args)
+{
+  QueueBase::AppendItemTypeIfNotPresent (type, "QueueDiscItem");
+  DoAddInternalQueues (handle, count, ObjectFactory (type, args...));
+}
+
+template <typename... Args>
+void
+TrafficControlHelper::AddPacketFilter (uint16_t handle, const std::string& type, Args&&... args)
+{
+  DoAddPacketFilter (handle, ObjectFactory (type, args...));
+}
+
+template <typename... Args>
+TrafficControlHelper::ClassIdList
+TrafficControlHelper::AddQueueDiscClasses (uint16_t handle, uint16_t count,
+                                           const std::string& type, Args&&... args)
+{
+  return DoAddQueueDiscClasses (handle, count, ObjectFactory (type, args...));
+}
+
+template <typename... Args>
+uint16_t
+TrafficControlHelper::AddChildQueueDisc (uint16_t handle, uint16_t classId,
+                                         const std::string& type, Args&&... args)
+{
+  return DoAddChildQueueDisc (handle, classId, ObjectFactory (type, args...));
+}
+
+template <typename... Args>
+TrafficControlHelper::HandleList
+TrafficControlHelper::AddChildQueueDiscs (uint16_t handle, const ClassIdList &classes,
+                                          const std::string& type, Args&&... args)
+{
+  return DoAddChildQueueDiscs (handle, classes, ObjectFactory (type, args...));
+}
+
+template <typename... Args>
+void
+TrafficControlHelper::SetQueueLimits (std::string type, Args&&... args)
+{
+  m_queueLimitsFactory.SetTypeId (type);
+  m_queueLimitsFactory.Set (args...);
+}
+
+} // namespace ns3
+
+>>>>>>> origin
 #endif /* TRAFFIC_CONTROL_HELPER_H */

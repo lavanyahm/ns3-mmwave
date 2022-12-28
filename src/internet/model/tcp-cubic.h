@@ -77,6 +77,14 @@ public:
   static TypeId GetTypeId (void);
 
   TcpCubic ();
+<<<<<<< HEAD
+=======
+
+  /**
+   * Copy constructor
+   * \param sock Socket to copy
+   */
+>>>>>>> origin
   TcpCubic (const TcpCubic& sock);
 
   virtual std::string GetName () const;
@@ -133,6 +141,7 @@ private:
 private:
   /**
    * \brief Reset HyStart parameters
+<<<<<<< HEAD
    */
   void HystartReset (Ptr<const TcpSocketState> tcb);
 
@@ -161,6 +170,43 @@ private:
    * \return t itself if it is in range, otherwise the min or max
    * value
    */
+=======
+   * \param tcb Transmission Control Block of the connection
+   */
+  void HystartReset (Ptr<const TcpSocketState> tcb);
+
+  /**
+   * \brief Reset Cubic parameters
+   * \param tcb Transmission Control Block of the connection
+   */
+  void CubicReset (Ptr<const TcpSocketState> tcb);
+
+  /**
+   * \brief Cubic window update after a new ack received
+   * \param tcb Transmission Control Block of the connection
+   * \returns the congestion window update counter
+   */
+  uint32_t Update (Ptr<TcpSocketState> tcb);
+
+  /**
+   * \brief Update HyStart parameters
+   *
+   * \param tcb Transmission Control Block of the connection
+   * \param delay Delay for HyStart algorithm
+   */
+  void HystartUpdate (Ptr<TcpSocketState> tcb, const Time &delay);
+
+  /**
+   * \brief Clamp time value in a range
+   *
+   * The returned value is t, clamped in a range specified
+   * by attributes (HystartDelayMin < t < HystartDelayMax)
+   *
+   * \param t Time value to clamp
+   * \return t itself if it is in range, otherwise the min or max
+   * value
+   */
+>>>>>>> origin
   Time HystartDelayThresh (const Time &t) const;
 };
 

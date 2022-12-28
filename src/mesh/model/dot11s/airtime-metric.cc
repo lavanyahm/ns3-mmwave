@@ -19,9 +19,7 @@
  */
 
 #include "airtime-metric.h"
-#include "ns3/wifi-remote-station-manager.h"
-#include "ns3/wifi-mode.h"
-#include "ns3/wifi-tx-vector.h"
+#include "ns3/wifi-phy.h"
 
 namespace ns3 {
 namespace dot11s {
@@ -35,7 +33,7 @@ AirtimeLinkMetricCalculator::GetTypeId ()
     .SetGroupName ("Mesh")
     .AddConstructor<AirtimeLinkMetricCalculator> ()
     .AddAttribute ( "TestLength",
-                    "Rate should be estimated using test length.",
+                    "Number of bytes in test frame (a constant 1024 in the standard)",
                     UintegerValue (1024),
                     MakeUintegerAccessor (
                       &AirtimeLinkMetricCalculator::SetTestLength),
@@ -57,9 +55,9 @@ AirtimeLinkMetricCalculator::AirtimeLinkMetricCalculator ()
 void
 AirtimeLinkMetricCalculator::SetHeaderTid (uint8_t tid)
 {
+  m_testHeader.SetType (WIFI_MAC_DATA);
   m_testHeader.SetDsFrom ();
   m_testHeader.SetDsTo ();
-  m_testHeader.SetTypeData ();
   m_testHeader.SetQosTid (tid);
 }
 void
@@ -70,7 +68,7 @@ AirtimeLinkMetricCalculator::SetTestLength (uint16_t testLength)
 uint32_t
 AirtimeLinkMetricCalculator::CalculateMetric (Mac48Address peerAddress, Ptr<MeshWifiInterfaceMac> mac)
 {
-  /* Airtime link metric is defined in 11B.10 of 802.11s Draft D3.0 as:
+  /* Airtime link metric is defined in Section 13.9 of 802.11-2012 as:
    *
    * airtime = (O + Bt/r) /  (1 - frame error rate), where
    * o  -- the PHY dependent channel access which includes frame headers, training sequences,
@@ -82,21 +80,33 @@ AirtimeLinkMetricCalculator::CalculateMetric (Mac48Address peerAddress, Ptr<Mesh
    */
   NS_ASSERT (!peerAddress.IsGroup ());
   //obtain current rate:
+<<<<<<< HEAD
   WifiMode mode = mac->GetWifiRemoteStationManager ()->GetDataTxVector (peerAddress, &m_testHeader, m_testFrame).GetMode();
+=======
+  WifiMode mode = mac->GetWifiRemoteStationManager ()->GetDataTxVector (m_testHeader).GetMode();
+>>>>>>> origin
   //obtain frame error rate:
   double failAvg = mac->GetWifiRemoteStationManager ()->GetInfo (peerAddress).GetFrameErrorRate ();
   if (failAvg == 1)
     {
-      // Retrun max metric value when frame error rate equals to 1
-      return (uint32_t)0xffffffff;
+      // Return max metric value when frame error rate equals to 1
+      return (uint32_t) 0xffffffff;
     }
   NS_ASSERT (failAvg < 1.0);
   WifiTxVector txVector;
   txVector.SetMode (mode);
+  txVector.SetPreambleType (WIFI_PREAMBLE_LONG);
   //calculate metric
   uint32_t metric = (uint32_t)((double)( /*Overhead + payload*/
+<<<<<<< HEAD
                                  mac->GetPifs () + mac->GetSlot () + mac->GetEifsNoDifs () + //DIFS + SIFS + AckTxTime = PIFS + SLOT + EifsNoDifs
                                  mac->GetWifiPhy ()->CalculateTxDuration (m_testFrame->GetSize (), txVector, WIFI_PREAMBLE_LONG, mac->GetWifiPhy ()->GetFrequency())
+=======
+                                 //DIFS + SIFS + AckTxTime = 2 * SIFS + 2 * SLOT + AckTxTime
+                                 2 * mac->GetWifiPhy ()->GetSifs () + 2 * mac->GetWifiPhy ()->GetSlot ()
+                                 + mac->GetWifiPhy ()->GetAckTxTime ()
+                                 + mac->GetWifiPhy ()->CalculateTxDuration (m_testFrame->GetSize (), txVector, mac->GetWifiPhy ()->GetPhyBand())
+>>>>>>> origin
                                  ).GetMicroSeconds () / (10.24 * (1.0 - failAvg)));
   return metric;
 }

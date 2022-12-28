@@ -23,8 +23,26 @@
 #include "ns3/object-factory.h"
 #include "ns3/assert.h"
 
+/**
+ * \file
+ * \ingroup core-tests
+ * \ingroup object
+ * \ingroup object-tests
+ * Object test suite.
+ */
+
+/**
+ * \ingroup core-tests
+ * \defgroup object-tests Object test suite
+ */
+
+
 namespace {
 
+/**
+ * \ingroup object-tests
+ * Base class A.
+ */
 class BaseA : public ns3::Object
 {
 public:
@@ -41,11 +59,15 @@ public:
       .AddConstructor<BaseA> ();
     return tid;
   }
+  /** Constructor. */
   BaseA ()
   {}
-  virtual void Dispose (void) {}
 };
 
+/**
+ * \ingroup object-tests
+ * Derived class A.
+ */
 class DerivedA : public BaseA
 {
 public:
@@ -62,13 +84,21 @@ public:
       .AddConstructor<DerivedA> ();
     return tid;
   }
+  /** Constructor. */
   DerivedA ()
   {}
-  virtual void Dispose (void) {
-    BaseA::Dispose ();
+
+protected:
+  virtual void DoDispose (void)
+  {
+    BaseA::DoDispose ();
   }
 };
 
+/**
+ * \ingroup object-tests
+ * Base class B.
+ */
 class BaseB : public ns3::Object
 {
 public:
@@ -85,11 +115,15 @@ public:
       .AddConstructor<BaseB> ();
     return tid;
   }
+  /** Constructor. */
   BaseB ()
   {}
-  virtual void Dispose (void) {}
 };
 
+/**
+ * \ingroup object-tests
+ * Derived class B.
+ */
 class DerivedB : public BaseB
 {
 public:
@@ -106,10 +140,14 @@ public:
       .AddConstructor<DerivedB> ();
     return tid;
   }
+  /** Constructor. */
   DerivedB ()
   {}
-  virtual void Dispose (void) {
-    BaseB::Dispose ();
+
+protected:
+  virtual void DoDispose (void)
+  {
+    BaseB::DoDispose ();
   }
 };
 
@@ -118,17 +156,23 @@ NS_OBJECT_ENSURE_REGISTERED (DerivedA);
 NS_OBJECT_ENSURE_REGISTERED (BaseB);
 NS_OBJECT_ENSURE_REGISTERED (DerivedB);
 
-} // namespace anonymous
+}  // unnamed namespace
 
-using namespace ns3;
+namespace ns3 {
 
-// ===========================================================================
-// Test case to make sure that we can make Objects using CreateObject.
-// ===========================================================================
+namespace tests {
+
+
+/**
+ * \ingroup object-tests
+ * Test we can make Objects using CreateObject.
+ */
 class CreateObjectTestCase : public TestCase
 {
 public:
+  /** Constructor. */
   CreateObjectTestCase ();
+  /** Destructor. */
   virtual ~CreateObjectTestCase ();
 
 private:
@@ -137,12 +181,10 @@ private:
 
 CreateObjectTestCase::CreateObjectTestCase ()
   : TestCase ("Check CreateObject<Type> template function")
-{
-}
+{}
 
 CreateObjectTestCase::~CreateObjectTestCase ()
-{
-}
+{}
 
 void
 CreateObjectTestCase::DoRun (void)
@@ -176,25 +218,28 @@ CreateObjectTestCase::DoRun (void)
   NS_TEST_ASSERT_MSG_EQ (baseA->GetObject<BaseA> (), baseA, "Unable to GetObject<BaseA> on BaseA");
 
   //
-  // Since we created a DerivedA and cast it to a BaseA, we should be able to 
+  // Since we created a DerivedA and cast it to a BaseA, we should be able to
   // get back a DerivedA and it should be the original Ptr.
   //
   NS_TEST_ASSERT_MSG_EQ (baseA->GetObject<DerivedA> (), baseA, "GetObject() of the original type returns different Ptr");
 
-  // If we created a DerivedA and cast it to a BaseA, then we GetObject for the 
-  // same DerivedA and cast it back to the same BaseA, we should get the same 
+  // If we created a DerivedA and cast it to a BaseA, then we GetObject for the
+  // same DerivedA and cast it back to the same BaseA, we should get the same
   // object.
   //
   NS_TEST_ASSERT_MSG_EQ (baseA->GetObject<BaseA> (DerivedA::GetTypeId ()), baseA, "GetObject returns different Ptr");
 }
 
-// ===========================================================================
-// Test case to make sure that we can aggregate Objects.
-// ===========================================================================
+/**
+ * \ingroup object-tests
+ * Test we can aggregate Objects.
+ */
 class AggregateObjectTestCase : public TestCase
 {
 public:
+  /** Constructor. */
   AggregateObjectTestCase ();
+  /** Destructor. */
   virtual ~AggregateObjectTestCase ();
 
 private:
@@ -203,12 +248,10 @@ private:
 
 AggregateObjectTestCase::AggregateObjectTestCase ()
   : TestCase ("Check Object aggregation functionality")
-{
-}
+{}
 
 AggregateObjectTestCase::~AggregateObjectTestCase ()
-{
-}
+{}
 
 void
 AggregateObjectTestCase::DoRun (void)
@@ -303,7 +346,7 @@ AggregateObjectTestCase::DoRun (void)
   NS_TEST_ASSERT_MSG_NE (baseA->GetObject<DerivedB> (), 0, "Cannot GetObject (through baseA) for DerivedB Object");
 
   //
-  // Since the DerivedB is also a BaseB, we should be able to ask the aggregation 
+  // Since the DerivedB is also a BaseB, we should be able to ask the aggregation
   // (through baseA) for the BaseB part
   //
   NS_TEST_ASSERT_MSG_NE (baseA->GetObject<BaseB> (), 0, "Cannot GetObject (through baseA) for BaseB Object");
@@ -314,7 +357,7 @@ AggregateObjectTestCase::DoRun (void)
   NS_TEST_ASSERT_MSG_NE (baseB->GetObject<DerivedA> (), 0, "Cannot GetObject (through baseB) for DerivedA Object");
 
   //
-  // Since the DerivedA is also a BaseA, we should be able to ask the aggregation 
+  // Since the DerivedA is also a BaseA, we should be able to ask the aggregation
   // (through baseB) for the BaseA part
   //
   NS_TEST_ASSERT_MSG_NE (baseB->GetObject<BaseA> (), 0, "Cannot GetObject (through baseB) for BaseA Object");
@@ -323,20 +366,20 @@ AggregateObjectTestCase::DoRun (void)
   // baseBCopy is a copy of the original Ptr to the Object BaseB.  Even though
   // we didn't use baseBCopy directly in the aggregations, the object to which
   // it points was used, therefore, we should be able to use baseBCopy as if
-  // it were baseB (same underlying Object) and get a BaseA and a DerivedA out 
+  // it were baseB (same underlying Object) and get a BaseA and a DerivedA out
   // of the aggregation through baseBCopy.
   //
   NS_TEST_ASSERT_MSG_NE (baseBCopy->GetObject<BaseA> (), 0, "Cannot GetObject (through baseBCopy) for a BaseA Object");
   NS_TEST_ASSERT_MSG_NE (baseBCopy->GetObject<DerivedA> (), 0, "Cannot GetObject (through baseBCopy) for a BaseA Object");
 
   //
-  // Since the Ptr<BaseB> is actually a DerivedB, we should be able to ask the 
+  // Since the Ptr<BaseB> is actually a DerivedB, we should be able to ask the
   // aggregation (through baseB) for the DerivedB part
   //
   NS_TEST_ASSERT_MSG_NE (baseB->GetObject<DerivedB> (), 0, "Cannot GetObject (through baseB) for DerivedB Object");
 
   //
-  // Since the DerivedB was cast to a BaseB, we should be able to ask the 
+  // Since the DerivedB was cast to a BaseB, we should be able to ask the
   // aggregation (through baseB) for the BaseB part
   //
   NS_TEST_ASSERT_MSG_NE (baseB->GetObject<BaseB> (), 0, "Cannot GetObject (through baseB) for BaseB Object");
@@ -359,13 +402,16 @@ AggregateObjectTestCase::DoRun (void)
   NS_TEST_ASSERT_MSG_NE (baseA, 0, "Unable to GetObject on released object");
 }
 
-// ===========================================================================
-// Test case to make sure that an Object factory can create Objects
-// ===========================================================================
+/**
+ * \ingroup object-tests
+ * Test an Object factory can create Objects
+ */
 class ObjectFactoryTestCase : public TestCase
 {
 public:
+  /** Constructor. */
   ObjectFactoryTestCase ();
+  /** Destructor. */
   virtual ~ObjectFactoryTestCase ();
 
 private:
@@ -374,12 +420,10 @@ private:
 
 ObjectFactoryTestCase::ObjectFactoryTestCase ()
   : TestCase ("Check ObjectFactory functionality")
-{
-}
+{}
 
 ObjectFactoryTestCase::~ObjectFactoryTestCase ()
-{
-}
+{}
 
 void
 ObjectFactoryTestCase::DoRun (void)
@@ -404,14 +448,14 @@ ObjectFactoryTestCase::DoRun (void)
   NS_TEST_ASSERT_MSG_EQ (a->GetObject<DerivedA> (), 0, "BaseA unexpectedly responds to GetObject for DerivedA");
 
   //
-  // Now tell the factory to make DerivedA Objects and create one with an 
+  // Now tell the factory to make DerivedA Objects and create one with an
   // implied cast back to a BaseA
   //
   factory.SetTypeId (DerivedA::GetTypeId ());
   a = factory.Create ();
 
   //
-  // Since the DerivedA has a BaseA part, we should be able to use GetObject to 
+  // Since the DerivedA has a BaseA part, we should be able to use GetObject to
   // dynamically cast back to a BaseA.
   //
   NS_TEST_ASSERT_MSG_EQ (a->GetObject<BaseA> (), a, "Unable to use GetObject as dynamic_cast<BaseA>()");
@@ -431,21 +475,32 @@ ObjectFactoryTestCase::DoRun (void)
   NS_TEST_ASSERT_MSG_NE (a->GetObject<DerivedA> (), 0, "Unexpectedly able to work around C++ type system");
 }
 
-// ===========================================================================
-// The Test Suite that glues the Test Cases together.
-// ===========================================================================
+/**
+ * \ingroup object-tests
+ * The Test Suite that glues the Test Cases together.
+ */
 class ObjectTestSuite : public TestSuite
 {
 public:
+  /** Constructor. */
   ObjectTestSuite ();
 };
 
 ObjectTestSuite::ObjectTestSuite ()
-  : TestSuite ("object", UNIT)
+  : TestSuite ("object")
 {
-  AddTestCase (new CreateObjectTestCase, TestCase::QUICK);
-  AddTestCase (new AggregateObjectTestCase, TestCase::QUICK);
-  AddTestCase (new ObjectFactoryTestCase, TestCase::QUICK);
+  AddTestCase (new CreateObjectTestCase);
+  AddTestCase (new AggregateObjectTestCase);
+  AddTestCase (new ObjectFactoryTestCase);
 }
 
-static ObjectTestSuite objectTestSuite;
+/**
+ * \ingroup object-tests
+ * ObjectTestSuite instance variable.
+ */
+static ObjectTestSuite g_objectTestSuite;
+
+
+}    // namespace tests
+
+}  // namespace ns3

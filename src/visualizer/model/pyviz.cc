@@ -62,10 +62,12 @@ PathSplit (std::string str)
 
 namespace ns3 {
 
-static PyViz* g_visualizer = NULL;
+static PyViz* g_visualizer = NULL; ///< the visualizer
 
 
-
+/**
+ * PyVizPacketTag structure
+ */
 struct PyVizPacketTag : public Tag
 {
   static TypeId GetTypeId (void);
@@ -76,10 +78,14 @@ struct PyVizPacketTag : public Tag
   virtual void Print (std::ostream &os) const;
   PyVizPacketTag ();
 
-  uint32_t m_packetId;
+  uint32_t m_packetId; ///< packet id
 };
 
 
+/**
+ * \brief Get the type ID.
+ * \return the object TypeId
+ */
 TypeId 
 PyVizPacketTag::GetTypeId (void)
 {
@@ -128,46 +134,50 @@ PyViz::PyViz ()
   NS_ASSERT (g_visualizer == NULL);
   g_visualizer = this;
 
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTx",
-                   MakeCallback (&PyViz::TraceNetDevTxWifi, this));
+  // WiFi
+  Config::ConnectFailSafe ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacTx",
+                           MakeCallback (&PyViz::TraceNetDevTxWifi, this));
 
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRx",
-                   MakeCallback (&PyViz::TraceNetDevRxWifi, this));
+  Config::ConnectFailSafe ("/NodeList/*/DeviceList/*/$ns3::WifiNetDevice/Mac/MacRx",
+                           MakeCallback (&PyViz::TraceNetDevRxWifi, this));
 
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::CsmaNetDevice/MacTx",
-                   MakeCallback (&PyViz::TraceNetDevTxCsma, this));
+  // CSMA
+  Config::ConnectFailSafe ("/NodeList/*/DeviceList/*/$ns3::CsmaNetDevice/MacTx",
+                           MakeCallback (&PyViz::TraceNetDevTxCsma, this));
 
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::CsmaNetDevice/MacRx",
-                   MakeCallback (&PyViz::TraceNetDevRxCsma, this));
+  Config::ConnectFailSafe ("/NodeList/*/DeviceList/*/$ns3::CsmaNetDevice/MacRx",
+                           MakeCallback (&PyViz::TraceNetDevRxCsma, this));
 
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::CsmaNetDevice/MacPromiscRx",
-                   MakeCallback (&PyViz::TraceNetDevPromiscRxCsma, this));
+  Config::ConnectFailSafe ("/NodeList/*/DeviceList/*/$ns3::CsmaNetDevice/MacPromiscRx",
+                           MakeCallback (&PyViz::TraceNetDevPromiscRxCsma, this));
 
-  Config::Connect ("/NodeList/*/DeviceList/*/TxQueue/Drop",
-                   MakeCallback (&PyViz::TraceDevQueueDrop, this));
+  // Generic queue drop
+  Config::ConnectFailSafe ("/NodeList/*/DeviceList/*/TxQueue/Drop",
+                           MakeCallback (&PyViz::TraceDevQueueDrop, this));
+  // IPv4 drop
+  Config::ConnectFailSafe ("/NodeList/*/$ns3::Ipv4L3Protocol/Drop",
+                           MakeCallback (&PyViz::TraceIpv4Drop, this));
 
-  Config::Connect ("/NodeList/*/$ns3::Ipv4L3Protocol/Drop",
-                   MakeCallback (&PyViz::TraceIpv4Drop, this));
+  // Point-to-Point
+  Config::ConnectFailSafe ("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/MacTx",
+                           MakeCallback (&PyViz::TraceNetDevTxPointToPoint, this));
 
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/MacTx",
-                   MakeCallback (&PyViz::TraceNetDevTxPointToPoint, this));
-
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/MacRx",
-                   MakeCallback (&PyViz::TraceNetDevRxPointToPoint, this));
+  Config::ConnectFailSafe ("/NodeList/*/DeviceList/*/$ns3::PointToPointNetDevice/MacRx",
+                           MakeCallback (&PyViz::TraceNetDevRxPointToPoint, this));
 
   // WiMax
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WimaxNetDevice/Tx",
-                   MakeCallback (&PyViz::TraceNetDevTxWimax, this));
+  Config::ConnectFailSafe ("/NodeList/*/DeviceList/*/$ns3::WimaxNetDevice/Tx",
+                           MakeCallback (&PyViz::TraceNetDevTxWimax, this));
 
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::WimaxNetDevice/Rx",
-                   MakeCallback (&PyViz::TraceNetDevRxWimax, this));
+  Config::ConnectFailSafe ("/NodeList/*/DeviceList/*/$ns3::WimaxNetDevice/Rx",
+                           MakeCallback (&PyViz::TraceNetDevRxWimax, this));
 
   // LTE
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::LteNetDevice/Tx",
-                   MakeCallback (&PyViz::TraceNetDevTxLte, this));
+  Config::ConnectFailSafe ("/NodeList/*/DeviceList/*/$ns3::LteNetDevice/Tx",
+                           MakeCallback (&PyViz::TraceNetDevTxLte, this));
 
-  Config::Connect ("/NodeList/*/DeviceList/*/$ns3::LteNetDevice/Rx",
-                   MakeCallback (&PyViz::TraceNetDevRxLte, this));
+  Config::ConnectFailSafe ("/NodeList/*/DeviceList/*/$ns3::LteNetDevice/Rx",
+                           MakeCallback (&PyViz::TraceNetDevRxLte, this));
 }
 
 void
@@ -244,7 +254,7 @@ void PyViz::DoPause (std::string const &message)
 {
   m_pauseMessages.push_back (message);
   m_stop = true;
-  NS_LOG_LOGIC (Simulator::Now ().GetSeconds () << ": Have "
+  NS_LOG_LOGIC (Simulator::Now ().As (Time::S) << ": Have "
                                                 << g_visualizer->m_pauseMessages.size () << " pause messages");
 }
 
@@ -257,7 +267,7 @@ void PyViz::Pause (std::string const &message)
 std::vector<std::string>
 PyViz::GetPauseMessages () const
 {
-  NS_LOG_LOGIC (Simulator::Now ().GetSeconds () << ": GetPauseMessages: have "
+  NS_LOG_LOGIC (Simulator::Now ().As (Time::S) << ": GetPauseMessages: have "
                                                 << g_visualizer->m_pauseMessages.size () << " pause messages");
   return m_pauseMessages;
 }
@@ -936,67 +946,104 @@ PyViz::GetLastPackets (uint32_t nodeId) const
 
 namespace
 {
-// Adapted from http://en.wikipedia.org/w/index.php?title=Line_clipping&oldid=248609574
+/// Adapted from http://en.wikipedia.org/w/index.php?title=Line_clipping&oldid=248609574
 class FastClipping
 {
 public:
+  /// Vector2 structure
   struct Vector2
   {
-    double x;
-    double y;
+    double x; ///< X
+    double y; ///< Y
   };
 
-  Vector2 m_clipMin, m_clipMax;
+  Vector2 m_clipMin; ///< clip minimum 
+  Vector2 m_clipMax; ///< clip maximum
 
+  /// Line structure
   struct Line
   {
-    Vector2 start, end;
-    double dx, dy;
+    Vector2 start; ///< start
+    Vector2 end; ///<  end
+    double dx; ///< dX 
+    double dy; ///< dY
   };
 
 private:
 
+  /**
+   * Clip start top function
+   * \param line the clip line
+   */
   void ClipStartTop (Line &line)
   {
     line.start.x += line.dx * (m_clipMin.y - line.start.y) / line.dy;
     line.start.y = m_clipMin.y;
   }
  
+  /**
+   * Clip start bottom function
+   * \param line the clip line
+   */
   void ClipStartBottom (Line &line)
   {
     line.start.x += line.dx * (m_clipMax.y - line.start.y) / line.dy;
     line.start.y = m_clipMax.y;
   }
  
+  /**
+   * Clip start right function
+   * \param line the clip line
+   */
   void ClipStartRight (Line &line)
   {
     line.start.y += line.dy * (m_clipMax.x - line.start.x) / line.dx;
     line.start.x = m_clipMax.x;
   }
  
+  /**
+   * Clip start left function
+   * \param line the clip line
+   */
   void ClipStartLeft (Line &line)
   {
     line.start.y += line.dy * (m_clipMin.x - line.start.x) / line.dx;
     line.start.x = m_clipMin.x;
   }
  
+  /**
+   * Clip end top function
+   * \param line the clip line
+   */
   void ClipEndTop (Line &line)
   {
     line.end.x += line.dx * (m_clipMin.y - line.end.y) / line.dy;
     line.end.y = m_clipMin.y;
   }
 
+  /**
+   * Clip end bottom function
+   * \param line the clip line
+   */
   void ClipEndBottom (Line &line) {
     line.end.x += line.dx * (m_clipMax.y - line.end.y) / line.dy;
     line.end.y = m_clipMax.y;
   }
  
+  /**
+   * Clip end right function
+   * \param line the clip line
+   */
   void ClipEndRight (Line &line)
   {
     line.end.y += line.dy * (m_clipMax.x - line.end.x) / line.dx;
     line.end.x = m_clipMax.x;
   }
  
+  /**
+   * Clip end left function
+   * \param line the clip line
+   */
   void ClipEndLeft (Line &line)
   {
     line.end.y += line.dy * (m_clipMin.x - line.end.x) / line.dx;
@@ -1004,12 +1051,23 @@ private:
   }
 
 public:
+  /**
+   * Constructor
+   *
+   * \param clipMin minimum clipping vector
+   * \param clipMax maximum clipping vector
+   */
   FastClipping (Vector2 clipMin, Vector2 clipMax)
     : m_clipMin (clipMin), m_clipMax (clipMax)
   {
   }
 
  
+  /**
+   * Clip line function
+   * \param line the clip line
+   * \returns true if clipped
+   */
   bool ClipLine (Line &line)
   {
     uint8_t lineCode = 0;

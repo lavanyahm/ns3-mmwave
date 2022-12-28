@@ -20,27 +20,49 @@
 #include "tcp-general-test.h"
 #include "ns3/node.h"
 #include "ns3/log.h"
+<<<<<<< HEAD
 
 namespace ns3 {
+=======
+#include "ns3/tcp-header.h"
+
+using namespace ns3;
+>>>>>>> origin
 
 NS_LOG_COMPONENT_DEFINE ("TcpDatSentCbTest");
 
 /**
+<<<<<<< HEAD
+=======
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+>>>>>>> origin
  * \brief Socket that the 50% of the times saves the entire packet in the buffer,
  * while in the other 50% saves only half the packet.
  */
 class TcpSocketHalfAck : public TcpSocketMsgBase
 {
 public:
+<<<<<<< HEAD
+=======
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
+>>>>>>> origin
   static TypeId GetTypeId (void);
 
   TcpSocketHalfAck () : TcpSocketMsgBase ()
   {
   }
 
+<<<<<<< HEAD
   TcpSocketHalfAck (const TcpSocketHalfAck &other) : TcpSocketMsgBase (other)
   {
   }
+=======
+>>>>>>> origin
 protected:
   virtual Ptr<TcpSocketBase> Fork ();
   virtual void ReceivedData (Ptr<Packet> packet, const TcpHeader& tcpHeader);
@@ -83,6 +105,12 @@ TcpSocketHalfAck::ReceivedData (Ptr<Packet> packet, const TcpHeader &tcpHeader)
 
 
 /**
+<<<<<<< HEAD
+=======
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+>>>>>>> origin
  * \brief Data Sent callback test
  *
  * The rationale of this test is to check if the dataSent callback advertises
@@ -94,6 +122,16 @@ TcpSocketHalfAck::ReceivedData (Ptr<Packet> packet, const TcpHeader &tcpHeader)
 class TcpDataSentCbTestCase : public TcpGeneralTest
 {
 public:
+<<<<<<< HEAD
+=======
+
+  /**
+   * Constructor.
+   * \param desc Test description.
+   * \param size Packet size.
+   * \param packets Number of packets.
+   */
+>>>>>>> origin
   TcpDataSentCbTestCase (const std::string &desc, uint32_t size, uint32_t packets) :
     TcpGeneralTest (desc),
     m_pktSize (size),
@@ -109,9 +147,15 @@ protected:
   virtual void FinalChecks ();
 
 private:
+<<<<<<< HEAD
   uint32_t m_pktSize;
   uint32_t m_pktCount;
   uint32_t m_notifiedData;
+=======
+  uint32_t m_pktSize;      //!< Packet size.
+  uint32_t m_pktCount;     //!< Number of packets sent.
+  uint32_t m_notifiedData; //!< Amount of data notified.
+>>>>>>> origin
 };
 
 void
@@ -145,7 +189,17 @@ TcpDataSentCbTestCase::CreateReceiverSocket (Ptr<Node> node)
   return CreateSocket (node, TcpSocketHalfAck::GetTypeId (), m_congControlTypeId);
 }
 
+<<<<<<< HEAD
 static class TcpDataSentCbTestSuite : public TestSuite
+=======
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief TestSuite: Data Sent callback
+ */
+class TcpDataSentCbTestSuite : public TestSuite
+>>>>>>> origin
 {
 public:
   TcpDataSentCbTestSuite ()
@@ -158,6 +212,12 @@ public:
     AddTestCase (new TcpDataSentCbTestCase ("Check the data sent callback", 1243, 59), TestCase::QUICK);
   }
 
+<<<<<<< HEAD
 } g_tcpDataSentCbTestSuite;
 
 } // namespace ns3
+=======
+};
+
+static TcpDataSentCbTestSuite g_tcpDataSentCbTestSuite; //!< Static variable for test initialization
+>>>>>>> origin

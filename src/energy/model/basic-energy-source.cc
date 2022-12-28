@@ -154,14 +154,7 @@ BasicEnergySource::UpdateEnergySource (void)
   NS_LOG_FUNCTION (this);
   NS_LOG_DEBUG ("BasicEnergySource:Updating remaining energy.");
 
-  // do not update if simulation has finished
-  if (Simulator::IsFinished ())
-    {
-      return;
-    }
-
-  m_energyUpdateEvent.Cancel ();
-
+  double remainingEnergy = m_remainingEnergyJ;
   CalculateRemainingEnergy ();
 
   m_lastUpdateTime = Simulator::Now ();
@@ -171,16 +164,22 @@ BasicEnergySource::UpdateEnergySource (void)
       m_depleted = true;
       HandleEnergyDrainedEvent ();
     }
-
-  if (m_depleted && m_remainingEnergyJ > m_highBatteryTh * m_initialEnergyJ)
+  else if (m_depleted && m_remainingEnergyJ > m_highBatteryTh * m_initialEnergyJ)
     {
       m_depleted = false;
       HandleEnergyRechargedEvent ();
     }
+  else if (m_remainingEnergyJ != remainingEnergy)
+    {
+      NotifyEnergyChanged ();
+    }
 
-  m_energyUpdateEvent = Simulator::Schedule (m_energyUpdateInterval,
-                                             &BasicEnergySource::UpdateEnergySource,
-                                             this);
+  if (m_energyUpdateEvent.IsExpired ())
+    {
+      m_energyUpdateEvent = Simulator::Schedule (m_energyUpdateInterval,
+                                                 &BasicEnergySource::UpdateEnergySource,
+                                                 this);
+    }
 }
 
 /*
@@ -223,8 +222,9 @@ BasicEnergySource::CalculateRemainingEnergy (void)
   NS_LOG_FUNCTION (this);
   double totalCurrentA = CalculateTotalCurrent ();
   Time duration = Simulator::Now () - m_lastUpdateTime;
-  NS_ASSERT (duration.GetSeconds () >= 0);
+  NS_ASSERT (duration.IsPositive ());
   // energy = current * voltage * time
+<<<<<<< HEAD
   double energyToDecreaseJ = totalCurrentA * m_supplyVoltageV * duration.GetSeconds ();
 
   if (m_remainingEnergyJ < energyToDecreaseJ) 
@@ -236,6 +236,11 @@ BasicEnergySource::CalculateRemainingEnergy (void)
       m_remainingEnergyJ -= energyToDecreaseJ;
     }  
 
+=======
+  double energyToDecreaseJ = (totalCurrentA * m_supplyVoltageV * duration).GetSeconds ();
+  NS_ASSERT (m_remainingEnergyJ >= energyToDecreaseJ);
+  m_remainingEnergyJ -= energyToDecreaseJ;
+>>>>>>> origin
   NS_LOG_DEBUG ("BasicEnergySource:Remaining energy = " << m_remainingEnergyJ);
 }
 

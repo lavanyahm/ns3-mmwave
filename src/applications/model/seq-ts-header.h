@@ -26,12 +26,26 @@
 
 namespace ns3 {
 /**
+<<<<<<< HEAD
  * \ingroup udpclientserver
  *
  * \brief Packet header for UDP client/server application.
+=======
+ * \ingroup applications
+>>>>>>> origin
  *
- * The header is made of a 32bits sequence number followed by
- * a 64bits time stamp.
+ * \brief Packet header to carry sequence number and timestamp
+ *
+ * The header is used as a payload in applications (typically UDP) to convey
+ * a 32 bit sequence number followed by a 64 bit timestamp (12 bytes total).
+ *
+ * The timestamp is not set explicitly but automatically set to the
+ * simulation time upon creation.
+ *
+ * If you need space for an application data unit size field (e.g. for 
+ * stream-based protocols like TCP), use ns3::SeqTsSizeHeader.
+ *
+ * \sa ns3::SeqTsSizeHeader
  */
 class SeqTsHeader : public Header
 {

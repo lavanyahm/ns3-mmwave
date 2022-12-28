@@ -298,6 +298,11 @@ LteHardFrTestCase::DoRun (void)
   NetDeviceContainer enbDevs;
   NetDeviceContainer ueDevs;
   lteHelper->SetSchedulerType (m_schedulerType);
+
+  // set DL and UL bandwidth
+  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
+  lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (25));
+
   enbDevs = lteHelper->InstallEnbDevice (enbNodes);
   ueDevs = lteHelper->InstallUeDevice (ueNodes);
 
@@ -407,6 +412,11 @@ LteStrictFrTestCase::DoRun (void)
   NetDeviceContainer enbDevs;
   NetDeviceContainer ueDevs;
   lteHelper->SetSchedulerType (m_schedulerType);
+
+  // set DL and UL bandwidth
+  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
+  lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (25));
+
   enbDevs = lteHelper->InstallEnbDevice (enbNodes);
   ueDevs = lteHelper->InstallUeDevice (ueNodes);
 
@@ -524,9 +534,28 @@ LteFrAreaTestCase::UlDataRxStart (Ptr<const SpectrumValue> spectrumValue)
   NS_LOG_DEBUG ("UL DATA Power allocation :");
   Values::const_iterator it;
   uint32_t i = 0;
+  uint32_t numActiveRbs = 0;
+
+  // At the moment I could not find a better way to find total number
+  // of active RBs. This method is independent of the bandwidth
+  // configuration done in a test scenario, thus, it requires
+  // minimum change to the script.
   for (it = spectrumValue->ConstValuesBegin (); it != spectrumValue->ConstValuesEnd (); it++)
     {
-      double power =  (*it) * (m_ulBandwidth * 180000);
+      // Count the RB as active if it is part of
+      // the expected UL RBs and has Power Spectral Density (PSD) > 0
+      if (m_expectedUlRb[numActiveRbs] == true && (*it) > 0)
+        {
+          numActiveRbs++;
+        }
+    }
+  NS_LOG_DEBUG ("Total number of active RBs = " << numActiveRbs);
+
+  // The uplink power control and the uplink PSD
+  // calculation only consider active resource blocks.
+  for (it = spectrumValue->ConstValuesBegin (); it != spectrumValue->ConstValuesEnd (); it++)
+    {
+      double power =  (*it) * (numActiveRbs * 180000);
       NS_LOG_DEBUG ("RB " << i << " POWER: " << power << " expectedUlPower: " << m_expectedUlPower);
       if (m_expectedUlRb[i] == false && power > 0)
         {
@@ -668,6 +697,10 @@ LteStrictFrAreaTestCase::DoRun (void)
   NetDeviceContainer ueDevs1;
   NetDeviceContainer ueDevs2;
   lteHelper->SetSchedulerType (m_schedulerType);
+
+  // set DL and UL bandwidth
+  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
+  lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (25));
 
   lteHelper->SetFfrAlgorithmType ("ns3::LteFrStrictAlgorithm");
   lteHelper->SetFfrAlgorithmAttribute ("RsrqThreshold", UintegerValue (25));
@@ -845,6 +878,10 @@ LteSoftFrAreaTestCase::DoRun (void)
   NetDeviceContainer ueDevs1;
   NetDeviceContainer ueDevs2;
   lteHelper->SetSchedulerType (m_schedulerType);
+
+  // set DL and UL bandwidth
+  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
+  lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (25));
 
   lteHelper->SetFfrAlgorithmType ("ns3::LteFrSoftAlgorithm");
   lteHelper->SetFfrAlgorithmAttribute ("AllowCenterUeUseEdgeSubBand", BooleanValue (false));
@@ -1028,6 +1065,10 @@ LteSoftFfrAreaTestCase::DoRun (void)
   NetDeviceContainer ueDevs1;
   NetDeviceContainer ueDevs2;
   lteHelper->SetSchedulerType (m_schedulerType);
+
+  // set DL and UL bandwidth
+  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
+  lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (25));
 
   lteHelper->SetFfrAlgorithmType ("ns3::LteFfrSoftAlgorithm");
   lteHelper->SetFfrAlgorithmAttribute ("CenterRsrqThreshold", UintegerValue (28));
@@ -1528,7 +1569,7 @@ LteDistributedFfrAreaTestCase::DoRun (void)
   ueLteDevs.Add (ueDevs1);
   ueLteDevs.Add (ueDevs2);
 
-  // Add X2 inteface
+  // Add X2 interface
   lteHelper->AddX2Interface (enbNodes);
 
   // Install the IP stack on the UEs

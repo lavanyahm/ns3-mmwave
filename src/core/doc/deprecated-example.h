@@ -30,7 +30,11 @@
  * \deprecated This method will go away in future versions of ns-3.
  * See instead TheNewWay()
  */
+<<<<<<< HEAD
 NS_DEPRECATED
+=======
+NS_DEPRECATED_3_XX
+>>>>>>> origin
 void SomethingUseful (void);
 /*
  * Do something more useful.

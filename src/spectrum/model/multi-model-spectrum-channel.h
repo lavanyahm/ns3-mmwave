@@ -80,7 +80,11 @@ public:
   RxSpectrumModelInfo (Ptr<const SpectrumModel> rxSpectrumModel);
 
   Ptr<const SpectrumModel> m_rxSpectrumModel;  //!< Rx Spectrum model.
+<<<<<<< HEAD
   std::set<Ptr<SpectrumPhy> > m_rxPhySet;      //!< Container of the Rx Spectrum phy objects.
+=======
+  std::vector<Ptr<SpectrumPhy> > m_rxPhys;     //!< Container of the Rx Spectrum phy objects.
+>>>>>>> origin
 };
 
 /**
@@ -116,14 +120,12 @@ public:
   static TypeId GetTypeId (void);
 
   // inherited from SpectrumChannel
-  virtual void AddPropagationLossModel (Ptr<PropagationLossModel> loss);
-  virtual void AddSpectrumPropagationLossModel (Ptr<SpectrumPropagationLossModel> loss);
-  virtual void SetPropagationDelayModel (Ptr<PropagationDelayModel> delay);
   virtual void AddRx (Ptr<SpectrumPhy> phy);
   virtual void StartTx (Ptr<SpectrumSignalParameters> params);
 
 
   // inherited from Channel
+<<<<<<< HEAD
   virtual uint32_t GetNDevices (void) const;
   virtual Ptr<NetDevice> GetDevice (uint32_t i) const;
 
@@ -132,6 +134,10 @@ public:
    * \returns a pointer to the propagation loss model.
    */
   virtual Ptr<SpectrumPropagationLossModel> GetSpectrumPropagationLossModel (void);
+=======
+  virtual std::size_t GetNDevices (void) const;
+  virtual Ptr<NetDevice> GetDevice (std::size_t i) const;
+>>>>>>> origin
 
 
 protected:
@@ -141,24 +147,36 @@ private:
   /**
    * This method checks if m_rxSpectrumModelInfoMap contains an entry
    * for the given TX SpectrumModel. If such entry exists, it returns
-   * an interator pointing to it. If not, it creates a new entry in
+   * an iterator pointing to it. If not, it creates a new entry in
    * m_txSpectrumMpodelInfoMap, and returns an iterator to it.
    *
+<<<<<<< HEAD
    * @param txSpectrumModel The TX SpectrumModel  being considered
    *
    * @return An iterator pointing to the corresponding entry in m_txSpectrumModelInfoMap
+=======
+   * \param txSpectrumModel The TX SpectrumModel  being considered
+   *
+   * \return An iterator pointing to the corresponding entry in m_txSpectrumModelInfoMap
+>>>>>>> origin
    */
   TxSpectrumModelInfoMap_t::const_iterator FindAndEventuallyAddTxSpectrumModel (Ptr<const SpectrumModel> txSpectrumModel);
 
   /**
    * Used internally to reschedule transmission after the propagation delay.
    *
+<<<<<<< HEAD
    * @param params The signal paramters.
    * @param receiver A pointer to the receiver SpectrumPhy.
+=======
+   * \param params The signal parameters.
+   * \param receiver A pointer to the receiver SpectrumPhy.
+>>>>>>> origin
    */
   virtual void StartRx (Ptr<SpectrumSignalParameters> params, Ptr<SpectrumPhy> receiver);
 
   /**
+<<<<<<< HEAD
    * Propagation delay model to be used with this channel.
    */
   Ptr<PropagationDelayModel> m_propagationDelay;
@@ -175,6 +193,8 @@ private:
 
 
   /**
+=======
+>>>>>>> origin
    * Data structure holding, for each TX SpectrumModel,  all the
    * converters to any RX SpectrumModel, and all the corresponding
    * SpectrumPhy instances.
@@ -189,6 +209,7 @@ private:
    */
   RxSpectrumModelInfoMap_t m_rxSpectrumModelInfoMap;
 
+<<<<<<< HEAD
   /**
    * Number of devices connected to the channel.
    */
@@ -201,12 +222,13 @@ private:
    */
   double m_maxLossDb;
 
+=======
+>>>>>>> origin
   /**
-   * \deprecated The non-const \c Ptr<SpectrumPhy> argument
-   * is deprecated and will be changed to \c Ptr<const SpectrumPhy>
-   * in a future release.
+   * Number of devices connected to the channel.
    */
-  TracedCallback<Ptr<SpectrumPhy>, Ptr<SpectrumPhy>, double > m_pathLossTrace;
+  std::size_t m_numDevices;
+
 };
 
 

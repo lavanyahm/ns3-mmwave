@@ -25,7 +25,7 @@
 #ifndef SNR_TAG_H
 #define SNR_TAG_H
 
-#include "ns3/packet.h"
+#include "ns3/tag.h"
 
 namespace ns3 {
 
@@ -34,42 +34,41 @@ class Tag;
 class SnrTag : public Tag
 {
 public:
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
   static TypeId GetTypeId (void);
-  virtual TypeId GetInstanceTypeId (void) const;
 
   /**
-   * Create a SnrTag with the default snr 0
+   * Create a SnrTag with the default SNR 0
    */
   SnrTag ();
 
-  /**
-   * Create a SnrTag with the given snr value
-   * \param snr the given SNR value
-   */
-  SnrTag (double snr);
-
-  virtual uint32_t GetSerializedSize (void) const;
-  virtual void Serialize (TagBuffer i) const;
-  virtual void Deserialize (TagBuffer i);
-  virtual void Print (std::ostream &os) const;
+  TypeId GetInstanceTypeId (void) const override;
+  uint32_t GetSerializedSize (void) const override;
+  void Serialize (TagBuffer i) const override;
+  void Deserialize (TagBuffer i) override;
+  void Print (std::ostream &os) const override;
 
   /**
    * Set the SNR to the given value.
    *
-   * \param snr the value of the snr to set
+   * \param snr the value of the SNR to set in linear scale
    */
   void Set (double snr);
   /**
    * Return the SNR value.
    *
-   * \return the SNR value
+   * \return the SNR value in linear scale
    */
   double Get (void) const;
 
 
 private:
-  double m_snr;  //!< SNR value
+  double m_snr;  //!< SNR value in linear scale
 };
 
 }
+
 #endif /* SNR_TAG_H */

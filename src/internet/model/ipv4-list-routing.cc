@@ -70,18 +70,23 @@ Ipv4ListRouting::DoDispose (void)
 }
 
 void
-Ipv4ListRouting::PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const
+Ipv4ListRouting::PrintRoutingTable (Ptr<OutputStreamWrapper> stream, Time::Unit unit) const
 {
   NS_LOG_FUNCTION (this << stream);
   *stream->GetStream () << "Node: " << m_ipv4->GetObject<Node> ()->GetId () 
+<<<<<<< HEAD
                         << ", Time: " << Now().As (Time::S)
                         << ", Local time: " << GetObject<Node> ()->GetLocalTime ().As (Time::S)
+=======
+                        << ", Time: " << Now().As (unit)
+                        << ", Local time: " << m_ipv4->GetObject<Node> ()->GetLocalTime ().As (unit)
+>>>>>>> origin
                         << ", Ipv4ListRouting table" << std::endl;
   for (Ipv4RoutingProtocolList::const_iterator i = m_routingProtocols.begin ();
        i != m_routingProtocols.end (); i++)
     {
       *stream->GetStream () << "  Priority: " << (*i).first << " Protocol: " << (*i).second->GetInstanceTypeId () << std::endl;
-      (*i).second->PrintRoutingTable (stream);
+      (*i).second->PrintRoutingTable (stream, unit);
     }
 }
 
@@ -292,7 +297,7 @@ Ipv4ListRouting::GetRoutingProtocol (uint32_t index, int16_t& priority) const
 bool 
 Ipv4ListRouting::Compare (const Ipv4RoutingProtocolEntry& a, const Ipv4RoutingProtocolEntry& b)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (a.first << a.second << b.first << b.second);
   return a.first > b.first;
 }
 

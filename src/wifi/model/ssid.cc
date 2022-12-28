@@ -19,7 +19,6 @@
  */
 
 #include "ssid.h"
-#include "ns3/assert.h"
 
 namespace ns3 {
 
@@ -45,23 +44,6 @@ Ssid::Ssid (std::string s)
     }
   NS_ASSERT (len <= 32);
   m_length = len;
-  while (len < 33)
-    {
-      m_ssid[len] = 0;
-      len++;
-    }
-}
-
-Ssid::Ssid (char const ssid[32], uint8_t length)
-{
-  NS_ASSERT (length <= 32);
-  uint8_t len = 0;
-  while (len < length)
-    {
-      m_ssid[len] = ssid[len];
-      len++;
-    }
-  m_length = length;
   while (len < 33)
     {
       m_ssid[len] = 0;
@@ -135,14 +117,6 @@ Ssid::DeserializeInformationField (Buffer::Iterator start,
 
 ATTRIBUTE_HELPER_CPP (Ssid);
 
-/**
- * Serialize SSID to the given ostream
- *
- * \param os
- * \param ssid
- *
- * \return std::ostream
- */
 std::ostream &
 operator << (std::ostream &os, const Ssid &ssid)
 {
@@ -150,15 +124,8 @@ operator << (std::ostream &os, const Ssid &ssid)
   return os;
 }
 
-/**
- * Serialize from the given istream to this SSID.
- *
- * \param is
- * \param ssid
- *
- * \return std::istream
- */
-std::istream &operator >> (std::istream &is, Ssid &ssid)
+std::istream &
+operator >> (std::istream &is, Ssid &ssid)
 {
   std::string str;
   is >> str;

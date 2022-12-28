@@ -21,6 +21,7 @@
 #ifndef AARFCD_WIFI_MANAGER_H
 #define AARFCD_WIFI_MANAGER_H
 
+#include "ns3/traced-value.h"
 #include "wifi-remote-station-manager.h"
 
 namespace ns3 {
@@ -36,17 +37,28 @@ struct AarfcdWifiRemoteStation;
  * version of ns-3. Federico died before merging this work in ns-3 itself so his code was ported
  * to ns-3 later without his supervision.
  *
+<<<<<<< HEAD
  * This RAA does not support HT or VHT modes and will error exit
  * if the user tries to configure this RAA with a Wi-Fi MAC that
  * has VhtSupported or HtSupported set.
+=======
+ * This RAA does not support HT modes and will error
+ * exit if the user tries to configure this RAA with a Wi-Fi MAC
+ * that supports 802.11n or higher.
+>>>>>>> origin
  */
 class AarfcdWifiManager : public WifiRemoteStationManager
 {
 public:
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
   static TypeId GetTypeId (void);
   AarfcdWifiManager ();
   virtual ~AarfcdWifiManager ();
 
+<<<<<<< HEAD
   // Inherited from WifiRemoteStationManager
   virtual void SetHtSupported (bool enable);
   virtual void SetVhtSupported (bool enable);
@@ -56,8 +68,17 @@ private:
   virtual WifiRemoteStation * DoCreateStation (void) const;
   virtual void DoReportRxOk (WifiRemoteStation *station,
                              double rxSnr, WifiMode txMode);
+=======
+>>>>>>> origin
 
-  virtual void DoReportRtsFailed (WifiRemoteStation *station);
+private:
+  // Overridden from base class.
+  void DoInitialize (void);
+  WifiRemoteStation * DoCreateStation (void) const;
+  void DoReportRxOk (WifiRemoteStation *station,
+                     double rxSnr, WifiMode txMode);
+
+  void DoReportRtsFailed (WifiRemoteStation *station);
   /**
    * It is important to realize that "recovery" mode starts after failure of
    * the first transmission after a rate increase and ends at the first successful
@@ -67,8 +88,9 @@ private:
    * The fundamental reason for this is that there is a backoff between each data
    * transmission, be it an initial transmission or a retransmission.
    *
-   * \param station the station that we failed to send DATA
+   * \param station the station that we failed to send Data
    */
+<<<<<<< HEAD
   virtual void DoReportDataFailed (WifiRemoteStation *station);
   virtual void DoReportRtsOk (WifiRemoteStation *station,
                               double ctsSnr, WifiMode ctsMode, double rtsSnr);
@@ -81,6 +103,19 @@ private:
   virtual bool DoNeedRts (WifiRemoteStation *station,
                           Ptr<const Packet> packet, bool normally);
   virtual bool IsLowLatency (void) const;
+=======
+  void DoReportDataFailed (WifiRemoteStation *station);
+  void DoReportRtsOk (WifiRemoteStation *station,
+                      double ctsSnr, WifiMode ctsMode, double rtsSnr);
+  void DoReportDataOk (WifiRemoteStation *station, double ackSnr, WifiMode ackMode,
+                       double dataSnr, uint16_t dataChannelWidth, uint8_t dataNss);
+  void DoReportFinalRtsFailed (WifiRemoteStation *station);
+  void DoReportFinalDataFailed (WifiRemoteStation *station);
+  WifiTxVector DoGetDataTxVector (WifiRemoteStation *station);
+  WifiTxVector DoGetRtsTxVector (WifiRemoteStation *station);
+  bool DoNeedRts (WifiRemoteStation *station,
+                  uint32_t size, bool normally);
+>>>>>>> origin
 
   /**
    * Check if the use of RTS for the given station can be turned off.
@@ -113,18 +148,20 @@ private:
    */
   void TurnOnRts (AarfcdWifiRemoteStation *station);
 
-  //aarf fields below
-  uint32_t m_minTimerThreshold;
-  uint32_t m_minSuccessThreshold;
-  double m_successK;
-  uint32_t m_maxSuccessThreshold;
-  double m_timerK;
+  //AARF fields below
+  uint32_t m_minTimerThreshold;   ///< minimum timer threshold
+  uint32_t m_minSuccessThreshold; ///< minimum success threshold
+  double m_successK;              ///< Multiplication factor for the success threshold
+  uint32_t m_maxSuccessThreshold; ///< maximum success threshold
+  double m_timerK;                ///< Multiplication factor for the timer threshold
 
-  //aarf-cd fields below
-  uint32_t m_minRtsWnd;
-  uint32_t m_maxRtsWnd;
-  bool m_turnOffRtsAfterRateDecrease;
-  bool m_turnOnRtsAfterRateIncrease;
+  //AARF-CD fields below
+  uint32_t m_minRtsWnd;               ///< minimum RTS window
+  uint32_t m_maxRtsWnd;               ///< maximum RTS window
+  bool m_turnOffRtsAfterRateDecrease; ///< turn off RTS after rate decrease
+  bool m_turnOnRtsAfterRateIncrease;  ///< turn on RTS after rate increase
+
+  TracedValue<uint64_t> m_currentRate; //!< Trace rate changes
 };
 
 } //namespace ns3

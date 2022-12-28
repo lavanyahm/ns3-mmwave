@@ -52,7 +52,7 @@ IeMeshId::IeMeshId (std::string s)
 WifiInformationElementId
 IeMeshId::ElementId () const
 {
-  return IE11S_MESH_ID;
+  return IE_MESH_ID;
 }
 bool
 IeMeshId::IsEqual (IeMeshId const &o) const
@@ -148,8 +148,6 @@ std::istream &operator >> (std::istream &is, IeMeshId &a)
   a = IeMeshId (str.c_str ());
   return is;
 }
-
-ATTRIBUTE_HELPER_CPP (IeMeshId);
 
 
 } // namespace dot11s

@@ -30,10 +30,17 @@ def build(bld):
     test_test = bld.create_ns3_module_test_library('test')
     test_test.source = [
         'csma-system-test-suite.cc',
+<<<<<<< HEAD
         'ns3tc/adaptive-red-queue-disc-test-suite.cc',
         'ns3tc/fq-codel-queue-disc-test-suite.cc',
         'ns3tc/pfifo-fast-queue-disc-test-suite.cc',
         'ns3tc/pie-queue-disc-test-suite.cc',
+=======
+        'ns3tc/fq-codel-queue-disc-test-suite.cc',
+        'ns3tc/fq-cobalt-queue-disc-test-suite.cc',
+        'ns3tc/fq-pie-queue-disc-test-suite.cc',
+        'ns3tc/pfifo-fast-queue-disc-test-suite.cc',
+>>>>>>> origin
         'ns3tcp/ns3tcp-cwnd-test-suite.cc',
         'ns3tcp/ns3tcp-interop-test-suite.cc',
         'ns3tcp/ns3tcp-loss-test-suite.cc',
@@ -42,10 +49,20 @@ def build(bld):
         'ns3tcp/ns3tcp-state-test-suite.cc',
         'ns3tcp/nsctcp-loss-test-suite.cc',
         'ns3tcp/ns3tcp-socket-writer.cc',
-        'ns3wifi/wifi-interference-test-suite.cc',
         'ns3wifi/wifi-msdu-aggregator-test-suite.cc',
         'ns3wifi/wifi-ac-mapping-test-suite.cc',
+<<<<<<< HEAD
+=======
+        'ns3wifi/wifi-issue-211-test-suite.cc',
+>>>>>>> origin
         'traced/traced-callback-typedef-test-suite.cc',
         'traced/traced-value-callback-typedef-test-suite.cc',
         ]
+
+    # Tests encapsulating example programs should be listed here
+    if (bld.env['ENABLE_EXAMPLES']):
+        test_test.source.extend([
+        #   'test/test-examples-test-suite.cc',
+            ])
+    
 

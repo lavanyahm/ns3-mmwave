@@ -47,16 +47,27 @@ class YansWifiChannel;
 class YansWifiPhy : public WifiPhy
 {
 public:
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
   static TypeId GetTypeId (void);
 
   YansWifiPhy ();
   virtual ~YansWifiPhy ();
+
+  // Implementation of pure virtual method.
+  void StartTx (Ptr<WifiPpdu> ppdu) override;
+  Ptr<Channel> GetChannel (void) const override;
+  uint16_t GetGuardBandwidth (uint16_t currentChannelWidth) const override;
+  std::tuple<double, double, double> GetTxMaskRejectionParams (void) const override;
 
   /**
    * Set the YansWifiChannel this YansWifiPhy is to be connected to.
    *
    * \param channel the YansWifiChannel this YansWifiPhy is to be connected to
    */
+<<<<<<< HEAD
   void SetChannel (Ptr<YansWifiChannel> channel);
 
   /**
@@ -118,6 +129,16 @@ private:
   void EndReceive (Ptr<Packet> packet, enum WifiPreamble preamble, enum mpduType mpdutype, Ptr<InterferenceHelper::Event> event);
 
   Ptr<YansWifiChannel> m_channel;        //!< YansWifiChannel that this YansWifiPhy is connected to
+=======
+  void SetChannel (const Ptr<YansWifiChannel> channel);
+
+protected:
+  void DoDispose (void) override;
+
+
+private:
+  Ptr<YansWifiChannel> m_channel; //!< YansWifiChannel that this YansWifiPhy is connected to
+>>>>>>> origin
 };
 
 } //namespace ns3

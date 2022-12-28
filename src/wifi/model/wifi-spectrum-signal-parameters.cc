@@ -19,9 +19,14 @@
  * Modified by Marco Miozzo <mmiozzo@cttc.es> (add data and ctrl diversity)
  */
 
+<<<<<<< HEAD
 #include <ns3/log.h>
 #include <ns3/packet.h>
 #include <ns3/ptr.h>
+=======
+#include "ns3/log.h"
+#include "wifi-ppdu.h"
+>>>>>>> origin
 #include "wifi-spectrum-signal-parameters.h"
 
 namespace ns3 {
@@ -37,7 +42,11 @@ WifiSpectrumSignalParameters::WifiSpectrumSignalParameters (const WifiSpectrumSi
   : SpectrumSignalParameters (p)
 {
   NS_LOG_FUNCTION (this << &p);
+<<<<<<< HEAD
   packet = p.packet;
+=======
+  ppdu = p.ppdu;
+>>>>>>> origin
 }
 
 Ptr<SpectrumSignalParameters>

@@ -18,10 +18,27 @@
 
 #include "ns3/core-module.h"
 
+<<<<<<< HEAD
+=======
+/**
+ * \defgroup string-value-formatting
+ * Check that StringValue parses complex values correctly.
+ */
+
+/**
+ * \file
+ * \ingroup core-examples
+ * \ingroup string-value-formatting
+ * Check that StringValue parses complex values correctly.
+ * \todo This should really be turned into a TestSuite
+ */
+
+>>>>>>> origin
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("TestStringValueFormatting");
 
+<<<<<<< HEAD
 class FormattingTestObject : public Object
 {
 public:
@@ -30,6 +47,36 @@ public:
   Ptr<RandomVariableStream> GetTestVariable (void) const;
 private:
   Ptr<RandomVariableStream> m_testVariable;
+=======
+namespace {
+
+/**
+ * \ingroup string-value-formatting
+ *
+ * StringValue formatting example test object.
+ *
+ * We use an attribute containing a pointer to a random variable
+ * to stress StringValue.
+ */
+class FormattingTestObject : public Object
+{
+public:
+  /**
+   * \brief Register this type and get the TypeId.
+   * \return the object TypeId
+   */
+  static TypeId GetTypeId (void);
+  /** Default constructor */
+  FormattingTestObject ();
+  /**
+   * Get the test variable
+   * \returns the test variable
+   */
+  Ptr<RandomVariableStream> GetTestVariable (void) const;
+
+private:
+  Ptr<RandomVariableStream> m_testVariable; //!< The test variable
+>>>>>>> origin
 };
 
 NS_OBJECT_ENSURE_REGISTERED (FormattingTestObject);
@@ -49,8 +96,12 @@ FormattingTestObject::GetTypeId (void)
 }
 
 FormattingTestObject::FormattingTestObject ()
+<<<<<<< HEAD
 {
 }
+=======
+{}
+>>>>>>> origin
 
 Ptr<RandomVariableStream>
 FormattingTestObject::GetTestVariable (void) const
@@ -58,6 +109,7 @@ FormattingTestObject::GetTestVariable (void) const
   return m_testVariable;
 }
 
+<<<<<<< HEAD
 class FormattingTestObjectHelper
 {
 public:
@@ -66,6 +118,32 @@ public:
   Ptr<Object> CreateFromFactory (void);
 private:
   ObjectFactory m_factory; 
+=======
+/**
+ * \ingroup string-value-formatting
+ *
+ * StringValue formatting example test helper class.
+ */
+class FormattingTestObjectHelper
+{
+public:
+  /** Default constructor */
+  FormattingTestObjectHelper ();
+  /**
+   * Set an attribute by name
+   * \param name the attribute
+   * \param value the attribute value
+   */
+  void SetAttribute (std::string name, const AttributeValue &value);
+  /**
+   * Create an Object as configured by SetAttribute
+   * \returns the newly created Object
+   */
+  Ptr<Object> CreateFromFactory (void);
+
+private:
+  ObjectFactory m_factory; //!< Object factory
+>>>>>>> origin
 };
 
 FormattingTestObjectHelper::FormattingTestObjectHelper ()
@@ -85,7 +163,14 @@ FormattingTestObjectHelper::CreateFromFactory (void)
   return m_factory.Create ();
 }
 
+<<<<<<< HEAD
 int 
+=======
+}  // unnamed namespace
+
+
+int
+>>>>>>> origin
 main (int argc, char *argv[])
 {
   // CreateObject parsing

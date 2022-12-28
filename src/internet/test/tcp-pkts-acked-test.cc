@@ -20,12 +20,27 @@
 #include "tcp-general-test.h"
 #include "ns3/node.h"
 #include "ns3/log.h"
+<<<<<<< HEAD
 
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("TcpPktsAckedTestSuite");
 
 /**
+=======
+#include "ns3/tcp-header.h"
+
+using namespace ns3;
+
+NS_LOG_COMPONENT_DEFINE ("TcpPktsAckedTestSuite");
+
+class DummyCongControl;
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+>>>>>>> origin
  * \brief Check the number of times that PktsAcked is called
  *
  * Set a custom congestion control class, which calls PktsAckedCalled
@@ -38,6 +53,7 @@ NS_LOG_COMPONENT_DEFINE ("TcpPktsAckedTestSuite");
  * \see DummyCongControl
  * \see FinalChecks
  */
+<<<<<<< HEAD
 class DummyCongControl;
 
 class TcpPktsAckedOpenTest : public TcpGeneralTest
@@ -45,6 +61,21 @@ class TcpPktsAckedOpenTest : public TcpGeneralTest
 public:
   TcpPktsAckedOpenTest (const std::string &desc);
 
+=======
+class TcpPktsAckedOpenTest : public TcpGeneralTest
+{
+public:
+  /**
+   * \brief Constructor.
+   * \param desc Test description.
+   */
+  TcpPktsAckedOpenTest (const std::string &desc);
+
+  /**
+   * \brief Called when an ACK is received.
+   * \param segmentsAcked The segment ACKed.
+   */
+>>>>>>> origin
   void PktsAckedCalled (uint32_t segmentsAcked);
 
 protected:
@@ -56,6 +87,7 @@ protected:
   void FinalChecks ();
 
 private:
+<<<<<<< HEAD
   uint32_t m_segmentsAcked;    //! Contains the number of times PktsAcked is called
   uint32_t m_segmentsReceived; //! Contains the ack number received
 
@@ -65,14 +97,45 @@ private:
 /**
  * \brief Behaves as NewReno, except that each time PktsAcked is called,
  * a notification is sent to TcpPktsAckedOpenTest
+=======
+  uint32_t m_segmentsAcked;    //!< Contains the number of times PktsAcked is called
+  uint32_t m_segmentsReceived; //!< Contains the ack number received
+
+  Ptr<DummyCongControl> m_congCtl; //!< Dummy congestion control.
+};
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief Behaves as NewReno, except that each time PktsAcked is called,
+ * a notification is sent to TcpPktsAckedOpenTest.
+>>>>>>> origin
  */
 class DummyCongControl : public TcpNewReno
 {
 public:
+<<<<<<< HEAD
   static TypeId GetTypeId (void);
   DummyCongControl ()
   {
   }
+=======
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
+  static TypeId GetTypeId (void);
+
+  DummyCongControl ()
+  {
+  }
+
+  /**
+   * \brief Set the callback to be used when an ACK is received.
+   * \param test The callback.
+   */
+>>>>>>> origin
   void SetCallback (Callback<void, uint32_t> test)
   {
     m_test = test;
@@ -85,7 +148,11 @@ public:
   }
 
 private:
+<<<<<<< HEAD
   Callback<void, uint32_t> m_test;
+=======
+  Callback<void, uint32_t> m_test; //!< Callback to be used when an ACK is received.
+>>>>>>> origin
 };
 
 TypeId
@@ -119,7 +186,11 @@ TcpPktsAckedOpenTest::CreateSenderSocket (Ptr<Node> node)
 {
   Ptr<TcpSocketMsgBase> s = TcpGeneralTest::CreateSenderSocket (node);
   m_congCtl = CreateObject<DummyCongControl> ();
+<<<<<<< HEAD
   m_congCtl->SetCallback (MakeCallback (&ns3::TcpPktsAckedOpenTest::PktsAckedCalled, this));
+=======
+  m_congCtl->SetCallback (MakeCallback (&TcpPktsAckedOpenTest::PktsAckedCalled, this));
+>>>>>>> origin
   s->SetCongestionControlAlgorithm (m_congCtl);
 
   return s;
@@ -147,9 +218,21 @@ TcpPktsAckedOpenTest::FinalChecks ()
                          "Not all acked segments have been passed to PktsAcked method");
 }
 
+<<<<<<< HEAD
 //-----------------------------------------------------------------------------
 
 static class TcpPktsAckedTestSuite : public TestSuite
+=======
+
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief PktsAcked is calls TestSuite.
+ */
+class TcpPktsAckedTestSuite : public TestSuite
+>>>>>>> origin
 {
 public:
   TcpPktsAckedTestSuite () : TestSuite ("tcp-pkts-acked-test", UNIT)
@@ -158,6 +241,13 @@ public:
                  TestCase::QUICK);
     // Add DISORDER, RECOVERY and LOSS state check
   }
+<<<<<<< HEAD
 } g_TcpPktsAckedTestSuite;
 
 } // namespace ns3
+=======
+};
+
+static TcpPktsAckedTestSuite g_TcpPktsAckedTestSuite; //!< Static variable for test initialization
+
+>>>>>>> origin

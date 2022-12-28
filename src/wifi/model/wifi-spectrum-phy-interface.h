@@ -17,12 +17,20 @@
  *
  * Author: Nicola Baldo <nbaldo@cttc.es>
  */
+<<<<<<< HEAD
 #ifndef WIFI_SPECTRUM_PHY_INTERFACE_H
 #define WIFI_SPECTRUM_PHY_INTERFACE_H
 
 #include <ns3/ptr.h>
 #include <ns3/object.h>
 #include <ns3/spectrum-phy.h>
+=======
+
+#ifndef WIFI_SPECTRUM_PHY_INTERFACE_H
+#define WIFI_SPECTRUM_PHY_INTERFACE_H
+
+#include "ns3/spectrum-phy.h"
+>>>>>>> origin
 
 namespace ns3 {
 
@@ -42,12 +50,20 @@ class SpectrumWifiPhy;
 class WifiSpectrumPhyInterface : public SpectrumPhy
 {
 public:
+<<<<<<< HEAD
+=======
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
+>>>>>>> origin
   static TypeId GetTypeId (void);
   WifiSpectrumPhyInterface ();
   /**
    * Connect SpectrumWifiPhy object
    * \param phy SpectrumWifiPhy object to be connected to this object
    */
+<<<<<<< HEAD
   void SetSpectrumWifiPhy (Ptr<SpectrumWifiPhy> phy);
 
   // Inherited from SpectrumPhy
@@ -65,6 +81,26 @@ private:
   Ptr<SpectrumWifiPhy> m_spectrumWifiPhy;
   Ptr<NetDevice> m_netDevice;
   Ptr<SpectrumChannel> m_channel;
+=======
+  void SetSpectrumWifiPhy (const Ptr<SpectrumWifiPhy> phy);
+
+  Ptr<NetDevice> GetDevice () const override;
+  void SetDevice (const Ptr<NetDevice> d) override;
+  void SetMobility (const Ptr<MobilityModel> m) override;
+  Ptr<MobilityModel> GetMobility () const override;
+  void SetChannel (const Ptr<SpectrumChannel> c) override;
+  Ptr<const SpectrumModel> GetRxSpectrumModel () const override;
+  Ptr<AntennaModel> GetRxAntenna () const override;
+  void StartRx (Ptr<SpectrumSignalParameters> params) override;
+
+
+private:
+  void DoDispose (void) override;
+
+  Ptr<SpectrumWifiPhy> m_spectrumWifiPhy; ///< spectrum PHY
+  Ptr<NetDevice> m_netDevice; ///< the device
+  Ptr<SpectrumChannel> m_channel; ///< spectrum channel
+>>>>>>> origin
 };
 
 } // namespace ns3

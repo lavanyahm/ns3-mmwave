@@ -18,11 +18,13 @@
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
 
-#include "ns3/object.h"
 #include "ns3/log.h"
+<<<<<<< HEAD
 #include "ns3/abort.h"
 #include "ns3/uinteger.h"
 #include "ns3/queue-limits.h"
+=======
+>>>>>>> origin
 #include "net-device.h"
 #include "packet.h"
 

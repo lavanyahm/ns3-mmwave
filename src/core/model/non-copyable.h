@@ -24,7 +24,7 @@
 /**
  * \file
  * \ingroup access
- * ns3::NonCopyable class declaration and implementation.
+ * ns3::NonCopyable declaration.
  */
 
 /**
@@ -55,9 +55,11 @@ class NonCopyable
 {
 protected:
   /** Constructor. */
-  NonCopyable () {}
+  NonCopyable ()
+  {}
   /** Destructor. */
-  ~NonCopyable () {}
+  ~NonCopyable ()
+  {}
 
 private:
   /** Copy constructor.  Private, so not copyable. */
@@ -68,8 +70,8 @@ private:
    * \return The unmodified copy.
    */
   NonCopyable & operator = (const NonCopyable &other);
-}; 
+};
 
-} // namespace ns3 
+} // namespace ns3
 
 #endif /* NS3_NON_COPYABLE_H */

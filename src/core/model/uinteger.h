@@ -28,7 +28,7 @@
 /**
  * \file
  * \ingroup attribute_Uinteger
- * Unsigned integer attribute value declarations and template implementations.
+ * ns3::UintegerValue attribute value declarations and template implementations.
  */
 
 namespace ns3 {
@@ -110,7 +110,7 @@ template <typename T>
 Ptr<const AttributeChecker> MakeUintegerChecker (uint64_t min, uint64_t max)
 {
   return internal::MakeUintegerChecker (min,
-                                        max, 
+                                        max,
                                         TypeNameGet<T> ());
 }
 

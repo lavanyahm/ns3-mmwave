@@ -38,6 +38,8 @@ SOURCES = \
 	$(SRC)/mpi/doc/distributed.rst \
 	$(SRC)/energy/doc/energy.rst \
 	$(SRC)/fd-net-device/doc/fd-net-device.rst \
+	$(SRC)/fd-net-device/doc/dpdk-net-device.rst \
+	$(SRC)/fd-net-device/doc/netmap-net-device.rst \
 	$(SRC)/tap-bridge/doc/tap.rst \
 	$(SRC)/mesh/doc/source/mesh.rst \
 	$(SRC)/mesh/doc/source/mesh-user.rst \
@@ -58,11 +60,19 @@ SOURCES = \
 	$(SRC)/network/doc/simple.rst \
 	$(SRC)/network/doc/queue.rst \
 	$(SRC)/network/doc/queue-limits.rst \
+<<<<<<< HEAD
+=======
+	$(SRC)/nix-vector-routing/doc/nix-vector-routing.rst \
+>>>>>>> origin
 	$(SRC)/internet/doc/internet-stack.rst \
 	$(SRC)/internet/doc/ipv4.rst \
 	$(SRC)/internet/doc/ipv6.rst \
 	$(SRC)/internet/doc/routing-overview.rst \
 	$(SRC)/internet/doc/tcp.rst \
+<<<<<<< HEAD
+=======
+	$(SRC)/internet/doc/udp.rst \
+>>>>>>> origin
 	$(SRC)/internet-apps/doc/internet-apps.rst \
 	$(SRC)/mobility/doc/mobility.rst \
 	$(SRC)/olsr/doc/olsr.rst \
@@ -79,19 +89,25 @@ SOURCES = \
 	$(SRC)/traffic-control/doc/traffic-control-layer.rst \
 	$(SRC)/traffic-control/doc/queue-discs.rst \
 	$(SRC)/traffic-control/doc/pfifo-fast.rst \
+<<<<<<< HEAD
 	$(SRC)/traffic-control/doc/red.rst \
 	$(SRC)/traffic-control/doc/codel.rst \
 	$(SRC)/traffic-control/doc/fq-codel.rst \
 	$(SRC)/traffic-control/doc/pie.rst \
+=======
+	$(SRC)/traffic-control/doc/fifo.rst \
+	$(SRC)/traffic-control/doc/prio.rst \
+	$(SRC)/traffic-control/doc/tbf.rst \
+	$(SRC)/traffic-control/doc/red.rst \
+	$(SRC)/traffic-control/doc/codel.rst \
+	$(SRC)/traffic-control/doc/cobalt.rst \
+	$(SRC)/traffic-control/doc/fq-codel.rst \
+	$(SRC)/traffic-control/doc/fq-cobalt.rst \
+	$(SRC)/traffic-control/doc/pie.rst \
+	$(SRC)/traffic-control/doc/fq-pie.rst \
+	$(SRC)/traffic-control/doc/mq.rst \
+>>>>>>> origin
 	$(SRC)/spectrum/doc/spectrum.rst \
-	$(SRC)/stats/doc/adaptor.rst \
-	$(SRC)/stats/doc/aggregator.rst \
-	$(SRC)/stats/doc/collector.rst \
-	$(SRC)/stats/doc/data-collection-helpers.rst \
-	$(SRC)/stats/doc/data-collection-overview.rst \
-	$(SRC)/stats/doc/data-collection.rst \
-	$(SRC)/stats/doc/probe.rst \
-	$(SRC)/stats/doc/scope-and-limitations.rst \
 	$(SRC)/netanim/doc/animation.rst \
 	$(SRC)/flow-monitor/doc/flow-monitor.rst \
 	$(SRC)/wave/doc/wave.rst \
@@ -108,6 +124,11 @@ SOURCEFIGS = \
 	figures/testbed.dia \
 	figures/emulated-channel.dia \
 	$(SRC)/antenna/doc/source/figures/antenna-coordinate-system.dia	\
+	$(SRC)/applications/doc/http-embedded-object-size.png \
+	$(SRC)/applications/doc/http-main-object-size.png \
+	$(SRC)/applications/doc/http-num-of-embedded-objects.png \
+	$(SRC)/applications/doc/http-parsing-time.png \
+	$(SRC)/applications/doc/http-reading-time.png \
 	$(SRC)/network/doc/packet.dia \
 	$(SRC)/network/doc/node.dia \
 	$(SRC)/network/doc/buffer.dia \
@@ -117,16 +138,57 @@ SOURCEFIGS = \
 	$(SRC)/internet/doc/routing.dia \
 	$(SRC)/internet/doc/routing-specialization.dia \
 	$(SRC)/internet/doc/figures/tcp-state-machine.png \
+<<<<<<< HEAD
+=======
+	$(SRC)/internet/doc/figures/dctcp-10ms-50mbps-tcp-throughput.pdf \
+	$(SRC)/internet/doc/figures/dctcp-10ms-50mbps-tcp-throughput.png \
+	$(SRC)/internet/doc/figures/dctcp-80ms-50mbps-tcp-throughput.pdf \
+	$(SRC)/internet/doc/figures/dctcp-80ms-50mbps-tcp-throughput.png \
+	$(SRC)/internet/doc/figures/cubic-50ms-50mbps-tcp-cwnd-no-ecn.pdf \
+	$(SRC)/internet/doc/figures/cubic-50ms-50mbps-tcp-cwnd-no-ecn.png \
+	$(SRC)/internet/doc/figures/cubic-50ms-50mbps-tcp-cwnd-ecn.pdf \
+	$(SRC)/internet/doc/figures/cubic-50ms-50mbps-tcp-cwnd-ecn.png \
+	$(SRC)/internet/doc/figures/dce-linux-reno-vs-ns3-linux-reno.png \
+	$(SRC)/internet/doc/figures/dce-linux-reno-vs-ns3-new-reno.png \
+	$(SRC)/internet/doc/figures/ns3-new-reno-vs-ns3-linux-reno.png \
+	$(SRC)/internet/doc/figures/ns3-bbr-vs-linux-bbr.png \
+>>>>>>> origin
 	$(SRC)/wifi/doc/source/figures/WifiArchitecture.dia \
+	$(SRC)/wifi/doc/source/figures/PhyEntityHierarchy.dia \
+	$(SRC)/wifi/doc/source/figures/WifiPpduHierarchy.dia \
+	$(SRC)/wifi/doc/source/figures/FemHierarchy.dia \
 	$(SRC)/wifi/doc/source/figures/snir.dia \
+<<<<<<< HEAD
 	$(SRC)/wifi/doc/source/figures/clear-channel.eps \
 	$(SRC)/wifi/doc/source/figures/nist-frame-success-rate.eps \
+=======
+	$(SRC)/wifi/doc/source/figures/ack-su-format.pdf \
+	$(SRC)/wifi/doc/source/figures/ack-su-format.png \
+	$(SRC)/wifi/doc/source/figures/mu-bar.pdf \
+	$(SRC)/wifi/doc/source/figures/mu-bar.png \
+	$(SRC)/wifi/doc/source/figures/aggr-mu-bar.pdf \
+	$(SRC)/wifi/doc/source/figures/aggr-mu-bar.png \
+	$(SRC)/wifi/doc/source/figures/ul-ofdma.pdf \
+	$(SRC)/wifi/doc/source/figures/ul-ofdma.png \
+	$(SRC)/wifi/doc/source/figures/clear-channel.eps \
+	$(SRC)/wifi/doc/source/figures/nist-frame-success-rate.eps \
+	$(SRC)/wifi/doc/source/figures/nist-frame-success-rate-n.eps \
+	$(SRC)/wifi/doc/source/figures/nist-frame-success-rate-ac.eps \
+	$(SRC)/wifi/doc/source/figures/nist-frame-success-rate-ax.eps \
+	$(SRC)/wifi/doc/source/figures/wifi-11a-p-1500-adhoc-r-54-min-5-max-50-step-5-throughput.eps \
+	$(SRC)/wifi/doc/source/figures/wifi-11g-p-1500-infrastructure-r-6-min-5-max-50-step-5-throughput.eps \
+	$(SRC)/wifi/doc/source/figures/default-table-based-error-model-validation.eps \
+	$(SRC)/wifi/doc/source/figures/error-models-comparison.eps \
+>>>>>>> origin
 	$(SRC)/wimax/doc/WimaxArchitecture.dia \
 	$(SRC)/lte/doc/source/figures/epc-ctrl-arch.dia \
 	$(SRC)/lte/doc/source/figures/epc-data-flow-dl.dia \
+	$(SRC)/lte/doc/source/figures/epc-data-flow-dl-with-split.dia \
 	$(SRC)/lte/doc/source/figures/epc-data-flow-ul.dia \
+	$(SRC)/lte/doc/source/figures/epc-data-flow-ul-with-split.dia \
 	$(SRC)/lte/doc/source/figures/epc-profiling-scenario.dia \
 	$(SRC)/lte/doc/source/figures/epc-topology.dia \
+	$(SRC)/lte/doc/source/figures/epc-topology-with-split.dia \
 	$(SRC)/lte/doc/source/figures/epc-topology-x2-enhanced.dia \
 	$(SRC)/lte/doc/source/figures/eutran-profiling-scenario.dia \
 	$(SRC)/lte/doc/source/figures/ff-example.dia \
@@ -139,6 +201,8 @@ SOURCEFIGS = \
 	$(SRC)/lte/doc/source/figures/lte-ue-phy.dia \
 	$(SRC)/lte/doc/source/figures/lte-epc-x2-handover-seq-diagram.dia \
 	$(SRC)/lte/doc/source/figures/lte-epc-e2e-data-protocol-stack.dia \
+	$(SRC)/lte/doc/source/figures/lte-epc-e2e-data-protocol-stack-with-split.dia \
+	$(SRC)/lte/doc/source/figures/lte-epc-e2e-control-protocol-stack-with-split.dia \
 	$(SRC)/lte/doc/source/figures/lte-interference-test-scenario.dia \
 	$(SRC)/lte/doc/source/figures/lte-subframe-structure.dia \
 	$(SRC)/lte/doc/source/figures/lte-epc-x2-interface.dia \
@@ -167,7 +231,18 @@ SOURCEFIGS = \
 	$(SRC)/lte/doc/source/figures/lte-rlc-data-retx-dl.dia \
 	$(SRC)/lte/doc/source/figures/lte-rlc-data-txon-ul.dia \
 	$(SRC)/lte/doc/source/figures/lte-rlc-data-retx-ul.dia \
+	$(SRC)/lte/doc/source/figures/lte-test-rlf-one-enb.dia \
+	$(SRC)/lte/doc/source/figures/lte-test-rlf-two-enb.dia \
+	$(SRC)/lte/doc/source/figures/lena-radio-link-failure-one-enb.dia \
+	$(SRC)/lte/doc/source/figures/lena-radio-link-failure-two-enb.dia \
 	$(SRC)/lte/doc/source/figures/lte-epc-x2-entity-saps.dia \
+	$(SRC)/lte/doc/source/figures/ca-rrc-reconf.dia \
+	$(SRC)/lte/doc/source/figures/ca-lte-enb-net-device-changes.dia \
+	$(SRC)/lte/doc/source/figures/ca-lte-ue-net-device-changes.dia \
+	$(SRC)/lte/doc/source/figures/ca-enb-data-plane.dia \
+	$(SRC)/lte/doc/source/figures/ca-enb-ctrl-plane.dia \
+	$(SRC)/lte/doc/source/figures/ca-ue-data-plane.dia \
+	$(SRC)/lte/doc/source/figures/ca-ue-ctrl-plane.dia \
 	$(SRC)/lte/doc/source/figures/lte-strongest-cell-handover-algorithm.eps \
 	$(SRC)/lte/doc/source/figures/lte-phy-interference.pdf \
 	$(SRC)/lte/doc/source/figures/lte-phy-interference.png \
@@ -185,6 +260,10 @@ SOURCEFIGS = \
 	$(SRC)/lte/doc/source/figures/rrc-connection-reconfiguration-handover.png \
 	$(SRC)/lte/doc/source/figures/nas-attach.pdf \
 	$(SRC)/lte/doc/source/figures/nas-attach.png \
+	$(SRC)/lte/doc/source/figures/ca-downlink-bsr.pdf \
+	$(SRC)/lte/doc/source/figures/ca-downlink-bsr.png \
+	$(SRC)/lte/doc/source/figures/ca-setup-radio-bearer.pdf \
+	$(SRC)/lte/doc/source/figures/ca-setup-radio-bearer.png \
 	$(SRC)/lte/doc/source/figures/lte-enb-rrc-states.pdf \
 	$(SRC)/lte/doc/source/figures/lte-enb-rrc-states.png \
 	$(SRC)/lte/doc/source/figures/lte-ue-rrc-states.pdf \
@@ -237,22 +316,31 @@ SOURCEFIGS = \
 	$(SRC)/lte/doc/source/figures/MCS_16_test.pdf \
 	$(SRC)/lte/doc/source/figures/miesm_scheme.pdf \
 	$(SRC)/lte/doc/source/figures/miesm_scheme.png \
+	$(SRC)/lte/doc/source/figures/carrier-aggregation-impact.pdf \
+	$(SRC)/lte/doc/source/figures/carrier-aggregation-impact.png \
+	$(SRC)/lte/doc/source/figures/carrier-aggregation-mac-impact.pdf \
+	$(SRC)/lte/doc/source/figures/carrier-aggregation-mac-impact.png \
+	$(SRC)/lte/doc/source/figures/ca-uplink-bsr.pdf \
+	$(SRC)/lte/doc/source/figures/ca-uplink-bsr.png \
+	$(SRC)/lte/doc/source/figures/ca-test-example-ul.pdf \
+	$(SRC)/lte/doc/source/figures/ca-test-example-ul.png \
+	$(SRC)/lte/doc/source/figures/ca-test-example-dl.pdf \
+	$(SRC)/lte/doc/source/figures/ca-test-example-dl.png \
+	$(SRC)/lte/doc/source/figures/lena-radio-link-failure-one-enb-thrput.png \
+	$(SRC)/lte/doc/source/figures/lena-radio-link-failure-two-enb-thrput.png \
 	$(SRC)/lte/doc/source/figures/lte-dl-power-control.dia \
 	$(SRC)/lte/doc/source/figures/lte-ffr-scheduling.dia \
 	$(SRC)/lte/doc/source/figures/lte-handover-campaign-rem.pdf \
 	$(SRC)/lte/doc/source/figures/lte-handover-campaign-rem.png \
 	$(SRC)/lte/doc/source/figures/lte-legacy-handover-algorithm.pdf \
 	$(SRC)/lte/doc/source/figures/lte-legacy-handover-algorithm.png \
+	$(SRC)/lte/doc/source/figures/lte-ue-context-removal-from-epc.pdf \
+	$(SRC)/lte/doc/source/figures/lte-ue-context-removal-from-epc.png \
+	$(SRC)/lte/doc/source/figures/lte-ue-context-removal-from-enb-stack.pdf \
+	$(SRC)/lte/doc/source/figures/lte-ue-context-removal-from-enb-stack.png \
+	$(SRC)/lte/doc/source/figures/lte-ue-procedures-after-rlf.pdf \
+	$(SRC)/lte/doc/source/figures/lte-ue-procedures-after-rlf.png \
 	$(SRC)/uan/doc/auvmobility-classes.dia \
-	$(SRC)/stats/doc/Stat-framework-arch.png \
-	$(SRC)/stats/doc/Wifi-default.png \
-	$(SRC)/stats/doc/dcf-overview.dia \
-	$(SRC)/stats/doc/dcf-overview-with-aggregation.dia \
-	$(SRC)/stats/doc/file-example.png \
-	$(SRC)/stats/doc/gnuplot-aggregator.png \
-	$(SRC)/stats/doc/gnuplot-example.png \
-	$(SRC)/stats/doc/gnuplot-helper-example.png \
-	$(SRC)/stats/doc/seventh-packet-byte-count.png \
 	$(SRC)/netanim/doc/figures/PacketStatistics.png \
 	$(SRC)/netanim/doc/figures/PacketStatistics.pdf \
 	$(SRC)/netanim/doc/figures/NetAnim_3_105.png \
@@ -275,6 +363,11 @@ SOURCEFIGS = \
 	$(SRC)/spectrum/doc/spectrum-tv-cofdm.png \
 	$(SRC)/traffic-control/doc/classful-queue-disc.dia \
 	$(SRC)/traffic-control/doc/multi-queue-aware-queue-disc.dia \
+<<<<<<< HEAD
+=======
+	$(SRC)/traffic-control/doc/figures/collision_prob.jpeg \
+	$(SRC)/traffic-control/doc/figures/overlapped.jpeg \
+>>>>>>> origin
 	$(SRC)/lr-wpan/doc/lr-wpan-arch.dia \
 	$(SRC)/lr-wpan/doc/lr-wpan-data-example.dia \
 	$(SRC)/lr-wpan/doc/lr-wpan-primitives.dia \
@@ -297,15 +390,19 @@ IMAGES_EPS = \
 	$(FIGURES)/routing.eps \
 	$(FIGURES)/routing-specialization.eps \
 	$(FIGURES)/WifiArchitecture.eps \
+	$(FIGURES)/PhyEntityHierarchy.eps \
+	$(FIGURES)/WifiPpduHierarchy.eps \
+	$(FIGURES)/FemHierarchy.eps \
 	$(FIGURES)/snir.eps \
 	$(FIGURES)/WimaxArchitecture.eps \
-	$(FIGURES)/dcf-overview.eps \
-	$(FIGURES)/dcf-overview-with-aggregation.eps \
 	$(FIGURES)/epc-ctrl-arch.eps \
 	$(FIGURES)/epc-data-flow-dl.eps \
+	$(FIGURES)/epc-data-flow-dl-with-split.eps \
 	$(FIGURES)/epc-data-flow-ul.eps \
+	$(FIGURES)/epc-data-flow-ul-with-split.eps \
 	$(FIGURES)/epc-profiling-scenario.eps \
 	$(FIGURES)/epc-topology.eps \
+	$(FIGURES)/epc-topology-with-split.eps \
 	$(FIGURES)/epc-topology-x2-enhanced.eps \
 	$(FIGURES)/eutran-profiling-scenario.eps \
 	$(FIGURES)/ff-example.eps \
@@ -327,6 +424,8 @@ IMAGES_EPS = \
 	$(FIGURES)/lte-enb-phy.eps \
 	$(FIGURES)/lte-ue-phy.eps \
 	$(FIGURES)/lte-epc-e2e-data-protocol-stack.eps \
+	$(FIGURES)/lte-epc-e2e-data-protocol-stack-with-split.eps \
+	$(FIGURES)/lte-epc-e2e-control-protocol-stack-with-split.eps \
 	$(FIGURES)/lte-interference-test-scenario.eps \
 	$(FIGURES)/lte-subframe-structure.eps \
 	$(FIGURES)/lte-epc-x2-interface.eps \
@@ -370,7 +469,29 @@ IMAGES_EPS = \
 	$(FIGURES)/802-15-4-per-sens.eps \
 	$(FIGURES)/802-15-4-psr-distance.eps \
 	$(FIGURES)/clear-channel.eps \
+<<<<<<< HEAD
 	$(FIGURES)/nist-frame-success-rate.eps
+=======
+	$(FIGURES)/nist-frame-success-rate.eps \
+	$(FIGURES)/nist-frame-success-rate-n.eps \
+	$(FIGURES)/nist-frame-success-rate-ac.eps \
+	$(FIGURES)/nist-frame-success-rate-ax.eps \
+	$(FIGURES)/wifi-11a-p-1500-adhoc-r-54-min-5-max-50-step-5-throughput.eps \
+	$(FIGURES)/wifi-11g-p-1500-infrastructure-r-6-min-5-max-50-step-5-throughput.eps \
+	$(FIGURES)/default-table-based-error-model-validation.eps \
+	$(FIGURES)/error-models-comparison.eps \
+	$(FIGURES)/ca-rrc-reconf.eps \
+	$(FIGURES)/ca-lte-enb-net-device-changes.eps \
+	$(FIGURES)/ca-lte-ue-net-device-changes.eps \
+	$(FIGURES)/ca-enb-data-plane.eps \
+	$(FIGURES)/ca-enb-ctrl-plane.eps \
+	$(FIGURES)/ca-ue-data-plane.eps \
+	$(FIGURES)/ca-ue-ctrl-plane.eps \
+	$(FIGURES)/lte-test-rlf-one-enb.eps \
+	$(FIGURES)/lte-test-rlf-two-enb.eps \
+	$(FIGURES)/lena-radio-link-failure-one-enb.eps \
+	$(FIGURES)/lena-radio-link-failure-two-enb.eps \
+>>>>>>> origin
 
 # rescale pdf figures as necessary
 $(FIGURES)/testbed.pdf_width = 5in
@@ -389,6 +510,7 @@ $(FIGURES)/lte-interference-test-scenario.pdf_width = 3in
 $(FIGURES)/epc-ctrl-arch.pdf_width = 8cm
 $(FIGURES)/epc-topology.pdf_width = 4in
 $(FIGURES)/epc-topology-x2-enhanced.pdf_width = 14cm
+$(FIGURES)/lena-radio-link-failure-one-enb.pdf_width = 10cm
 $(FIGURES)/lte-arch-data-rrc-pdcp-rlc.pdf_width = 3in
 $(FIGURES)/lte-epc-e2e-data-protocol-stack.pdf_width = 15cm
 $(FIGURES)/ff-mac-saps.pdf_width = 5in
@@ -425,6 +547,12 @@ $(FIGURES)/lr-wpan-primitives.pdf_width = 3in
 $(FIGURES)/lr-wpan-arch.pdf_width = 2in
 $(FIGURES)/clear-channel.pdf_width = 12cm
 $(FIGURES)/nist-frame-success-rate.pdf_width = 12cm
+<<<<<<< HEAD
+=======
+$(FIGURES)/nist-frame-success-rate-n.pdf_width = 12cm
+$(FIGURES)/nist-frame-success-rate-ac.pdf_width = 12cm
+$(FIGURES)/nist-frame-success-rate-ax.pdf_width = 12cm
+>>>>>>> origin
 
 IMAGES_PNG = ${IMAGES_EPS:.eps=.png}
 IMAGES_PDF = ${IMAGES_EPS:.eps=.pdf}

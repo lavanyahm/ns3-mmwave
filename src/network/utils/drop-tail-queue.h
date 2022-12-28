@@ -19,7 +19,10 @@
 #ifndef DROPTAIL_H
 #define DROPTAIL_H
 
+<<<<<<< HEAD
 #include <queue>
+=======
+>>>>>>> origin
 #include "ns3/queue.h"
 
 namespace ns3 {
@@ -29,7 +32,12 @@ namespace ns3 {
  *
  * \brief A FIFO packet queue that drops tail-end packets on overflow
  */
+<<<<<<< HEAD
 class DropTailQueue : public Queue
+=======
+template <typename Item>
+class DropTailQueue : public Queue<Item>
+>>>>>>> origin
 {
 public:
   /**
@@ -44,8 +52,9 @@ public:
    */
   DropTailQueue ();
 
-  virtual ~DropTailQueue();
+  virtual ~DropTailQueue ();
 
+<<<<<<< HEAD
 private:
   virtual bool DoEnqueue (Ptr<QueueItem> item);
   virtual Ptr<QueueItem> DoDequeue (void);
@@ -53,7 +62,114 @@ private:
   virtual Ptr<const QueueItem> DoPeek (void) const;
 
   std::queue<Ptr<QueueItem> > m_packets; //!< the items in the queue
+=======
+  virtual bool Enqueue (Ptr<Item> item);
+  virtual Ptr<Item> Dequeue (void);
+  virtual Ptr<Item> Remove (void);
+  virtual Ptr<const Item> Peek (void) const;
+
+private:
+  using Queue<Item>::begin;
+  using Queue<Item>::end;
+  using Queue<Item>::DoEnqueue;
+  using Queue<Item>::DoDequeue;
+  using Queue<Item>::DoRemove;
+  using Queue<Item>::DoPeek;
+
+  NS_LOG_TEMPLATE_DECLARE;     //!< redefinition of the log component
+>>>>>>> origin
 };
+
+
+/**
+ * Implementation of the templates declared above.
+ */
+
+template <typename Item>
+TypeId
+DropTailQueue<Item>::GetTypeId (void)
+{
+  static TypeId tid = TypeId (("ns3::DropTailQueue<" + GetTypeParamName<DropTailQueue<Item> > () + ">").c_str ())
+    .SetParent<Queue<Item> > ()
+    .SetGroupName ("Network")
+    .template AddConstructor<DropTailQueue<Item> > ()
+    .AddAttribute ("MaxSize",
+                   "The max queue size",
+                   QueueSizeValue (QueueSize ("100p")),
+                   MakeQueueSizeAccessor (&QueueBase::SetMaxSize,
+                                          &QueueBase::GetMaxSize),
+                   MakeQueueSizeChecker ())
+  ;
+  return tid;
+}
+
+template <typename Item>
+DropTailQueue<Item>::DropTailQueue () :
+  Queue<Item> (),
+  NS_LOG_TEMPLATE_DEFINE ("DropTailQueue")
+{
+  NS_LOG_FUNCTION (this);
+}
+
+template <typename Item>
+DropTailQueue<Item>::~DropTailQueue ()
+{
+  NS_LOG_FUNCTION (this);
+}
+
+template <typename Item>
+bool
+DropTailQueue<Item>::Enqueue (Ptr<Item> item)
+{
+  NS_LOG_FUNCTION (this << item);
+
+  return DoEnqueue (end (), item);
+}
+
+template <typename Item>
+Ptr<Item>
+DropTailQueue<Item>::Dequeue (void)
+{
+  NS_LOG_FUNCTION (this);
+
+  Ptr<Item> item = DoDequeue (begin ());
+
+  NS_LOG_LOGIC ("Popped " << item);
+
+  return item;
+}
+
+template <typename Item>
+Ptr<Item>
+DropTailQueue<Item>::Remove (void)
+{
+  NS_LOG_FUNCTION (this);
+
+  Ptr<Item> item = DoRemove (begin ());
+
+  NS_LOG_LOGIC ("Removed " << item);
+
+  return item;
+}
+
+template <typename Item>
+Ptr<const Item>
+DropTailQueue<Item>::Peek (void) const
+{
+  NS_LOG_FUNCTION (this);
+
+  return DoPeek (begin ());
+}
+
+// The following explicit template instantiation declarations prevent all the
+// translation units including this header file to implicitly instantiate the
+// DropTailQueue<Packet> class and the DropTailQueue<QueueDiscItem> class. The
+// unique instances of these classes are explicitly created through the macros
+// NS_OBJECT_TEMPLATE_CLASS_DEFINE (DropTailQueue,Packet) and
+// NS_OBJECT_TEMPLATE_CLASS_DEFINE (DropTailQueue,QueueDiscItem), which are included
+// in drop-tail-queue.cc
+extern template class DropTailQueue<Packet>;
+extern template class DropTailQueue<QueueDiscItem>;
 
 } // namespace ns3
 

@@ -19,6 +19,7 @@
  */
 
 #include "dsss-parameter-set.h"
+<<<<<<< HEAD
 #include "ns3/assert.h"
 #include "ns3/log.h"
 #include <cmath>
@@ -27,6 +28,11 @@ namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("DsssParameterSet");
 
+=======
+
+namespace ns3 {
+
+>>>>>>> origin
 DsssParameterSet::DsssParameterSet ()
   : m_currentChannel (0),
     m_dsssSupported (0)
@@ -36,7 +42,11 @@ DsssParameterSet::DsssParameterSet ()
 WifiInformationElementId
 DsssParameterSet::ElementId () const
 {
+<<<<<<< HEAD
   return IE_DS_PARAMETER_SET;
+=======
+  return IE_DSSS_PARAMETER_SET;
+>>>>>>> origin
 }
 
 void
@@ -52,6 +62,7 @@ DsssParameterSet::SetCurrentChannel (uint8_t currentChannel)
 }
 
 uint8_t
+<<<<<<< HEAD
 DsssParameterSet::GetCurrentChannel (void) const
 {
   return m_currentChannel;
@@ -61,13 +72,22 @@ uint8_t
 DsssParameterSet::GetInformationFieldSize () const
 {
   NS_ASSERT (m_dsssSupported > 0);
+=======
+DsssParameterSet::GetInformationFieldSize () const
+{
+  NS_ASSERT (m_dsssSupported);
+>>>>>>> origin
   return 1;
 }
 
 Buffer::Iterator
 DsssParameterSet::Serialize (Buffer::Iterator i) const
 {
+<<<<<<< HEAD
   if (m_dsssSupported < 1)
+=======
+  if (!m_dsssSupported)
+>>>>>>> origin
     {
       return i;
     }
@@ -77,7 +97,11 @@ DsssParameterSet::Serialize (Buffer::Iterator i) const
 uint16_t
 DsssParameterSet::GetSerializedSize () const
 {
+<<<<<<< HEAD
   if (m_dsssSupported < 1)
+=======
+  if (!m_dsssSupported)
+>>>>>>> origin
     {
       return 0;
     }
@@ -87,7 +111,11 @@ DsssParameterSet::GetSerializedSize () const
 void
 DsssParameterSet::SerializeInformationField (Buffer::Iterator start) const
 {
+<<<<<<< HEAD
   if (m_dsssSupported == 1)
+=======
+  if (m_dsssSupported)
+>>>>>>> origin
     {
       start.WriteU8 (m_currentChannel);
     }
@@ -101,6 +129,7 @@ DsssParameterSet::DeserializeInformationField (Buffer::Iterator start, uint8_t l
   return length;
 }
 
+<<<<<<< HEAD
 ATTRIBUTE_HELPER_CPP (DsssParameterSet);
 
 std::ostream & operator << (std::ostream &os, const DsssParameterSet &DsssParameterSet)
@@ -113,4 +142,6 @@ std::istream &operator >> (std::istream &is, DsssParameterSet &DsssParameterSet)
   return is;
 }
 
+=======
+>>>>>>> origin
 } //namespace ns3

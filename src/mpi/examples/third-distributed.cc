@@ -14,33 +14,43 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "mpi-test-fixtures.h"
+
 #include "ns3/core-module.h"
 #include "ns3/point-to-point-module.h"
 #include "ns3/network-module.h"
 #include "ns3/applications-module.h"
-#include "ns3/wifi-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/csma-module.h"
 #include "ns3/internet-module.h"
-
 #include "ns3/mpi-module.h"
+#include "ns3/yans-wifi-helper.h"
+#include "ns3/ssid.h"
 
-// Default Network Topology
-//
-// (same as third.cc from tutorial)
-// Distributed simulation, split along the p2p link
-// Number of wifi or csma nodes can be increased up to 250
-//                          |
-//                 Rank 0   |   Rank 1
-// -------------------------|----------------------------
-//   Wifi 10.1.3.0
-//                 AP
-//  *    *    *    *
-//  |    |    |    |    10.1.1.0
-// n5   n6   n7   n0 -------------- n1   n2   n3   n4
-//                   point-to-point  |    |    |    |
-//                                   ================
-//                                     LAN 10.1.2.0
+#include <iomanip>
+
+/**
+ * \file
+ * \ingroup mpi
+ *
+ * Distributed version of third.cc from the tutorial.
+ *
+ *  Default Network Topology
+ *
+ * (same as third.cc from tutorial)
+ * Distributed simulation, split across the p2p link
+ *                          |
+ *                 Rank 0   |   Rank 1
+ * -------------------------|----------------------------
+ *   Wifi 10.1.3.0
+ *                 AP
+ *  *    *    *    *
+ *  |    |    |    |    10.1.1.0
+ * n5   n6   n7   n0 -------------- n1   n2   n3   n4
+ *                   point-to-point  |    |    |    |
+ *                                   ================
+ *                                    LAN 10.1.2.0
+ */
 
 using namespace ns3;
 
@@ -49,41 +59,41 @@ NS_LOG_COMPONENT_DEFINE ("ThirdExampleDistributed");
 int 
 main (int argc, char *argv[])
 {
-  bool verbose = true;
+  bool verbose = false;
   uint32_t nCsma = 3;
   uint32_t nWifi = 3;
   bool tracing = false;
   bool nullmsg = false;
+  bool testing = false;
 
-  CommandLine cmd;
+  CommandLine cmd (__FILE__);
   cmd.AddValue ("nCsma", "Number of \"extra\" CSMA nodes/devices", nCsma);
   cmd.AddValue ("nWifi", "Number of wifi STA devices", nWifi);
   cmd.AddValue ("verbose", "Tell echo applications to log if true", verbose);
   cmd.AddValue ("tracing", "Enable pcap tracing", tracing);
   cmd.AddValue ("nullmsg", "Enable the use of null-message synchronization", nullmsg);
+  cmd.AddValue ("test", "Enable regression test output", testing);
 
   cmd.Parse (argc,argv);
 
-  // Check for valid number of csma or wifi nodes
-  // 250 should be enough, otherwise IP addresses 
-  // soon become an issue
-  if (nWifi > 250 || nCsma > 250)
+  // The underlying restriction of 18 is due to the grid position
+  // allocator's configuration; the grid layout will exceed the
+  // bounding box if more than 18 nodes are provided.
+  if (nWifi > 18)
     {
-      std::cout << "Too many wifi or csma nodes, no more than 250 each." << std::endl;
+      std::cout << "nWifi should be 18 or less; otherwise grid layout exceeds the bounding box" << std::endl;
       return 1;
     }
 
   if (verbose)
     {
-      LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
-      LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
+      LogComponentEnable ("UdpEchoClientApplication", (LogLevel)(LOG_LEVEL_INFO | LOG_PREFIX_NODE | LOG_PREFIX_TIME));
+      LogComponentEnable ("UdpEchoServerApplication", (LogLevel)(LOG_LEVEL_INFO | LOG_PREFIX_NODE | LOG_PREFIX_TIME));
     }
 
   // Sequential fallback values
   uint32_t systemId = 0;
   uint32_t systemCount = 1;
-
-#ifdef NS3_MPI
 
   // Distributed simulation setup; by default use granted time window algorithm.
   if(nullmsg) 
@@ -99,6 +109,8 @@ main (int argc, char *argv[])
 
   MpiInterface::Enable (&argc, &argv);
 
+  SinkTracer::Init ();
+
   systemId = MpiInterface::GetSystemId ();
   systemCount = MpiInterface::GetSize ();
 
@@ -110,8 +122,6 @@ main (int argc, char *argv[])
       return 1;
     }
 
-#endif // NS3_MPI
-
   // System id of Wifi side
   uint32_t systemWifi = 0;
   
@@ -119,8 +129,9 @@ main (int argc, char *argv[])
   uint32_t systemCsma = systemCount - 1;
   
   NodeContainer p2pNodes;
-  Ptr<Node> p2pNode1 = CreateObject<Node> (systemWifi); // Create node with rank 0
-  Ptr<Node> p2pNode2 = CreateObject<Node> (systemCsma); // Create node with rank 1
+  // Create each end of the P2P link on a separate system (rank)
+  Ptr<Node> p2pNode1 = CreateObject<Node> (systemWifi);
+  Ptr<Node> p2pNode2 = CreateObject<Node> (systemCsma);
   p2pNodes.Add (p2pNode1);
   p2pNodes.Add (p2pNode2);
 
@@ -133,7 +144,8 @@ main (int argc, char *argv[])
 
   NodeContainer csmaNodes;
   csmaNodes.Add (p2pNodes.Get (1));
-  csmaNodes.Create (nCsma, systemCsma);  // Create csma nodes with rank 1
+  // Create the csma nodes on one system (rank)
+  csmaNodes.Create (nCsma, systemCsma);
 
   CsmaHelper csma;
   csma.SetChannelAttribute ("DataRate", StringValue ("100Mbps"));
@@ -143,11 +155,12 @@ main (int argc, char *argv[])
   csmaDevices = csma.Install (csmaNodes);
 
   NodeContainer wifiStaNodes;
-  wifiStaNodes.Create (nWifi, systemWifi); // Create wifi nodes with rank 0
+  // Create the wifi nodes on the other system (rank)
+  wifiStaNodes.Create (nWifi, systemWifi);
   NodeContainer wifiApNode = p2pNodes.Get (0);
 
   YansWifiChannelHelper channel = YansWifiChannelHelper::Default ();
-  YansWifiPhyHelper phy = YansWifiPhyHelper::Default ();
+  YansWifiPhyHelper phy;
   phy.SetChannel (channel.Create ());
 
   WifiHelper wifi;
@@ -214,6 +227,11 @@ main (int argc, char *argv[])
       ApplicationContainer serverApps = echoServer.Install (csmaNodes.Get (nCsma));
       serverApps.Start (Seconds (1.0));
       serverApps.Stop (Seconds (10.0));
+
+      if (testing)
+        {
+          serverApps.Get (0)->TraceConnectWithoutContext ("RxWithAddresses", MakeCallback (&SinkTracer::SinkTrace));
+        }
     }
 
   // If this rank is systemWifi
@@ -230,6 +248,11 @@ main (int argc, char *argv[])
         echoClient.Install (wifiStaNodes.Get (nWifi - 1));
       clientApps.Start (Seconds (2.0));
       clientApps.Stop (Seconds (10.0));
+
+      if (testing)
+        {
+          clientApps.Get (0)->TraceConnectWithoutContext ("RxWithAddresses", MakeCallback (&SinkTracer::SinkTrace));
+        }
     }
  
   Ipv4GlobalRoutingHelper::PopulateRoutingTables ();
@@ -243,27 +266,30 @@ main (int argc, char *argv[])
       // will be empty for rank0, since these nodes are placed on 
       // on rank 1.  All ethernet traffic will take place on rank 1.
       // Similar differences are seen in the p2p and wireless pcaps.
-      if (systemId == systemWifi)
-        {
-          pointToPoint.EnablePcapAll ("third-distributed-wifi");
-          phy.EnablePcap ("third-distributed-wifi", apDevices.Get (0));
-          csma.EnablePcap ("third-distributed-wifi", csmaDevices.Get (0), true);
-        }
-      else // systemCsma
+      if (systemId == systemCsma)
         {
           pointToPoint.EnablePcapAll ("third-distributed-csma");
           phy.EnablePcap ("third-distributed-csma", apDevices.Get (0));
           csma.EnablePcap ("third-distributed-csma", csmaDevices.Get (0), true);
+        }
+      else // systemWifi
+        {
+          pointToPoint.EnablePcapAll ("third-distributed-wifi");
+          phy.EnablePcap ("third-distributed-wifi", apDevices.Get (0));
+          csma.EnablePcap ("third-distributed-wifi", csmaDevices.Get (0), true);
         }
     }
 
   Simulator::Run ();
   Simulator::Destroy ();
 
-#ifdef NS3_MPI
+  if (testing)
+    {
+      SinkTracer::Verify (2);
+    }
+
   // Exit the MPI execution environment
   MpiInterface::Disable ();
-#endif
   
   return 0;
 }

@@ -24,7 +24,7 @@
 /**
  * \file
  * \ingroup breakpoint
- * Definition of NS_BREAKPOINT() macro and ns3::BreakpointFallback
+ * NS_BREAKPOINT() macro definition and ns3::BreakpointFallback
  * function declaration.
  */
 
@@ -38,7 +38,7 @@ namespace ns3 {
  * Modified by the GLib Team and others 1997-2000.  See the AUTHORS
  * file for a list of people on the GLib Team.  See the ChangeLog
  * files for a list of changes.  These files are distributed with
- * GLib at ftp://ftp.gtk.org/pub/gtk/. 
+ * GLib at ftp://ftp.gtk.org/pub/gtk/.
  */
 
 /**
@@ -54,7 +54,7 @@ namespace ns3 {
  * Inserts a breakpoint instruction (or equivalent system call) into
  * the code for selected machines.  When an NS_ASSERT cannot verify
  * its condition, this macro is used. Falls back to calling
- * AssertBreakpoint() for architectures where breakpoint assembly
+ * ns3::BreakpointFallback() for architectures where breakpoint assembly
  * instructions are not supported.
  */
 #if (defined (__i386__) || defined (__amd64__) || defined (__x86_64__)) && defined (__GNUC__) && __GNUC__ >= 2
@@ -79,7 +79,7 @@ namespace ns3 {
  * for when breakpoint assembly instructions are not available.  It
  * attempts to halt program execution either by a raising SIGTRAP, on
  * unix systems, or by dereferencing a null pointer.
- * 
+ *
  * Normally you should not call this function directly.
  */
 void BreakpointFallback (void);

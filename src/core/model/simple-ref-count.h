@@ -25,13 +25,14 @@
 #include "empty.h"
 #include "default-deleter.h"
 #include "assert.h"
+#include "unused.h"
 #include <stdint.h>
 #include <limits>
 
 /**
  * \file
  * \ingroup ptr
- * Reference counting for smart pointers.
+ * ns3::SimpleRefCount declaration and template implementation.
  */
 
 namespace ns3 {
@@ -43,8 +44,8 @@ namespace ns3 {
  * This template can be used to give reference-counting powers
  * to a class. This template does not require this class to
  * have a virtual destructor or a specific (or any) parent class.
- * 
- * Note: if you are moving to this template from the RefCountBase class,
+ *
+ * \note If you are moving to this template from the RefCountBase class,
  * you need to be careful to mark appropriately your destructor virtual
  * if needed. i.e., if your class has subclasses, _do_ mark your destructor
  * virtual.
@@ -72,23 +73,27 @@ template <typename T, typename PARENT = empty, typename DELETER = DefaultDeleter
 class SimpleRefCount : public PARENT
 {
 public:
-  /**
-   * Constructor
-   */
+  /** Default constructor.  */
   SimpleRefCount ()
     : m_count (1)
   {}
   /**
    * Copy constructor
+   * \param [in] o The object to copy into this one.
    */
   SimpleRefCount (const SimpleRefCount &o)
     : m_count (1)
-  {}
+  {
+    NS_UNUSED (o);
+  }
   /**
-   * Assignment
+   * Assignment operator
+   * \param [in] o The object to copy
+   * \returns The copy of \pname{o}
    */
   SimpleRefCount &operator = (const SimpleRefCount &o)
   {
+    NS_UNUSED (o);
     return *this;
   }
   /**
@@ -99,12 +104,12 @@ public:
    */
   inline void Ref (void) const
   {
-    NS_ASSERT (m_count < std::numeric_limits<uint32_t>::max());
+    NS_ASSERT (m_count < std::numeric_limits<uint32_t>::max ());
     m_count++;
   }
   /**
    * Decrement the reference count. This method should not be called
-   * by user code. SimpleRefCount instances are expected to be used in 
+   * by user code. SimpleRefCount instances are expected to be used in
    * conjunction with the Ptr template which would make calling Ref
    * unnecessary and dangerous.
    */
@@ -128,10 +133,6 @@ public:
     return m_count;
   }
 
-  /**
-   *  Noop
-   */
-  static void Cleanup (void) {}
 private:
   /**
    * The reference count.

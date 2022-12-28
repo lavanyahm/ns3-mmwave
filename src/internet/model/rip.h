@@ -194,7 +194,11 @@ public:
   virtual void NotifyAddAddress (uint32_t interface, Ipv4InterfaceAddress address);
   virtual void NotifyRemoveAddress (uint32_t interface, Ipv4InterfaceAddress address);
   virtual void SetIpv4 (Ptr<Ipv4> ipv4);
+<<<<<<< HEAD
   virtual void PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const;
+=======
+  virtual void PrintRoutingTable (Ptr<OutputStreamWrapper> stream, Time::Unit unit = Time::S) const;
+>>>>>>> origin
 
   /**
    * Split Horizon strategy type. See \RFC{2453}.
@@ -340,6 +344,10 @@ private:
 
   /**
    * \brief Send Routing Updates on all interfaces.
+<<<<<<< HEAD
+=======
+   * \param periodic true for periodic update, else triggered.
+>>>>>>> origin
    */
   void DoSendRouteUpdate (bool periodic);
 
@@ -388,8 +396,13 @@ private:
   /// Socket list type const iterator
   typedef std::map<Ptr<Socket>, uint32_t>::const_iterator SocketListCI;
 
+<<<<<<< HEAD
   SocketList m_sendSocketList; //!< list of sockets for sending (socket, interface index)
   Ptr<Socket> m_recvSocket; //!< receive socket
+=======
+  SocketList m_unicastSocketList; //!< list of sockets for unicast messages (socket, interface index)
+  Ptr<Socket> m_multicastRecvSocket; //!< multicast receive socket
+>>>>>>> origin
 
   EventId m_nextUnsolicitedUpdate; //!< Next Unsolicited Update event
   EventId m_nextTriggeredUpdate; //!< Next Triggered Update event

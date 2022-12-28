@@ -1,12 +1,16 @@
 # -*- Mode: python; py-indent-offset: 4; indent-tabs-mode: nil; coding: utf-8; -*-
 
 def build(bld):
+    bld.env['ENABLE_QD_CHANNEL'] = False
+
     obj = bld.create_ns3_program('mmwave-example', ['mmwave'])
     obj.source = 'mmwave-example.cc'
     obj = bld.create_ns3_program('mmwave-tcp-example', ['mmwave'])
     obj.source = 'mmwave-tcp-example.cc'
     obj = bld.create_ns3_program('mmwave-simple-epc', ['mmwave'])
     obj.source = 'mmwave-simple-epc.cc'
+    obj = bld.create_ns3_program('mmwave-simple-epc-ipv6', ['mmwave'])
+    obj.source = 'mmwave-simple-epc-ipv6.cc'
     obj = bld.create_ns3_program('mmwave-epc-tdma', ['mmwave'])
     obj.source = 'mmwave-epc-tdma.cc'   
     obj = bld.create_ns3_program('mmwave-tdma', ['mmwave'])
@@ -21,6 +25,7 @@ def build(bld):
     obj.source = 'mmwave-amc-test2.cc'
     obj = bld.create_ns3_program('mmwave-epc-amc-test', ['mmwave'])
     obj.source = 'mmwave-epc-amc-test.cc'    
+<<<<<<< HEAD
     obj = bld.create_ns3_program('mmwave-tcp-raytracing-example', ['mmwave'])
     obj.source = 'mmwave-tcp-raytracing-example.cc'
     obj = bld.create_ns3_program('mmwave-3gpp-channel-example', ['mmwave'])
@@ -31,3 +36,19 @@ def build(bld):
     obj.source = 'mmwave-tcp-multiflow.cc'
     obj = bld.create_ns3_program('mmwave-tcp-multi-ue', ['mmwave'])
     obj.source = 'mmwave-tcp-multi-ue.cc'
+=======
+    obj = bld.create_ns3_program('mc-twoenbs', ['mmwave'])
+    obj.source = 'mc-twoenbs.cc' 
+    obj = bld.create_ns3_program('mc-twoenbs-ipv6', ['mmwave'])
+    obj.source = 'mc-twoenbs-ipv6.cc' 
+    obj = bld.create_ns3_program('mmwave-ca-diff-bandwidth', ['mmwave'])
+    obj.source = 'mmwave-ca-diff-bandwidth.cc' 
+    obj = bld.create_ns3_program('mmwave-ca-same-bandwidth', ['mmwave'])
+    obj.source = 'mmwave-ca-same-bandwidth.cc' 
+    obj = bld.create_ns3_program('mmwave-beamforming-codebook-example', ['mmwave'])
+    obj.source = 'mmwave-beamforming-codebook-example.cc' 
+
+    if bld.env['ENABLE_QD_CHANNEL']:
+        obj = bld.create_ns3_program('qd-channel-full-stack-example', ['mmwave','qd-channel'])
+        obj.source = 'qd-channel-full-stack-example.cc'
+>>>>>>> origin

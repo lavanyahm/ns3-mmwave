@@ -16,13 +16,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+<<<<<<< HEAD
 #include "ns3/log.h"
+=======
+>>>>>>> origin
 #include "drop-tail-queue.h"
 
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("DropTailQueue");
 
+<<<<<<< HEAD
 NS_OBJECT_ENSURE_REGISTERED (DropTailQueue);
 
 TypeId DropTailQueue::GetTypeId (void)
@@ -94,6 +98,9 @@ DropTailQueue::DoPeek (void) const
 
   return m_packets.front ();
 }
+=======
+NS_OBJECT_TEMPLATE_CLASS_DEFINE (DropTailQueue,Packet);
+NS_OBJECT_TEMPLATE_CLASS_DEFINE (DropTailQueue,QueueDiscItem);
+>>>>>>> origin
 
 } // namespace ns3
-

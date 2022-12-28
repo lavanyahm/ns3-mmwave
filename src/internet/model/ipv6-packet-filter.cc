@@ -23,6 +23,10 @@
 
 #include "ns3/log.h"
 #include "ns3/enum.h"
+<<<<<<< HEAD
+=======
+#include "ns3/uinteger.h"
+>>>>>>> origin
 #include "ns3/tcp-header.h"
 #include "ns3/udp-header.h"
 #include "ipv6-queue-disc-item.h"
@@ -63,6 +67,7 @@ Ipv6PacketFilter::CheckProtocol (Ptr<QueueDiscItem> item) const
 
 // ------------------------------------------------------------------------- //
 
+<<<<<<< HEAD
 NS_OBJECT_ENSURE_REGISTERED (FqCoDelIpv6PacketFilter);
 
 TypeId
@@ -145,5 +150,7 @@ FqCoDelIpv6PacketFilter::DoClassify (Ptr< QueueDiscItem > item) const
 
   return hash;
 }
+=======
+>>>>>>> origin
 
 } // namespace ns3

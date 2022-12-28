@@ -237,13 +237,7 @@ public:
   virtual void NotifyAddRoute (Ipv6Address dst, Ipv6Prefix mask, Ipv6Address nextHop, uint32_t interface, Ipv6Address prefixToUse = Ipv6Address::GetZero ());
   virtual void NotifyRemoveRoute (Ipv6Address dst, Ipv6Prefix mask, Ipv6Address nextHop, uint32_t interface, Ipv6Address prefixToUse = Ipv6Address::GetZero ());
   virtual void SetIpv6 (Ptr<Ipv6> ipv6);
-
-  /**
-   * \brief Print the Routing Table entries
-   *
-   * \param stream the ostream the Routing table is printed to
-   */
-  virtual void PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const;
+  virtual void PrintRoutingTable (Ptr<OutputStreamWrapper> stream, Time::Unit unit = Time::S) const;
 
 protected:
   /**
@@ -269,6 +263,14 @@ private:
 
   /// Iterator for container for the multicast routes
   typedef std::list<Ipv6MulticastRoutingTableEntry *>::iterator MulticastRoutesI;
+
+  /**
+   * \brief Checks if a route is already present in the forwarding table.
+   * \param route route
+   * \param metric metric of route
+   * \return true if the route/metric is already in the forwarding table
+   */
+  bool LookupRoute (const Ipv6RoutingTableEntry &route, uint32_t metric);
 
   /**
    * \brief Lookup in the forwarding table for destination.

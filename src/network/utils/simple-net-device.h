@@ -25,8 +25,6 @@
 
 #include "ns3/traced-callback.h"
 #include "ns3/net-device.h"
-#include "ns3/queue.h"
-#include "ns3/data-rate.h"
 #include "ns3/data-rate.h"
 #include "ns3/event-id.h"
 
@@ -34,6 +32,7 @@
 
 namespace ns3 {
 
+template <typename Item> class Queue;
 class SimpleChannel;
 class Node;
 class ErrorModel;
@@ -88,14 +87,14 @@ public:
    *
    * \param queue Ptr to the new queue.
    */
-  void SetQueue (Ptr<Queue> queue);
+  void SetQueue (Ptr<Queue<Packet> > queue);
 
   /**
    * Get a copy of the attached Queue.
    *
    * \returns Ptr to the queue.
    */
-  Ptr<Queue> GetQueue (void) const;
+  Ptr<Queue<Packet> > GetQueue (void) const;
 
   /**
    * Attach a receive ErrorModel to the SimpleNetDevice.
@@ -138,6 +137,7 @@ public:
 
 protected:
   virtual void DoDispose (void);
+
 private:
   Ptr<SimpleChannel> m_channel; //!< the channel the device is connected to
   NetDevice::ReceiveCallback m_rxCallback; //!< Receive callback
@@ -159,10 +159,19 @@ private:
   TracedCallback<Ptr<const Packet> > m_phyRxDropTrace;
 
   /**
-   * The TransmitComplete method is used internally to finish the process
-   * of sending a packet out on the channel.
+   * The StartTransmission method is used internally to start the process
+   * of sending a packet out on the channel, by scheduling the
+   * FinishTransmission method at a time corresponding to the transmission
+   * delay of the packet.
    */
-  void TransmitComplete (void);
+  void StartTransmission (void);
+
+  /**
+   * The FinishTransmission method is used internally to finish the process
+   * of sending a packet out on the channel.
+   * \param packet The packet to send on the channel
+   */
+  void FinishTransmission (Ptr<Packet> packet);
 
   bool m_linkUp; //!< Flag indicating whether or not the link is up
 
@@ -172,9 +181,9 @@ private:
    */
   bool m_pointToPointMode;
 
-  Ptr<Queue> m_queue; //!< The Queue for outgoing packets.
+  Ptr<Queue<Packet> > m_queue; //!< The Queue for outgoing packets.
   DataRate m_bps; //!< The device nominal Data rate. Zero means infinite
-  EventId TransmitCompleteEvent; //!< the Tx Complete event
+  EventId FinishTransmissionEvent; //!< the Tx Complete event
 
   /**
    * List of callbacks to fire if the link changes state (up or down).

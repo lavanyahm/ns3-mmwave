@@ -23,18 +23,38 @@
 namespace ns3 {
 class WaveNetDevice;
 
+/**
+ * \ingroup wave
+ * EdcaParameter structure
+ */
 struct EdcaParameter
 {
-  uint32_t cwmin;
-  uint32_t cwmax;
-  uint32_t aifsn;
+  uint32_t cwmin; ///< minimum
+  uint32_t cwmax; ///< maximum
+  uint32_t aifsn; ///< AIFSN
 };
+<<<<<<< HEAD
 typedef std::map<AcIndex,EdcaParameter> EdcaParameters;
+=======
+
+/**
+ * \ingroup wave
+ * EDCA parameters typedef
+ */
+typedef std::map<AcIndex,EdcaParameter> EdcaParameters;
+
+/**
+ * \ingroup wave
+ * EDCA parameters iterator typedef
+ */
+>>>>>>> origin
 typedef std::map<AcIndex,EdcaParameter>::const_iterator EdcaParametersI;
 
 #define EXTENDED_ALTERNATING 0x00
 #define EXTENDED_CONTINUOUS 0xff
 /**
+ * \ingroup wave
+ *
  * \param channelNumber channel number that the SCH service
  * can be made available for communications.
  * \param operationalRateSet OperationalRateSet if present, as specified in IEEE Std 802.11.
@@ -48,11 +68,18 @@ typedef std::map<AcIndex,EdcaParameter>::const_iterator EdcaParametersI;
  */
 struct SchInfo
 {
-  uint32_t channelNumber;
+  uint32_t channelNumber; ///< channel number
   //OperationalRateSet  operationalRateSet;  // not supported
+<<<<<<< HEAD
   bool immediateAccess;
   uint8_t extendedAccess;
   EdcaParameters edcaParameters;
+=======
+  bool immediateAccess; ///< immediate access
+  uint8_t extendedAccess; ///< extended access
+  EdcaParameters edcaParameters; ///< EDCA parameters
+  /// Initializer
+>>>>>>> origin
   SchInfo ()
     : channelNumber (SCH1),
       immediateAccess (false),
@@ -60,6 +87,12 @@ struct SchInfo
   {
 
   }
+  /**
+   * Initializer
+   * \param channel the channel number
+   * \param immediate true if immediate access
+   * \param channelAccess
+   */
   SchInfo (uint32_t channel, bool immediate, uint32_t channelAccess)
     : channelNumber (channel),
       immediateAccess (immediate),
@@ -67,6 +100,16 @@ struct SchInfo
   {
 
   }
+<<<<<<< HEAD
+=======
+  /**
+   * Initializer
+   * \param channel the channel number
+   * \param immediate true if immediate access
+   * \param channelAccess
+   * \param edca the EDCA parameters
+   */
+>>>>>>> origin
   SchInfo (uint32_t channel, bool immediate, uint32_t channelAccess, EdcaParameters edca)
     : channelNumber (channel),
       immediateAccess (immediate),
@@ -77,6 +120,7 @@ struct SchInfo
   }
 };
 
+/// ChannelAccess enumeration
 enum ChannelAccess
 {
   ContinuousAccess,      // continuous access for SCHs
@@ -98,6 +142,10 @@ enum ChannelAccess
 class ChannelScheduler : public Object
 {
 public:
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
   static TypeId GetTypeId (void);
   ChannelScheduler ();
   virtual ~ChannelScheduler ();
@@ -108,11 +156,11 @@ public:
   virtual void SetWaveNetDevice (Ptr<WaveNetDevice> device);
   /**
    * \return whether CCH channel access is assigned.
-.   */
+   */
   bool IsCchAccessAssigned (void) const;
   /**
    * \return whether SCH channel access is assigned.
-.   */
+   */
   bool IsSchAccessAssigned (void) const;
   /**
    * \param channelNumber the specified channel number
@@ -141,11 +189,11 @@ public:
   /**
    * \param channelNumber the specified channel number
    * \return  the type of current assigned channel access for the specific channel.
-.  */
+   */
   virtual enum ChannelAccess GetAssignedAccessType (uint32_t channelNumber) const = 0;
 
   /**
-   * \param sch_info the request information for assigning SCH access.
+   * \param schInfo the request information for assigning SCH access.
    * \return whether the channel access is assigned successfully.
    *
    * This method is called to assign channel access for sending packets.
@@ -154,11 +202,13 @@ public:
   /**
    * \param channelNumber indicating which channel should release
    * the assigned channel access resource.
+   * \return true if successful.
    */
   bool StopSch (uint32_t channelNumber);
 
 protected:
   virtual void DoInitialize (void);
+  virtual void DoDispose (void);
 
   /**
      * \param channelNumber the specific channel
@@ -178,23 +228,26 @@ protected:
   virtual bool AssignContinuousAccess (uint32_t channelNumber, bool immediate) = 0;
   /**
    * \param channelNumber the specific channel
+   * \param extends extension duration
    * \param immediate indicate whether channel switch to channel
    * \return whether the channel access is assigned successfully
    *
    * This method will assign extended access for SCHs.
    */
   virtual bool AssignExtendedAccess (uint32_t channelNumber, uint32_t extends, bool immediate) = 0;
-  /*
+  /**
    * This method will assign default CCH access for CCH.
+   * \return whether the channel access is assigned successfully
    */
   virtual bool AssignDefaultCchAccess (void) = 0;
   /**
    * \param channelNumber indicating for which channel should release
    * the assigned channel access resource.
+   * \return whether the channel access is released successfully
    */
   virtual bool ReleaseAccess (uint32_t channelNumber) = 0;
 
-  Ptr<WaveNetDevice> m_device;
+  Ptr<WaveNetDevice> m_device; ///< the device
 };
 
 }

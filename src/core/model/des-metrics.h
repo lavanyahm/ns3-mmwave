@@ -34,6 +34,10 @@
 #include <stdint.h>    // uint32_t
 #include <fstream>
 #include <string>
+<<<<<<< HEAD
+=======
+#include <vector>
+>>>>>>> origin
 
 namespace ns3 {
 
@@ -96,7 +100,11 @@ namespace ns3 {
  * \li Run everything, retaining the results directory: <br/>
  *   \code  ./test.py --nowaf --retain \endcode
  * \li Example traces end up in \c testpy-output/, so move there: <br/>
+<<<<<<< HEAD
  *   \code cd testpy-output/$(date +"%F")*_/  \endcode 
+=======
+ *   \code cd testpy-output/$(date +"%F")*_/  \endcode
+>>>>>>> origin
  *   (Remove the `_', which is to work around a Doxygen limitation.)
  * \li Remove the traces with less than 10 events: <br/>
  *   \code wc -l *.json | sort -nr | grep "^ *[789] " | cut -d ' ' -f 9 | xargs rm -f \endcode
@@ -104,13 +112,18 @@ namespace ns3 {
  *   \code wc -l *.json | sort -n | tail -2 \endcode
  *
  */
+<<<<<<< HEAD
 class DesMetrics : public Singleton<DesMetrics> 
+=======
+class DesMetrics : public Singleton<DesMetrics>
+>>>>>>> origin
 {
 public:
 
   /**
    * Open the DesMetrics trace file and print the header.
    *
+<<<<<<< HEAD
    * The trace file will have the same base name as the main program, 
    * '.json' as the extension. 
    *
@@ -119,14 +132,30 @@ public:
    * \param outDir [in] Directory where the trace file should be written.
    */
   void Initialize (int argc, char * argv[], std::string outDir = "");
+=======
+   * The trace file will have the same base name as the main program,
+   * '.json' as the extension.
+   *
+   * \param args [in] Command line arguments.
+   * \param outDir [in] Directory where the trace file should be written.
+   */
+  void Initialize (std::vector<std::string> args, std::string outDir = "");
+>>>>>>> origin
 
   /**
    * Trace an event to self at the time it is scheduled.
    *
+<<<<<<< HEAD
    * \param now [in] The local simulation time. 
    * \param delay [in] The delay to the event. 
    */
   void Trace (const Time & now, const Time & delay); 
+=======
+   * \param now [in] The local simulation time.
+   * \param delay [in] The delay to the event.
+   */
+  void Trace (const Time & now, const Time & delay);
+>>>>>>> origin
 
   /**
    * Trace an event (with context) at the time it is scheduled.
@@ -154,14 +183,24 @@ private:
    * in \c command-line-test-suite.cc
    */
   static std::string m_outputDir;
+<<<<<<< HEAD
   
   bool m_initialized;    //!< Have we been initialized.
   std::ofstream m_os;    //!< The output json trace file stream.
+=======
+
+  bool m_initialized;    //!< Have we been initialized.
+  std::ofstream m_os;    //!< The output JSON trace file stream.
+>>>>>>> origin
   char m_separator;      //!< The separator between event records.
 
   /** Mutex to control access to the output file. */
   SystemMutex m_mutex;
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> origin
 };  // class DesMetrics
 
 

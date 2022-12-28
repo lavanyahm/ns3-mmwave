@@ -20,13 +20,26 @@
 #include "tcp-general-test.h"
 #include "ns3/node.h"
 #include "ns3/log.h"
+<<<<<<< HEAD
 #include "tcp-error-model.h"
 
 namespace ns3 {
+=======
+#include "ns3/config.h"
+#include "tcp-error-model.h"
+
+using namespace ns3;
+>>>>>>> origin
 
 NS_LOG_COMPONENT_DEFINE ("TcpBytesInFlightTestSuite");
 
 /**
+<<<<<<< HEAD
+=======
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+>>>>>>> origin
  * \brief Check the value of BytesInFlight against a home-made guess
  *
  * The guess is made wrt to segments that travel the network; we have,
@@ -39,6 +52,7 @@ NS_LOG_COMPONENT_DEFINE ("TcpBytesInFlightTestSuite");
 class TcpBytesInFlightTest : public TcpGeneralTest
 {
 public:
+<<<<<<< HEAD
   TcpBytesInFlightTest (const std::string &desc, std::vector<uint32_t> &toDrop);
 
 protected:
@@ -59,12 +73,89 @@ private:
   SequenceNumber32 m_lastAckRecv;
   SequenceNumber32 m_greatestSeqSent;
   std::vector<uint32_t> m_toDrop;     // List of SequenceNumber to drop
+=======
+  /**
+   * \brief Constructor.
+   * \param desc Description.
+   * \param toDrop Packets to drop.
+   */
+  TcpBytesInFlightTest (const std::string &desc, std::vector<uint32_t> &toDrop);
+
+protected:
+  /**
+   * \brief Create a receiver error model.
+   * \returns The receiver error model.
+   */
+  virtual Ptr<ErrorModel> CreateReceiverErrorModel ();
+  /**
+   * \brief Receive a packet.
+   * \param p The packet.
+   * \param h The TCP header.
+   * \param who Who the socket belongs to (sender or receiver).
+   */
+  virtual void Rx (const Ptr<const Packet> p, const TcpHeader&h, SocketWho who);
+  /**
+   * \brief Transmit a packet.
+   * \param p The packet.
+   * \param h The TCP header.
+   * \param who Who the socket belongs to (sender or receiver).
+   */
+  virtual void Tx (const Ptr<const Packet> p, const TcpHeader&h, SocketWho who);
+  /**
+   * \brief Track the bytes in flight.
+   * \param oldValue previous value.
+   * \param newValue actual value.
+   */
+  virtual void BytesInFlightTrace (uint32_t oldValue, uint32_t newValue);
+
+  /**
+   * \brief Called when a packet is dropped.
+   * \param ipH The IP header.
+   * \param tcpH The TCP header.
+   * \param p The packet.
+   */
+  void PktDropped (const Ipv4Header &ipH, const TcpHeader& tcpH, Ptr<const Packet> p);
+
+  /**
+   * \brief Configure the test.
+   */
+  void ConfigureEnvironment ();
+
+  /**
+   * \brief Do the checks before the RTO expires.
+   * \param tcb The TcpSocketState.
+   * \param who The socket.
+   */
+  void BeforeRTOExpired (const Ptr<const TcpSocketState> tcb, SocketWho who);
+
+  /**
+   * \brief Update when RTO expires
+   * \param oldVal old time value
+   * \param newVal new time value
+   */
+  void RTOExpired (Time oldVal, Time newVal);
+
+  /**
+   * \brief Do the final checks.
+   */
+  void FinalChecks ();
+
+private:
+  uint32_t m_guessedBytesInFlight;  //!< Guessed bytes in flight.
+  uint32_t m_dupAckRecv;            //!< Number of DupACKs received.
+  SequenceNumber32 m_lastAckRecv;   //!< Last ACK received.
+  SequenceNumber32 m_greatestSeqSent; //!< greatest sequence number sent.
+  std::vector<uint32_t> m_toDrop;     //!< List of SequenceNumber to drop
+>>>>>>> origin
 };
 
 TcpBytesInFlightTest::TcpBytesInFlightTest (const std::string &desc,
                                             std::vector<uint32_t> &toDrop)
   : TcpGeneralTest (desc),
+<<<<<<< HEAD
     m_realBytesInFlight (0),
+=======
+>>>>>>> origin
     m_guessedBytesInFlight (0),
     m_dupAckRecv (0),
     m_lastAckRecv (1),
@@ -81,6 +172,10 @@ TcpBytesInFlightTest::ConfigureEnvironment ()
   SetPropagationDelay (MilliSeconds (50));
   SetTransmitStart (Seconds (2.0));
 
+<<<<<<< HEAD
+=======
+  Config::SetDefault ("ns3::TcpSocketBase::Sack", BooleanValue (false));
+>>>>>>> origin
 }
 
 Ptr<ErrorModel>
@@ -98,13 +193,33 @@ TcpBytesInFlightTest::CreateReceiverErrorModel ()
 }
 
 void
+<<<<<<< HEAD
+=======
+TcpBytesInFlightTest::BeforeRTOExpired (const Ptr<const TcpSocketState> tcb, SocketWho who)
+{
+  NS_LOG_DEBUG ("Before RTO for " << who);
+  GetSenderSocket ()->TraceConnectWithoutContext ("RTO", MakeCallback (&TcpBytesInFlightTest::RTOExpired, this));
+}
+
+void
+TcpBytesInFlightTest::RTOExpired (Time oldVal, Time newVal)
+{
+  NS_LOG_DEBUG ("RTO expired at " << newVal.GetSeconds ());
+  m_guessedBytesInFlight = 0;
+}
+
+void
+>>>>>>> origin
 TcpBytesInFlightTest::PktDropped (const Ipv4Header &ipH, const TcpHeader &tcpH,
                                   Ptr<const Packet> p)
 {
   NS_LOG_DEBUG ("Drop seq= " << tcpH.GetSequenceNumber () << " size " << p->GetSize ());
+<<<<<<< HEAD
 
   // These bytes leave the world, they were not loved by anyone
   m_realBytesInFlight -= p->GetSize ();
+=======
+>>>>>>> origin
 }
 
 void
@@ -112,8 +227,11 @@ TcpBytesInFlightTest::Rx (const Ptr<const Packet> p, const TcpHeader &h, SocketW
 {
   if (who == RECEIVER)
     {
+<<<<<<< HEAD
       // Received has got data; bytes are not in flight anymore
       m_realBytesInFlight -= p->GetSize ();
+=======
+>>>>>>> origin
     }
   else if (who == SENDER)
     {
@@ -126,6 +244,7 @@ TcpBytesInFlightTest::Rx (const Ptr<const Packet> p, const TcpHeader &h, SocketW
             { // Previously we got some ACKs
               if (h.GetAckNumber () >= m_greatestSeqSent)
                 { // This an ACK which acknowledge all the window
+<<<<<<< HEAD
                   diff -= (m_dupAckRecv * GetSegSize (SENDER));
 
                   if (diff > m_guessedBytesInFlight)
@@ -135,12 +254,22 @@ TcpBytesInFlightTest::Rx (const Ptr<const Packet> p, const TcpHeader &h, SocketW
                       diff = m_guessedBytesInFlight;
                     }
 
+=======
+                  m_guessedBytesInFlight = 0; // All outstanding data acked
+                  diff = 0;
+>>>>>>> origin
                   m_dupAckRecv = 0;
                 }
               else
                 {
                   // Partial ACK: Update the dupAck received count
                   m_dupAckRecv -= diff / GetSegSize (SENDER);
+<<<<<<< HEAD
+=======
+                  // During fast recovery the TCP data sender respond to a partial acknowledgment
+                  // by inferring that the next in-sequence packet has been lost (RFC5681)
+                  m_guessedBytesInFlight -= GetSegSize (SENDER);
+>>>>>>> origin
                 }
             }
 
@@ -162,6 +291,15 @@ TcpBytesInFlightTest::Rx (const Ptr<const Packet> p, const TcpHeader &h, SocketW
           // Please do not count FIN and SYN/ACK as dupacks
           m_guessedBytesInFlight -= GetSegSize (SENDER);
           m_dupAckRecv++;
+<<<<<<< HEAD
+=======
+          // RFC 6675 says after two dupacks, the segment is considered lost
+          if (m_dupAckRecv == 3)
+            {
+              NS_LOG_DEBUG ("Loss of a segment detected");
+              m_guessedBytesInFlight -= GetSegSize (SENDER);
+            }
+>>>>>>> origin
           NS_LOG_DEBUG ("Dupack received, Update m_guessedBytesInFlight to " <<
                         m_guessedBytesInFlight);
         }
@@ -174,6 +312,7 @@ TcpBytesInFlightTest::Tx (const Ptr<const Packet> p, const TcpHeader &h, SocketW
 {
   if (who == SENDER)
     {
+<<<<<<< HEAD
       m_realBytesInFlight += p->GetSize ();
       if (m_greatestSeqSent <= h.GetSequenceNumber ())
         { // This is not a retransmission
@@ -183,6 +322,28 @@ TcpBytesInFlightTest::Tx (const Ptr<const Packet> p, const TcpHeader &h, SocketW
 
       // TODO: Maybe we need to account retransmission in another variable,
       // such as m_guessedRetransOut ?
+=======
+      static SequenceNumber32 retr = SequenceNumber32 (0);
+      static uint32_t times = 0;
+
+      if (m_greatestSeqSent <= h.GetSequenceNumber ())
+        { // This is not a retransmission
+          m_greatestSeqSent = h.GetSequenceNumber ();
+          times = 0;
+        }
+
+      if (retr == h.GetSequenceNumber ())
+        {
+          ++times;
+        }
+
+      if (times < 2)
+        {
+          // count retransmission only one time
+          m_guessedBytesInFlight += p->GetSize ();
+        }
+      retr = h.GetSequenceNumber ();
+>>>>>>> origin
 
       NS_LOG_DEBUG ("TX size=" << p->GetSize () << " seq=" << h.GetSequenceNumber () <<
                     " m_guessedBytesInFlight=" << m_guessedBytesInFlight);
@@ -195,7 +356,11 @@ TcpBytesInFlightTest::BytesInFlightTrace (uint32_t oldValue, uint32_t newValue)
   NS_LOG_DEBUG ("Socket BytesInFlight=" << newValue <<
                 " mine is=" << m_guessedBytesInFlight);
   NS_TEST_ASSERT_MSG_EQ (m_guessedBytesInFlight, newValue,
+<<<<<<< HEAD
                          "Guessed and measured bytes in flight differs");
+=======
+                         "At time " << Simulator::Now ().GetSeconds () << "; guessed and measured bytes in flight differs");
+>>>>>>> origin
 }
 
 void
@@ -205,9 +370,20 @@ TcpBytesInFlightTest::FinalChecks ()
                          "Still present bytes in flight at the end of the transmission");
 }
 
+<<<<<<< HEAD
 //-----------------------------------------------------------------------------
 
 static class TcpBytesInFlightTestSuite : public TestSuite
+=======
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief TestSuite: Check the value of BytesInFlight against a home-made guess
+ */
+class TcpBytesInFlightTestSuite : public TestSuite
+>>>>>>> origin
 {
 public:
   TcpBytesInFlightTestSuite () : TestSuite ("tcp-bytes-in-flight-test", UNIT)
@@ -226,6 +402,13 @@ public:
     AddTestCase (new TcpBytesInFlightTest ("BytesInFlight value, two drop of consecutive segments", toDrop),
                  TestCase::QUICK);
   }
+<<<<<<< HEAD
 } g_tcpBytesInFlightTestSuite;
 
 } // namespace ns3
+=======
+};
+
+static TcpBytesInFlightTestSuite g_tcpBytesInFlightTestSuite; //!< Static variable for test initialization
+
+>>>>>>> origin

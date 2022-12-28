@@ -35,7 +35,6 @@
 #include "ns3/inet-socket-address.h"
 #include "ns3/trace-source-accessor.h"
 #include "ns3/udp-socket-factory.h"
-#include "ns3/wifi-net-device.h"
 #include "ns3/boolean.h"
 #include "ns3/double.h"
 #include "ns3/uinteger.h"
@@ -43,9 +42,9 @@
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("DsdvRoutingProtocol");
-  
+
 namespace dsdv {
-  
+
 NS_OBJECT_ENSURE_REGISTERED (RoutingProtocol);
 
 /// UDP Port for DSDV control traffic
@@ -57,12 +56,21 @@ struct DeferredRouteOutputTag : public Tag
   /// Positive if output device is fixed in RouteOutput
   int32_t oif;
 
+  /**
+   * Constructor
+   *
+   * \param o outgoing interface (OIF)
+   */
   DeferredRouteOutputTag (int32_t o = -1)
     : Tag (),
       oif (o)
   {
   }
 
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
   static TypeId
   GetTypeId ()
   {
@@ -70,7 +78,7 @@ struct DeferredRouteOutputTag : public Tag
       .SetParent<Tag> ()
       .SetGroupName ("Dsdv")
       .AddConstructor<DeferredRouteOutputTag> ()
-      ;
+    ;
     return tid;
   }
 
@@ -229,14 +237,22 @@ RoutingProtocol::DoDispose ()
 }
 
 void
-RoutingProtocol::PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const
+RoutingProtocol::PrintRoutingTable (Ptr<OutputStreamWrapper> stream, Time::Unit unit) const
 {
   *stream->GetStream () << "Node: " << m_ipv4->GetObject<Node> ()->GetId ()
+<<<<<<< HEAD
                         << ", Time: " << Now().As (Time::S)
                         << ", Local time: " << GetObject<Node> ()->GetLocalTime ().As (Time::S)
                         << ", DSDV Routing table" << std::endl;
 
   m_routingTable.Print (stream);
+=======
+                        << ", Time: " << Now ().As (unit)
+                        << ", Local time: " << m_ipv4->GetObject<Node> ()->GetLocalTime ().As (unit)
+                        << ", DSDV Routing table" << std::endl;
+
+  m_routingTable.Print (stream, unit);
+>>>>>>> origin
   *stream->GetStream () << std::endl;
 }
 
@@ -658,8 +674,8 @@ RoutingProtocol::RecvDsdv (Ptr<Socket> socket)
                       NS_LOG_DEBUG ("Received update with better sequence number and changed metric.Waiting for WST");
                       Time tempSettlingtime = GetSettlingTime (dsdvHeader.GetDst ());
                       advTableEntry.SetSettlingTime (tempSettlingtime);
-                      NS_LOG_DEBUG ("Added Settling Time:" << tempSettlingtime.GetSeconds ()
-                                                           << "s as there is no event running for this route");
+                      NS_LOG_DEBUG ("Added Settling Time:" << tempSettlingtime.As (Time::S)
+                                                           << " as there is no event running for this route");
                       event = Simulator::Schedule (tempSettlingtime,&RoutingProtocol::SendTriggeredUpdate,this);
                       m_advRoutingTable.AddIpv4Event (dsdvHeader.GetDst (),event);
                       NS_LOG_DEBUG ("EventCreated EventUID: " << event.GetUid ());
@@ -698,7 +714,7 @@ RoutingProtocol::RecvDsdv (Ptr<Socket> socket)
                       advTableEntry.SetHop (dsdvHeader.GetHopCount ());
                       Time tempSettlingtime = GetSettlingTime (dsdvHeader.GetDst ());
                       advTableEntry.SetSettlingTime (tempSettlingtime);
-                      NS_LOG_DEBUG ("Added Settling Time," << tempSettlingtime.GetSeconds ()
+                      NS_LOG_DEBUG ("Added Settling Time," << tempSettlingtime.As (Time::S)
                                                            << " as there is no current event running for this route");
                       event = Simulator::Schedule (tempSettlingtime,&RoutingProtocol::SendTriggeredUpdate,this);
                       m_advRoutingTable.AddIpv4Event (dsdvHeader.GetDst (),event);
@@ -905,7 +921,7 @@ RoutingProtocol::SendPeriodicUpdate ()
           NS_LOG_DEBUG ("Forwarding details are, Destination: " << dsdvHeader.GetDst ()
                                                                 << ", SeqNo:" << dsdvHeader.GetDstSeqno ()
                                                                 << ", HopCount:" << dsdvHeader.GetHopCount ()
-                                                                << ", LifeTime: " << i->second.GetLifeTime ().GetSeconds ());
+                                                                << ", LifeTime: " << i->second.GetLifeTime ().As (Time::S));
         }
       for (std::map<Ipv4Address, RoutingTableEntry>::const_iterator rmItr = removedAddresses.begin (); rmItr
            != removedAddresses.end (); ++rmItr)
@@ -976,8 +992,8 @@ RoutingProtocol::NotifyInterfaceUp (uint32_t i)
   Ptr<Socket> socket = Socket::CreateSocket (GetObject<Node> (),UdpSocketFactory::GetTypeId ());
   NS_ASSERT (socket != 0);
   socket->SetRecvCallback (MakeCallback (&RoutingProtocol::RecvDsdv,this));
-  socket->Bind (InetSocketAddress (Ipv4Address::GetAny (), DSDV_PORT));
   socket->BindToNetDevice (l3->GetNetDevice (i));
+  socket->Bind (InetSocketAddress (Ipv4Address::GetAny (), DSDV_PORT));
   socket->SetAllowBroadcast (true);
   socket->SetAttribute ("IpTtl",UintegerValue (1));
   m_socketAddresses.insert (std::make_pair (socket,iface));
@@ -1034,8 +1050,8 @@ RoutingProtocol::NotifyAddAddress (uint32_t i,
       NS_ASSERT (socket != 0);
       socket->SetRecvCallback (MakeCallback (&RoutingProtocol::RecvDsdv,this));
       // Bind to any IP address so that broadcasts can be received
-      socket->Bind (InetSocketAddress (Ipv4Address::GetAny (), DSDV_PORT));
       socket->BindToNetDevice (l3->GetNetDevice (i));
+      socket->Bind (InetSocketAddress (Ipv4Address::GetAny (), DSDV_PORT));
       socket->SetAllowBroadcast (true);
       m_socketAddresses.insert (std::make_pair (socket,iface));
       Ptr<NetDevice> dev = m_ipv4->GetNetDevice (m_ipv4->GetInterfaceForAddress (iface.GetLocal ()));
@@ -1188,11 +1204,11 @@ RoutingProtocol::GetSettlingTime (Ipv4Address address)
         }
       else
         {
-          NS_LOG_DEBUG ("Route SettlingTime: " << mainrt.GetSettlingTime ().GetSeconds ()
-                                               << " and LifeTime:" << mainrt.GetLifeTime ().GetSeconds ());
-          weightedTime = Time (m_weightedFactor * mainrt.GetSettlingTime ().GetSeconds () + (1.0 - m_weightedFactor)
-                               * mainrt.GetLifeTime ().GetSeconds ());
-          NS_LOG_DEBUG ("Calculated weightedTime:" << weightedTime.GetSeconds ());
+          NS_LOG_DEBUG ("Route SettlingTime: " << mainrt.GetSettlingTime ().As (Time::S)
+                                               << " and LifeTime:" << mainrt.GetLifeTime ().As (Time::S));
+          weightedTime = m_weightedFactor * mainrt.GetSettlingTime ()  +
+            (1.0 - m_weightedFactor) * mainrt.GetLifeTime ();
+          NS_LOG_DEBUG ("Calculated weightedTime:" << weightedTime.As (Time::S));
           return weightedTime;
         }
     }

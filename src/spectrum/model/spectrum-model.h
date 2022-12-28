@@ -82,21 +82,26 @@ public:
    * center frequency of the adjacent lower (resp. upper) band.
    *
    * @param centerFreqs the vector of center frequencies.
-   *
-   * @return
    */
-  SpectrumModel (std::vector<double> centerFreqs);
+  SpectrumModel (const std::vector<double>& centerFreqs);
 
 
   /**
-   * This construct a SpectrumModel based on the explicit values of
+   * This constructs a SpectrumModel based on the explicit values of
    * center frequencies and boundaries of each subband.
    *
-   * @param bands
-   *
-   * @return
+   * @param bands the vector of bands for this model
    */
-  SpectrumModel (Bands bands);
+  SpectrumModel (const Bands& bands);
+
+  /**
+   * This constructs a SpectrumModel based on the explicit values of
+   * center frequencies and boundaries of each subband. This is used
+   * if <i>bands</i> is an rvalue.
+   *
+   * @param bands the vector of bands for this model
+   */
+  SpectrumModel (Bands&& bands);
 
   /**
    *
@@ -113,12 +118,30 @@ public:
 
   /**
    * Const Iterator to the model Bands container start.
+<<<<<<< HEAD
+=======
+   *
+   * @return a const iterator to the start of the vector of bands
+>>>>>>> origin
    */
   Bands::const_iterator Begin () const;
   /**
    * Const Iterator to the model Bands container end.
+<<<<<<< HEAD
+=======
+   *
+   * @return a const iterator to past-the-end of the vector of bands
+>>>>>>> origin
    */
   Bands::const_iterator End () const;
+
+  /**
+   * Check if another SpectrumModels has bands orthogonal to our bands.
+   *
+   * \param other another SpectrumModel
+   * \returns true if bands are orthogonal
+   */
+  bool IsOrthogonal (const SpectrumModel &other) const;
 
 private:
   Bands m_bands;         //!< Actual definition of frequency bands within this SpectrumModel

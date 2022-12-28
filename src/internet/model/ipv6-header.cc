@@ -38,8 +38,8 @@ Ipv6Header::Ipv6Header ()
     m_nextHeader (0),
     m_hopLimit (0)
 {
-  SetSourceAddress (Ipv6Address ("::"));
-  SetDestinationAddress (Ipv6Address ("::"));
+  SetSource (Ipv6Address ("::"));
+  SetDestination (Ipv6Address ("::"));
 }
 
 void Ipv6Header::SetTrafficClass (uint8_t traffic)
@@ -92,24 +92,44 @@ uint8_t Ipv6Header::GetHopLimit () const
   return m_hopLimit;
 }
 
-void Ipv6Header::SetSourceAddress (Ipv6Address src)
+void Ipv6Header::SetSource (Ipv6Address src)
 {
   m_sourceAddress = src;
 }
 
-Ipv6Address Ipv6Header::GetSourceAddress () const
+void Ipv6Header::SetSourceAddress (Ipv6Address src)
+{
+  SetSource (src);
+}
+
+Ipv6Address Ipv6Header::GetSource () const
 {
   return m_sourceAddress;
 }
 
-void Ipv6Header::SetDestinationAddress (Ipv6Address dst)
+Ipv6Address Ipv6Header::GetSourceAddress () const
+{
+  return GetSource ();
+}
+
+void Ipv6Header::SetDestination (Ipv6Address dst)
 {
   m_destinationAddress = dst;
 }
 
-Ipv6Address Ipv6Header::GetDestinationAddress () const
+void Ipv6Header::SetDestinationAddress (Ipv6Address dst)
+{
+  SetDestination (dst);
+}
+
+Ipv6Address Ipv6Header::GetDestination () const
 {
   return m_destinationAddress;
+}
+
+Ipv6Address Ipv6Header::GetDestinationAddress () const
+{
+  return GetDestination ();
 }
 
 TypeId Ipv6Header::GetTypeId (void)
@@ -192,6 +212,16 @@ void Ipv6Header::SetDscp (DscpType dscp)
   m_trafficClass |= (dscp << 2);
 }
 
+<<<<<<< HEAD
+=======
+void Ipv6Header::SetEcn (EcnType ecn)
+{
+  NS_LOG_FUNCTION (this << ecn);
+  m_trafficClass &= 0xFC; // Clear out the ECN part, retain 6 bits of DSCP
+  m_trafficClass |= ecn;
+}
+
+>>>>>>> origin
 Ipv6Header::DscpType Ipv6Header::GetDscp (void) const
 {
   NS_LOG_FUNCTION (this);
@@ -251,6 +281,34 @@ std::string Ipv6Header::DscpTypeToString (DscpType dscp) const
     };
 }
 
+<<<<<<< HEAD
+=======
+Ipv6Header::EcnType
+Ipv6Header::GetEcn (void) const
+{
+  NS_LOG_FUNCTION (this);
+  // Extract only last 2 bits of Traffic Class byte, i.e 0x3
+  return EcnType (m_trafficClass & 0x3);
+}
+
+std::string Ipv6Header::EcnTypeToString (EcnType ecn) const
+{
+  NS_LOG_FUNCTION (this << ecn);
+  switch (ecn)
+    {
+      case ECN_NotECT:
+        return "Not-ECT";
+      case ECN_ECT1:
+        return "ECT (1)";
+      case ECN_ECT0:
+        return "ECT (0)";
+      case ECN_CE:
+        return "CE";
+      default:
+        return "Unknown ECN codepoint";
+    };
+}
+>>>>>>> origin
 
 } /* namespace ns3 */
 

@@ -18,17 +18,14 @@
 #include "ns3/point-to-point-module.h"
 #include "ns3/network-module.h"
 #include "ns3/applications-module.h"
-#include "ns3/wifi-module.h"
 #include "ns3/mobility-module.h"
 #include "ns3/csma-module.h"
 #include "ns3/internet-module.h"
+#include "ns3/yans-wifi-helper.h"
+#include "ns3/ssid.h"
 
 // Default Network Topology
 //
-// Number of wifi or csma nodes can be increased up to 250
-//                          |
-//                 Rank 0   |   Rank 1
-// -------------------------|----------------------------
 //   Wifi 10.1.3.0
 //                 AP
 //  *    *    *    *
@@ -50,7 +47,7 @@ main (int argc, char *argv[])
   uint32_t nWifi = 3;
   bool tracing = false;
 
-  CommandLine cmd;
+  CommandLine cmd (__FILE__);
   cmd.AddValue ("nCsma", "Number of \"extra\" CSMA nodes/devices", nCsma);
   cmd.AddValue ("nWifi", "Number of wifi STA devices", nWifi);
   cmd.AddValue ("verbose", "Tell echo applications to log if true", verbose);
@@ -58,12 +55,12 @@ main (int argc, char *argv[])
 
   cmd.Parse (argc,argv);
 
-  // Check for valid number of csma or wifi nodes
-  // 250 should be enough, otherwise IP addresses 
-  // soon become an issue
-  if (nWifi > 250 || nCsma > 250)
+  // The underlying restriction of 18 is due to the grid position
+  // allocator's configuration; the grid layout will exceed the
+  // bounding box if more than 18 nodes are provided.
+  if (nWifi > 18)
     {
-      std::cout << "Too many wifi or csma nodes, no more than 250 each." << std::endl;
+      std::cout << "nWifi should be 18 or less; otherwise grid layout exceeds the bounding box" << std::endl;
       return 1;
     }
 
@@ -99,7 +96,7 @@ main (int argc, char *argv[])
   NodeContainer wifiApNode = p2pNodes.Get (0);
 
   YansWifiChannelHelper channel = YansWifiChannelHelper::Default ();
-  YansWifiPhyHelper phy = YansWifiPhyHelper::Default ();
+  YansWifiPhyHelper phy;
   phy.SetChannel (channel.Create ());
 
   WifiHelper wifi;
@@ -176,8 +173,9 @@ main (int argc, char *argv[])
 
   Simulator::Stop (Seconds (10.0));
 
-  if (tracing == true)
+  if (tracing)
     {
+      phy.SetPcapDataLinkType (WifiPhyHelper::DLT_IEEE802_11_RADIO);
       pointToPoint.EnablePcapAll ("third");
       phy.EnablePcap ("third", apDevices.Get (0));
       csma.EnablePcap ("third", csmaDevices.Get (0), true);

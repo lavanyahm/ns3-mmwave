@@ -18,7 +18,7 @@
  */
 
 #define NS_LOG_APPEND_CONTEXT                                   \
-  if (m_node) { std::clog << Simulator::Now ().GetSeconds () << " [node " << m_node->GetId () << "] "; } 
+  if (m_node) { std::clog << Simulator::Now ().As (Time::S) << " [node " << m_node->GetId () << "] "; } 
 
 #include "ns3/node.h"
 #include "ns3/inet-socket-address.h"
@@ -124,7 +124,7 @@ NscTcpSocketImpl::NscTcpSocketImpl(const NscTcpSocketImpl& sock)
     m_nscTcpSocket (0),
     m_sndBufSize (sock.m_sndBufSize)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   NS_LOG_LOGIC ("Invoked the copy constructor");
   //copy the pending data if necessary
   if(!sock.m_txBuffer.empty () )
@@ -178,7 +178,7 @@ NscTcpSocketImpl::SetTcp (Ptr<NscTcpL4Protocol> tcp)
 enum Socket::SocketErrno
 NscTcpSocketImpl::GetErrno (void) const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   return m_errno;
 }
 
@@ -191,14 +191,14 @@ NscTcpSocketImpl::GetSocketType (void) const
 Ptr<Node>
 NscTcpSocketImpl::GetNode (void) const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   return m_node;
 }
 
 void 
 NscTcpSocketImpl::Destroy (void)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   m_node = 0;
   m_endPoint = 0;
   m_tcp = 0;
@@ -206,7 +206,7 @@ NscTcpSocketImpl::Destroy (void)
 int
 NscTcpSocketImpl::FinishBind (void)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   if (m_endPoint == 0)
     {
       return -1;
@@ -221,7 +221,7 @@ NscTcpSocketImpl::FinishBind (void)
 int
 NscTcpSocketImpl::Bind (void)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   m_endPoint = m_tcp->Allocate ();
   return FinishBind ();
 }
@@ -250,7 +250,7 @@ NscTcpSocketImpl::Bind (const Address &address)
     }
   else if (ipv4 == Ipv4Address::GetAny () && port != 0)
     {
-      m_endPoint = m_tcp->Allocate (port);
+      m_endPoint = m_tcp->Allocate (GetBoundNetDevice (), port);
       NS_LOG_LOGIC ("NscTcpSocketImpl "<<this<<" got an endpoint: "<<m_endPoint);
     }
   else if (ipv4 != Ipv4Address::GetAny () && port == 0)
@@ -260,7 +260,7 @@ NscTcpSocketImpl::Bind (const Address &address)
     }
   else if (ipv4 != Ipv4Address::GetAny () && port != 0)
     {
-      m_endPoint = m_tcp->Allocate (ipv4, port);
+      m_endPoint = m_tcp->Allocate (GetBoundNetDevice (), ipv4, port);
       NS_LOG_LOGIC ("NscTcpSocketImpl "<<this<<" got an endpoint: "<<m_endPoint);
     }
 
@@ -268,17 +268,30 @@ NscTcpSocketImpl::Bind (const Address &address)
   return FinishBind ();
 }
 
+/* Inherit from Socket class: Bind this socket to the specified NetDevice */
+void
+NscTcpSocketImpl::BindToNetDevice (Ptr<NetDevice> netdevice)
+{
+  NS_LOG_FUNCTION (this << netdevice);
+  Socket::BindToNetDevice (netdevice); // Includes sanity check
+  if (m_endPoint != 0)
+    {
+      m_endPoint->BindToNetDevice (netdevice);
+    }
+  return;
+}
+
 int 
 NscTcpSocketImpl::ShutdownSend (void)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   m_shutdownSend = true;
   return 0;
 }
 int 
 NscTcpSocketImpl::ShutdownRecv (void)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   m_shutdownRecv = true;
   return 0;
 }
@@ -386,7 +399,7 @@ NscTcpSocketImpl::SendTo (Ptr<Packet> p, uint32_t flags, const Address &address)
 uint32_t
 NscTcpSocketImpl::GetTxAvailable (void) const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   if (m_txBufferSize != 0)
     {
       NS_ASSERT (m_txBufferSize <= m_sndBufSize);
@@ -411,6 +424,7 @@ NscTcpSocketImpl::Listen (void)
 void
 NscTcpSocketImpl::NSCWakeup ()
 {
+  NS_LOG_FUNCTION (this);
   switch (m_state) {
     case SYN_SENT:
       if (!m_nscTcpSocket->is_connected ())
@@ -420,7 +434,16 @@ NscTcpSocketImpl::NSCWakeup ()
     // fall through to schedule read/write events
     case ESTABLISHED:
       if (!m_txBuffer.empty ())
-        Simulator::ScheduleNow (&NscTcpSocketImpl::SendPendingData, this);
+        {
+          Simulator::ScheduleNow (&NscTcpSocketImpl::SendPendingData, this);
+        }
+      else
+        {
+          if (GetTxAvailable ())
+            {
+              NotifySend (GetTxAvailable ());
+            }
+        }
       Simulator::ScheduleNow (&NscTcpSocketImpl::ReadPendingData, this);
       break;
     case LISTEN:
@@ -435,7 +458,7 @@ NscTcpSocketImpl::NSCWakeup ()
 Ptr<Packet>
 NscTcpSocketImpl::Recv (uint32_t maxSize, uint32_t flags)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this << maxSize << flags);
   if (m_deliveryQueue.empty () )
     {
       m_errno = ERROR_AGAIN;
@@ -468,7 +491,7 @@ NscTcpSocketImpl::RecvFrom (uint32_t maxSize, uint32_t flags,
 int
 NscTcpSocketImpl::GetSockName (Address &address) const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this << address);
   address = InetSocketAddress (m_localAddress, m_localPort);
   return 0;
 }
@@ -491,7 +514,7 @@ NscTcpSocketImpl::GetPeerName (Address &address) const
 uint32_t
 NscTcpSocketImpl::GetRxAvailable (void) const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   // We separately maintain this state to avoid walking the queue 
   // every time this might be called
   return m_rxAvailable;
@@ -686,8 +709,13 @@ bool NscTcpSocketImpl::SendPendingData (void)
 
   if (written > 0)
     {
+      NS_LOG_DEBUG ("Notifying data sent, remaining txbuffer size: " << m_txBufferSize);
       Simulator::ScheduleNow (&NscTcpSocketImpl::NotifyDataSent, this, ret);
       return true;
+    }
+  else
+    {
+      NS_LOG_DEBUG ("Not notifying data sent, return value " << ret);
     }
   return false;
 }
@@ -869,7 +897,7 @@ NscTcpSocketImpl::GetNativeNs3Errno (int error) const
     {
     case NSC_EADDRINUSE:   // fallthrough
     case NSC_EADDRNOTAVAIL: return ERROR_AFNOSUPPORT;
-    case NSC_EINPROGRESS:   // Altough nsc sockets are nonblocking, we pretend they're not.
+    case NSC_EINPROGRESS:   // Although nsc sockets are nonblocking, we pretend they're not.
     case NSC_EAGAIN: return ERROR_AGAIN;
     case NSC_EISCONN:   // fallthrough
     case NSC_EALREADY: return ERROR_ISCONN;

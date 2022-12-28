@@ -36,6 +36,10 @@ class ArpCache;
 class Ipv4InterfaceAddress;
 class Ipv4Address;
 class Ipv4Header;
+<<<<<<< HEAD
+=======
+class TrafficControlLayer;
+>>>>>>> origin
 
 /**
  * \ingroup ipv4
@@ -169,7 +173,7 @@ public:
   Ipv4InterfaceAddress GetAddress (uint32_t index) const;
 
   /**
-   * \returns the number of Ipv4InterfaceAddresss stored on this interface
+   * \returns the number of Ipv4InterfaceAddress stored on this interface
    */
   uint32_t GetNAddresses (void) const;
 
@@ -191,6 +195,23 @@ public:
 protected:
   virtual void DoDispose (void);
 private:
+  /**
+   * \brief Copy constructor
+   * \param o object to copy
+   *
+   * Defined and unimplemented to avoid misuse
+   */
+  Ipv4Interface (const Ipv4Interface &o);
+
+  /**
+   * \brief Assignment operator
+   * \param o object to copy
+   * \returns the copied object
+   *
+   * Defined and unimplemented to avoid misuse
+   */
+  Ipv4Interface &operator = (const Ipv4Interface &o);
+
   /**
    * \brief Initialize interface.
    */

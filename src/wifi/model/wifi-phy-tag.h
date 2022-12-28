@@ -17,6 +17,7 @@
  *
  * Author: Nicola Baldo <nbaldo@cttc.es>
  */
+<<<<<<< HEAD
 #ifndef WIFI_PHY_TAG_H
 #define WIFI_PHY_TAG_H
 
@@ -24,6 +25,15 @@
 #include <ns3/wifi-tx-vector.h>
 #include <ns3/wifi-preamble.h>
 #include <ns3/wifi-phy.h>
+=======
+
+#ifndef WIFI_PHY_TAG_H
+#define WIFI_PHY_TAG_H
+
+#include "ns3/tag.h"
+#include "wifi-phy-common.h"
+#include "wifi-mode.h"
+>>>>>>> origin
 
 namespace ns3 {
 
@@ -36,8 +46,17 @@ namespace ns3 {
 class WifiPhyTag : public Tag
 {
 public:
+<<<<<<< HEAD
   static TypeId GetTypeId (void);
   virtual TypeId GetInstanceTypeId (void) const;
+=======
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
+  static TypeId GetTypeId (void);
+  TypeId GetInstanceTypeId (void) const;
+>>>>>>> origin
 
   /**
    * Constructor
@@ -45,6 +64,7 @@ public:
   WifiPhyTag ();
   /**
    * Constructor
+<<<<<<< HEAD
    * \param txVector the WifiTxVector
    * \param preamble the WifiPreamble
    * \param mpduType the mpduType
@@ -76,6 +96,40 @@ private:
   WifiTxVector m_wifiTxVector;
   int32_t m_wifiPreamble;
   enum mpduType m_mpduType;
+=======
+   * \param preamble the preamble type
+   * \param modulation the modulation
+   * \param frameComplete the frameComplete
+   */
+  WifiPhyTag (WifiPreamble preamble, WifiModulationClass modulation, uint8_t frameComplete);
+  /**
+   * Getter for preamble parameter
+   * \return the preamble type
+   */
+  WifiPreamble GetPreambleType (void) const;
+  /**
+   * Getter for modulation parameter
+   * \return the modulation
+   */
+  WifiModulationClass GetModulation (void) const;
+  /**
+   * Getter for frameComplete parameter
+   * \return the frameComplete parameter, i.e. 0 if the frame is not complete, 1 otherwise.
+   */
+  uint8_t GetFrameComplete (void) const;
+
+  // From class Tag
+  uint32_t GetSerializedSize (void) const;
+  void Serialize (TagBuffer i) const;
+  void Deserialize (TagBuffer i);
+  void Print (std::ostream &os) const;
+
+
+private:
+  WifiPreamble m_preamble;          ///< preamble type
+  WifiModulationClass m_modulation; ///< modulation used for transmission
+  uint8_t m_frameComplete;          ///< Used to indicate that TX stopped sending before the end of the frame
+>>>>>>> origin
 };
 
 } // namespace ns3

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
  /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
  /*
  *   Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
@@ -24,6 +25,34 @@
  *        	 	  Russell Ford <russell.ford@nyu.edu>
  *        		  Menglei Zhang <menglei@nyu.edu>
  */
+=======
+/* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
+/*
+*   Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
+*   Copyright (c) 2015, NYU WIRELESS, Tandon School of Engineering, New York University
+*
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License version 2 as
+*   published by the Free Software Foundation;
+*
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
+*
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+*   Author: Marco Miozzo <marco.miozzo@cttc.es>
+*           Nicola Baldo  <nbaldo@cttc.es>
+*
+*   Modified by: Marco Mezzavilla < mezzavilla@nyu.edu>
+*                         Sourjya Dutta <sdutta@nyu.edu>
+*                         Russell Ford <russell.ford@nyu.edu>
+*                         Menglei Zhang <menglei@nyu.edu>
+*/
+>>>>>>> origin
 
 
 #include "ns3/core-module.h"
@@ -39,37 +68,33 @@
 #include "ns3/log.h"
 
 using namespace ns3;
+using namespace mmwave;
 
-int 
+int
 main (int argc, char *argv[])
 {
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin
   CommandLine cmd;
   cmd.Parse (argc, argv);
-//  LogComponentEnable ("MmWaveSpectrumPhy", LOG_LEVEL_INFO);
-  //LogComponentEnable ("MmWaveUePhy", LOG_LEVEL_INFO);
-  //LogComponentEnable ("MmWaveEnbPhy", LOG_LEVEL_INFO);
-  //LogComponentEnable ("MmWavePhy", LOG_LEVEL_INFO);
 
-//  LogComponentEnable ("MmWaveUeMac", LOG_LEVEL_INFO);
-//  LogComponentEnable ("MmWaveEnbMac", LOG_LEVEL_INFO);
-//  LogComponentEnable ("MmWaveRrMacScheduler", LOG_LEVEL_INFO);
-
-  //LogComponentEnable ("LteUeRrc", LOG_LEVEL_ALL);
-  //LogComponentEnable ("LteEnbRrc", LOG_LEVEL_ALL);
-  //LogComponentEnable("PropagationLossModel",LOG_LEVEL_ALL);
-  //LogComponentEnable("mmWaveInterference",LOG_LEVEL_ALL);
-  //LogComponentEnable("MmWaveBeamforming",LOG_LEVEL_ALL);
-  //LogComponentEnable ("UdpEchoClientApplication", LOG_LEVEL_INFO);
-  //LogComponentEnable ("UdpEchoServerApplication", LOG_LEVEL_INFO);
-
+<<<<<<< HEAD
+=======
+  /* Information regarding the traces generated:
+   *
+   * 1. UE_1_SINR.txt : Gives the SINR for each sub-band
+   *    Subframe no.  | Slot No. | Sub-band  | SINR (db)
+   *
+   * 2. UE_1_Tb_size.txt : Allocated transport block size
+   *    Time (micro-sec)  |  Tb-size in bytes
+   * */
+>>>>>>> origin
 
   Ptr<MmWaveHelper> ptr_mmWave = CreateObject<MmWaveHelper> ();
-
-  ptr_mmWave->Initialize();
-
   /* A configuration example.
-   * ptr_mmWave->GetPhyMacConfigurable ()->SetAttribute("SymbolPerSlot", UintegerValue(30)); */
+   * ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute("SymbolPerSlot", UintegerValue(30)); */
 
   NodeContainer enbNodes;
   NodeContainer ueNodes;
@@ -81,7 +106,7 @@ main (int argc, char *argv[])
 
   MobilityHelper enbmobility;
   enbmobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  enbmobility.SetPositionAllocator(enbPositionAlloc);
+  enbmobility.SetPositionAllocator (enbPositionAlloc);
   enbmobility.Install (enbNodes);
   BuildingsHelper::Install (enbNodes);
 
@@ -90,7 +115,7 @@ main (int argc, char *argv[])
   uePositionAlloc->Add (Vector (80.0, 0.0, 0.0));
 
   uemobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
-  uemobility.SetPositionAllocator(uePositionAlloc);
+  uemobility.SetPositionAllocator (uePositionAlloc);
   uemobility.Install (ueNodes);
   BuildingsHelper::Install (ueNodes);
 
@@ -99,7 +124,7 @@ main (int argc, char *argv[])
 
 
   ptr_mmWave->AttachToClosestEnb (ueNetDev, enbNetDev);
-  ptr_mmWave->EnableTraces();
+  ptr_mmWave->EnableTraces ();
 
   // Activate a data radio bearer
   enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
@@ -113,5 +138,3 @@ main (int argc, char *argv[])
   Simulator::Destroy ();
   return 0;
 }
-
-

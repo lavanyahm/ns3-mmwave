@@ -18,18 +18,24 @@
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
 
-#include "ns3/core-module.h"
-#include "ns3/network-module.h"
-#include "ns3/applications-module.h"
-#include "ns3/mobility-module.h"
-#include "ns3/stats-module.h"
-#include "ns3/wifi-module.h"
-
-#include <iostream>
+#include "ns3/gnuplot.h"
+#include "ns3/command-line.h"
+#include "ns3/config.h"
+#include "ns3/uinteger.h"
+#include "ns3/string.h"
+#include "ns3/log.h"
+#include "ns3/yans-wifi-helper.h"
+#include "ns3/mobility-helper.h"
+#include "ns3/ipv4-address-helper.h"
+#include "ns3/on-off-helper.h"
+#include "ns3/yans-wifi-channel.h"
+#include "ns3/mobility-model.h"
+#include "ns3/packet-socket-helper.h"
+#include "ns3/packet-socket-address.h"
 
 using namespace ns3;
 
-NS_LOG_COMPONENT_DEFINE ("Main");
+NS_LOG_COMPONENT_DEFINE ("Wifi-Adhoc");
 
 class Experiment
 {
@@ -73,20 +79,19 @@ Experiment::GetPosition (Ptr<Node> node)
   return mobility->GetPosition ();
 }
 
-void 
-Experiment::AdvancePosition (Ptr<Node> node) 
+void
+Experiment::AdvancePosition (Ptr<Node> node)
 {
   Vector pos = GetPosition (node);
   double mbs = ((m_bytesTotal * 8.0) / 1000000);
   m_bytesTotal = 0;
   m_output.Add (pos.x, mbs);
   pos.x += 1.0;
-  if (pos.x >= 210.0) 
+  if (pos.x >= 210.0)
     {
       return;
     }
   SetPosition (node, pos);
-  //std::cout << "x="<<pos.x << std::endl;
   Simulator::Schedule (Seconds (1.0), &Experiment::AdvancePosition, this, node);
 }
 
@@ -162,20 +167,22 @@ Experiment::Run (const WifiHelper &wifi, const YansWifiPhyHelper &wifiPhy,
 
 int main (int argc, char *argv[])
 {
-  // disable fragmentation
-  Config::SetDefault ("ns3::WifiRemoteStationManager::FragmentationThreshold", StringValue ("2200"));
-  Config::SetDefault ("ns3::WifiRemoteStationManager::RtsCtsThreshold", StringValue ("2200"));
-
-  CommandLine cmd;
+  CommandLine cmd (__FILE__);
   cmd.Parse (argc, argv);
 
   Gnuplot gnuplot = Gnuplot ("reference-rates.png");
 
   Experiment experiment;
   WifiHelper wifi;
+<<<<<<< HEAD
   wifi.SetStandard (WIFI_PHY_STANDARD_80211a);
   WifiMacHelper wifiMac;
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
+=======
+  wifi.SetStandard (WIFI_STANDARD_80211a);
+  WifiMacHelper wifiMac;
+  YansWifiPhyHelper wifiPhy;
+>>>>>>> origin
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
   Gnuplot2dDataset dataset;
 
@@ -239,10 +246,7 @@ int main (int argc, char *argv[])
 
   gnuplot.GenerateOutput (std::cout);
 
-
   gnuplot = Gnuplot ("rate-control.png");
-  wifi.SetStandard (WIFI_PHY_STANDARD_holland);
-
 
   NS_LOG_DEBUG ("arf");
   experiment = Experiment ("arf");

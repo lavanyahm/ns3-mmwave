@@ -45,7 +45,11 @@ int main (int argc, char *argv[])
 #ifdef NS3_CLICK
   std::string clickConfigFolder = "src/click/examples";
 
+<<<<<<< HEAD
   CommandLine cmd;
+=======
+  CommandLine cmd (__FILE__);
+>>>>>>> origin
   cmd.AddValue ("clickConfigFolder", "Base folder for click configuration files", clickConfigFolder);
   cmd.Parse (argc, argv);
 

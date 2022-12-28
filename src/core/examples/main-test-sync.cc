@@ -27,11 +27,12 @@
 #include "ns3/global-value.h"
 #include "ns3/ptr.h"
 
-#include <unistd.h>
-#include <sys/time.h>
+#include <chrono>  // seconds, milliseconds
+#include <thread>  // sleep_for
 
 /**
  * \file
+ * \ingroup core-examples
  * \ingroup scheduler
  * An example of scheduling events in a background thread.
  *
@@ -41,34 +42,37 @@
 
 using namespace ns3;
 
+
 NS_LOG_COMPONENT_DEFINE ("TestSync");
+
+namespace {
 
 /** Check that the event functions run in the intended order. */
 bool gFirstRun = false;
 
 /** An event method called many times from the background thread. */
-void 
+void
 inserted_function (void)
 {
   NS_ASSERT (gFirstRun);
-  NS_LOG_UNCOND ("inserted_function() called at " << 
+  NS_LOG_UNCOND ("inserted_function() called at " <<
                  Simulator::Now ().GetSeconds () << " s");
 }
 
 /** An event method called many times from the main thread. */
-void 
+void
 background_function (void)
 {
   NS_ASSERT (gFirstRun);
-  NS_LOG_UNCOND ("background_function() called at " << 
+  NS_LOG_UNCOND ("background_function() called at " <<
                  Simulator::Now ().GetSeconds () << " s");
 }
 
 /** An event method called once from the main thread. */
-void 
+void
 first_function (void)
 {
-  NS_LOG_UNCOND ("first_function() called at " << 
+  NS_LOG_UNCOND ("first_function() called at " <<
                  Simulator::Now ().GetSeconds () << " s");
   gFirstRun = true;
 }
@@ -92,14 +96,20 @@ void
 FakeNetDevice::Doit3 (void)
 {
   NS_LOG_FUNCTION_NOARGS ();
-  sleep (1);
+  std::this_thread::sleep_for (std::chrono::seconds (1));
+
   for (uint32_t i = 0; i < 10000; ++i)
     {
       //
       // Exercise the realtime relative now path
       //
+<<<<<<< HEAD
       Simulator::ScheduleWithContext(Simulator::NO_CONTEXT, Seconds(0.0), MakeEvent (&inserted_function));
       usleep (1000);
+=======
+      Simulator::ScheduleWithContext (Simulator::NO_CONTEXT, Seconds (0.0), MakeEvent (&inserted_function));
+      std::this_thread::sleep_for (std::chrono::milliseconds (1));
+>>>>>>> origin
     }
 }
 
@@ -112,20 +122,20 @@ FakeNetDevice::Doit3 (void)
  * thread with an instance of FakeNetDevice, which schedules many instances of
  * \c inserted_function.
  */
-void 
+void
 test (void)
 {
-  GlobalValue::Bind ("SimulatorImplementationType", 
+  GlobalValue::Bind ("SimulatorImplementationType",
                      StringValue ("ns3::RealtimeSimulatorImpl"));
 
   FakeNetDevice fnd;
 
-  // 
+  //
   // Make sure ScheduleNow works when the system isn't running
   //
-  Simulator::ScheduleWithContext(0xffffffff, Seconds(0.0), MakeEvent (&first_function));
+  Simulator::ScheduleWithContext (0xffffffff, Seconds (0.0), MakeEvent (&first_function));
 
-  // 
+  //
   // drive the progression of m_currentTs at a ten millisecond rate from the main thread
   //
   for (double d = 0.; d < 14.999; d += 0.01)
@@ -134,7 +144,7 @@ test (void)
     }
 
   Ptr<SystemThread> st3 = Create<SystemThread> (
-      MakeCallback (&FakeNetDevice::Doit3, &fnd));
+    MakeCallback (&FakeNetDevice::Doit3, &fnd));
   st3->Start ();
 
   Simulator::Stop (Seconds (15.0));
@@ -143,12 +153,21 @@ test (void)
   Simulator::Destroy ();
 }
 
+}  // unnamed namespace
+
+
 int
 main (int argc, char *argv[])
 {
+<<<<<<< HEAD
   CommandLine cmd;
   cmd.Parse (argc, argv);
   
+=======
+  CommandLine cmd (__FILE__);
+  cmd.Parse (argc, argv);
+
+>>>>>>> origin
   while (true)
     {
       test ();

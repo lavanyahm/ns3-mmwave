@@ -86,7 +86,7 @@ CsmaNetDevice::GetTypeId (void)
                    "A queue to use as the transmit queue in the device.",
                    PointerValue (),
                    MakePointerAccessor (&CsmaNetDevice::m_queue),
-                   MakePointerChecker<Queue> ())
+                   MakePointerChecker<Queue<Packet> > ())
 
     //
     // Trace sources at the "top" of the net device, where packets transition
@@ -130,7 +130,7 @@ CsmaNetDevice::GetTypeId (void)
                      MakeTraceSourceAccessor (&CsmaNetDevice::m_macTxBackoffTrace),
                      "ns3::Packet::TracedCallback")
     //
-    // Trace souces at the "bottom" of the net device, where packets transition
+    // Trace sources at the "bottom" of the net device, where packets transition
     // to/from the channel.
     //
     .AddTraceSource ("PhyTxBegin", 
@@ -189,7 +189,7 @@ CsmaNetDevice::CsmaNetDevice ()
   NS_LOG_FUNCTION (this);
   m_txMachineState = READY;
   m_tInterframeGap = Seconds (0);
-  m_channel = 0; 
+  m_channel = 0;
 
   // 
   // We would like to let the attribute system take care of initializing the 
@@ -217,6 +217,7 @@ CsmaNetDevice::DoDispose ()
   NS_LOG_FUNCTION_NOARGS ();
   m_channel = 0;
   m_node = 0;
+  m_queue = 0;
   NetDevice::DoDispose ();
 }
 
@@ -494,7 +495,7 @@ CsmaNetDevice::TransmitStart (void)
           m_backoff.IncrNumRetries ();
           Time backoffTime = m_backoff.GetBackoffTime ();
 
-          NS_LOG_LOGIC ("Channel busy, backing off for " << backoffTime.GetSeconds () << " sec");
+          NS_LOG_LOGIC ("Channel busy, backing off for " << backoffTime.As (Time::S));
 
           Simulator::Schedule (backoffTime, &CsmaNetDevice::TransmitStart, this);
         }
@@ -504,6 +505,7 @@ CsmaNetDevice::TransmitStart (void)
       //
       // The channel is free, transmit the packet
       //
+      m_phyTxBeginTrace (m_currentPkt);
       if (m_channel->TransmitStart (m_currentPkt, m_deviceId) == false)
         {
           NS_LOG_WARN ("Channel TransmitStart returns an error");
@@ -519,10 +521,9 @@ CsmaNetDevice::TransmitStart (void)
           //
           m_backoff.ResetBackoffTime ();
           m_txMachineState = BUSY;
-          m_phyTxBeginTrace (m_currentPkt);
 
           Time tEvent = m_bps.CalculateBytesTxTime (m_currentPkt->GetSize ());
-          NS_LOG_LOGIC ("Schedule TransmitCompleteEvent in " << tEvent.GetSeconds () << "sec");
+          NS_LOG_LOGIC ("Schedule TransmitCompleteEvent in " << tEvent.As (Time::S));
           Simulator::Schedule (tEvent, &CsmaNetDevice::TransmitCompleteEvent, this);
         }
     }
@@ -564,9 +565,15 @@ CsmaNetDevice::TransmitAbort (void)
     }
   else
     {
+<<<<<<< HEAD
       Ptr<QueueItem> item = m_queue->Dequeue ();
       NS_ASSERT_MSG (item != 0, "CsmaNetDevice::TransmitAbort(): IsEmpty false but no Packet on queue?");
       m_currentPkt = item->GetPacket ();
+=======
+      Ptr<Packet> packet = m_queue->Dequeue ();
+      NS_ASSERT_MSG (packet != 0, "CsmaNetDevice::TransmitAbort(): IsEmpty false but no Packet on queue?");
+      m_currentPkt = packet;
+>>>>>>> origin
       m_snifferTrace (m_currentPkt);
       m_promiscSnifferTrace (m_currentPkt);
       TransmitStart ();
@@ -600,7 +607,7 @@ CsmaNetDevice::TransmitCompleteEvent (void)
   m_phyTxEndTrace (m_currentPkt);
   m_currentPkt = 0;
 
-  NS_LOG_LOGIC ("Schedule TransmitReadyEvent in " << m_tInterframeGap.GetSeconds () << "sec");
+  NS_LOG_LOGIC ("Schedule TransmitReadyEvent in " << m_tInterframeGap.As (Time::S));
 
   Simulator::Schedule (m_tInterframeGap, &CsmaNetDevice::TransmitReadyEvent, this);
 }
@@ -633,9 +640,15 @@ CsmaNetDevice::TransmitReadyEvent (void)
     }
   else
     {
+<<<<<<< HEAD
       Ptr<QueueItem> item = m_queue->Dequeue ();
       NS_ASSERT_MSG (item != 0, "CsmaNetDevice::TransmitReadyEvent(): IsEmpty false but no Packet on queue?");
       m_currentPkt = item->GetPacket ();
+=======
+      Ptr<Packet> packet = m_queue->Dequeue ();
+      NS_ASSERT_MSG (packet != 0, "CsmaNetDevice::TransmitReadyEvent(): IsEmpty false but no Packet on queue?");
+      m_currentPkt = packet;
+>>>>>>> origin
       m_snifferTrace (m_currentPkt);
       m_promiscSnifferTrace (m_currentPkt);
       TransmitStart ();
@@ -669,7 +682,7 @@ CsmaNetDevice::Attach (Ptr<CsmaChannel> ch)
 }
 
 void
-CsmaNetDevice::SetQueue (Ptr<Queue> q)
+CsmaNetDevice::SetQueue (Ptr<Queue<Packet> > q)
 {
   NS_LOG_FUNCTION (q);
   m_queue = q;
@@ -819,7 +832,7 @@ CsmaNetDevice::Receive (Ptr<Packet> packet, Ptr<CsmaNetDevice> senderDevice)
     }
 }
 
-Ptr<Queue>
+Ptr<Queue<Packet> >
 CsmaNetDevice::GetQueue (void) const 
 { 
   NS_LOG_FUNCTION_NOARGS ();
@@ -985,9 +998,15 @@ CsmaNetDevice::SendFrom (Ptr<Packet> packet, const Address& src, const Address& 
     {
       if (m_queue->IsEmpty () == false)
         {
+<<<<<<< HEAD
           Ptr<QueueItem> item = m_queue->Dequeue ();
           NS_ASSERT_MSG (item != 0, "CsmaNetDevice::SendFrom(): IsEmpty false but no Packet on queue?");
           m_currentPkt = item->GetPacket ();
+=======
+          Ptr<Packet> packet = m_queue->Dequeue ();
+          NS_ASSERT_MSG (packet != 0, "CsmaNetDevice::SendFrom(): IsEmpty false but no Packet on queue?");
+          m_currentPkt = packet;
+>>>>>>> origin
           m_promiscSnifferTrace (m_currentPkt);
           m_snifferTrace (m_currentPkt);
           TransmitStart ();

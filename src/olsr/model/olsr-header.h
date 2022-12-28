@@ -408,7 +408,11 @@ public:
     std::vector<LinkMessage> linkMessages; //!< Link messages container.
 
     /**
+<<<<<<< HEAD
      * This method is used to print the content of a MID message.
+=======
+     * This method is used to print the content of a Hello message.
+>>>>>>> origin
      * \param os output stream
      */
     void Print (std::ostream &os) const;
@@ -461,7 +465,11 @@ public:
     uint16_t ansn;  //!< Advertised Neighbor Sequence Number.
 
     /**
+<<<<<<< HEAD
      * This method is used to print the content of a MID message.
+=======
+     * This method is used to print the content of a Tc message.
+>>>>>>> origin
      * \param os output stream
      */
     void Print (std::ostream &os) const;
@@ -525,7 +533,11 @@ public:
     std::vector<Association> associations; //!< Association container.
 
     /**
+<<<<<<< HEAD
      * This method is used to print the content of a MID message.
+=======
+     * This method is used to print the content of a Hna message.
+>>>>>>> origin
      * \param os output stream
      */
     void Print (std::ostream &os) const;

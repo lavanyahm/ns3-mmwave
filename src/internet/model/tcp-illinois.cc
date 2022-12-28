@@ -27,7 +27,12 @@
 
 
 #include "tcp-illinois.h"
+<<<<<<< HEAD
 #include "ns3/tcp-socket-base.h"
+=======
+#include "tcp-socket-state.h"
+
+>>>>>>> origin
 #include "ns3/log.h"
 
 namespace ns3 {
@@ -184,7 +189,11 @@ TcpIllinois::IncreaseWindow (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked)
 
   if (tcb->m_cWnd < tcb->m_ssThresh)
     {
+<<<<<<< HEAD
       segmentsAcked = TcpNewReno::SlowStart (tcb, segmentsAcked);
+=======
+      TcpNewReno::SlowStart (tcb, segmentsAcked);
+>>>>>>> origin
       NS_LOG_INFO ("In SlowStart, updated to cwnd " << tcb->m_cWnd <<
                    " ssthresh " << tcb->m_ssThresh);
     }
@@ -243,7 +252,11 @@ TcpIllinois::GetSsThresh (Ptr<const TcpSocketState> tcb, uint32_t bytesInFlight)
   NS_LOG_FUNCTION (this << tcb << bytesInFlight);
 
   uint32_t segBytesInFlight = bytesInFlight / tcb->m_segmentSize;
+<<<<<<< HEAD
   uint32_t ssThresh = std::max (2.0, (1.0 - m_beta) * segBytesInFlight);
+=======
+  uint32_t ssThresh = static_cast<uint32_t> (std::max (2.0, (1.0 - m_beta) * segBytesInFlight));
+>>>>>>> origin
 
   NS_LOG_DEBUG ("Calculated ssThresh (in segments) = " << ssThresh);
 

@@ -38,7 +38,7 @@
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("DsdvPacketQueue");
-  
+
 namespace dsdv {
 uint32_t
 PacketQueue::GetSize ()
@@ -65,7 +65,7 @@ PacketQueue::Enqueue (QueueEntry & entry)
     }
   numPacketswithdst = GetCountForPacketsWithDst (entry.GetIpv4Header ().GetDestination ());
   NS_LOG_DEBUG ("Number of packets with this destination: " << numPacketswithdst);
-  /** For Brock Paper comparision*/
+  /** For Brock Paper comparison*/
   if (numPacketswithdst >= m_maxLenPerDst || m_queue.size () >= m_maxLen)
     {
       NS_LOG_DEBUG ("Max packets reached for this destination. Not queuing any further packets");
@@ -88,13 +88,14 @@ PacketQueue::DropPacketWithDst (Ipv4Address dst)
   for (std::vector<QueueEntry>::iterator i = m_queue.begin (); i
        != m_queue.end (); ++i)
     {
-      if (IsEqual (*i, dst))
+      if (i->GetIpv4Header ().GetDestination () == dst)
         {
           Drop (*i, "DropPacketWithDst ");
         }
     }
-  m_queue.erase (std::remove_if (m_queue.begin (), m_queue.end (),
-                                 std::bind2nd (std::ptr_fun (PacketQueue::IsEqual), dst)), m_queue.end ());
+  auto new_end = std::remove_if (m_queue.begin (), m_queue.end (), [&](const QueueEntry& en)
+                                 { return en.GetIpv4Header ().GetDestination () == dst; });
+  m_queue.erase (new_end, m_queue.end ());
 }
 
 bool
@@ -144,8 +145,16 @@ PacketQueue::GetCountForPacketsWithDst (Ipv4Address dst)
   return count;
 }
 
+/**
+ * IsExpired structure
+ */
 struct IsExpired
 {
+  /**
+   * \brief Check for expired entry
+   * \param e QueueEntry to check
+   * \return true if expired
+   */
   bool
   operator() (QueueEntry const & e) const
   {

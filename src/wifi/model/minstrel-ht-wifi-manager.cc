@@ -16,9 +16,15 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
+<<<<<<< HEAD
  * Author: Duy Nguyen <duy@soe.ucsc.edu>
  *         Ghada Badawy <gbadawy@gmail.com>
  *         Matias Richart <mrichart@fing.edu.uy>
+=======
+ * Authors: Duy Nguyen <duy@soe.ucsc.edu>
+ *          Ghada Badawy <gbadawy@gmail.com>
+ *          Matias Richart <mrichart@fing.edu.uy>
+>>>>>>> origin
  *
  * Some Comments:
  *
@@ -34,6 +40,7 @@
  * reference: http://lwn.net/Articles/376765/
  */
 
+<<<<<<< HEAD
 #include "minstrel-ht-wifi-manager.h"
 #include "wifi-phy.h"
 #include "ns3/random-variable-stream.h"
@@ -48,6 +55,16 @@
 #include <vector>
 #include <iomanip>
 #include <fstream>
+=======
+#include <iomanip>
+#include "ns3/packet.h"
+#include "ns3/simulator.h"
+#include "ns3/log.h"
+#include "ns3/random-variable-stream.h"
+#include "minstrel-ht-wifi-manager.h"
+#include "wifi-mac.h"
+#include "wifi-phy.h"
+>>>>>>> origin
 
 #define Min(a,b) ((a < b) ? a : b)
 #define Max(a,b) ((a > b) ? a : b)
@@ -56,19 +73,31 @@ NS_LOG_COMPONENT_DEFINE ("MinstrelHtWifiManager");
 
 namespace ns3 {
 
+<<<<<<< HEAD
 struct MinstrelHtWifiRemoteStation : MinstrelWifiRemoteStation
 {
   void DisposeStation ();
 
   uint32_t m_sampleGroup;     //!< The group that the sample rate belongs to.
+=======
+///MinstrelHtWifiRemoteStation structure
+struct MinstrelHtWifiRemoteStation : MinstrelWifiRemoteStation
+{
+  uint8_t m_sampleGroup;     //!< The group that the sample rate belongs to.
+>>>>>>> origin
 
   uint32_t m_sampleWait;      //!< How many transmission attempts to wait until a new sample.
   uint32_t m_sampleTries;     //!< Number of sample tries after waiting sampleWait.
   uint32_t m_sampleCount;     //!< Max number of samples per update interval.
   uint32_t m_numSamplesSlow;  //!< Number of times a slow rate was sampled.
 
+<<<<<<< HEAD
   double m_avgAmpduLen;       //!< Average number of MPDUs in an A-MPDU.
   double m_ampduLen;          //!< Number of MPDUs in an A-MPDU.
+=======
+  uint32_t m_avgAmpduLen;      //!< Average number of MPDUs in an A-MPDU.
+  uint32_t m_ampduLen;         //!< Number of MPDUs in an A-MPDU.
+>>>>>>> origin
   uint32_t m_ampduPacketCount; //!< Number of A-MPDUs transmitted.
 
   McsGroupData m_groupsTable;  //!< Table of groups with stats.
@@ -77,6 +106,7 @@ struct MinstrelHtWifiRemoteStation : MinstrelWifiRemoteStation
   std::ofstream m_statsFile;   //!< File where statistics table is written.
 };
 
+<<<<<<< HEAD
 void
 MinstrelHtWifiRemoteStation::DisposeStation ()
 {
@@ -92,6 +122,8 @@ MinstrelHtWifiRemoteStation::DisposeStation ()
     }
 }
 
+=======
+>>>>>>> origin
 NS_OBJECT_ENSURE_REGISTERED (MinstrelHtWifiManager);
 
 TypeId
@@ -103,6 +135,7 @@ MinstrelHtWifiManager::GetTypeId (void)
     .SetGroupName ("Wifi")
     .AddAttribute ("UpdateStatistics",
                    "The interval between updating statistics table ",
+<<<<<<< HEAD
                    TimeValue (MilliSeconds (100)),
                    MakeTimeAccessor (&MinstrelHtWifiManager::m_updateStats),
                    MakeTimeChecker ())
@@ -116,13 +149,39 @@ MinstrelHtWifiManager::GetTypeId (void)
                    DoubleValue (75),
                    MakeDoubleAccessor (&MinstrelHtWifiManager::m_ewmaLevel),
                    MakeDoubleChecker<double> (0, 100))
+=======
+                   TimeValue (MilliSeconds (50)),
+                   MakeTimeAccessor (&MinstrelHtWifiManager::m_updateStats),
+                   MakeTimeChecker ())
+    .AddAttribute ("LegacyUpdateStatistics",
+                   "The interval between updating statistics table (for legacy Minstrel) ",
+                   TimeValue (MilliSeconds (100)),
+                   MakeTimeAccessor (&MinstrelHtWifiManager::m_legacyUpdateStats),
+                   MakeTimeChecker ())
+    .AddAttribute ("LookAroundRate",
+                   "The percentage to try other rates (for legacy Minstrel)",
+                   UintegerValue (10),
+                   MakeUintegerAccessor (&MinstrelHtWifiManager::m_lookAroundRate),
+                   MakeUintegerChecker<uint8_t>(0, 100))
+    .AddAttribute ("EWMA",
+                   "EWMA level",
+                   UintegerValue (75),
+                   MakeUintegerAccessor (&MinstrelHtWifiManager::m_ewmaLevel),
+                   MakeUintegerChecker<uint8_t>(0, 100))
+>>>>>>> origin
     .AddAttribute ("SampleColumn",
                    "The number of columns used for sampling",
                    UintegerValue (10),
                    MakeUintegerAccessor (&MinstrelHtWifiManager::m_nSampleCol),
+<<<<<<< HEAD
                    MakeUintegerChecker <uint32_t> ())
     .AddAttribute ("PacketLength",
                    "The packet length used for calculating mode TxTime",
+=======
+                   MakeUintegerChecker <uint8_t> ())
+    .AddAttribute ("PacketLength",
+                   "The packet length used for calculating mode TxTime (bytes)",
+>>>>>>> origin
                    UintegerValue (1200),
                    MakeUintegerAccessor (&MinstrelHtWifiManager::m_frameLength),
                    MakeUintegerChecker <uint32_t> ())
@@ -136,17 +195,29 @@ MinstrelHtWifiManager::GetTypeId (void)
                    BooleanValue (false),
                    MakeBooleanAccessor (&MinstrelHtWifiManager::m_printStats),
                    MakeBooleanChecker ())
+<<<<<<< HEAD
     .AddTraceSource ("RateChange",
                      "The transmission rate has changed",
                      MakeTraceSourceAccessor (&MinstrelHtWifiManager::m_rateChange),
                      "ns3::MinstrelHtWifiManager::RateChangeTracedCallback")
+=======
+    .AddTraceSource ("Rate",
+                     "Traced value for rate changes (b/s)",
+                     MakeTraceSourceAccessor (&MinstrelHtWifiManager::m_currentRate),
+                     "ns3::TracedValueCallback::Uint64")
+>>>>>>> origin
   ;
   return tid;
 }
 
 MinstrelHtWifiManager::MinstrelHtWifiManager ()
   : m_numGroups (0),
+<<<<<<< HEAD
     m_numRates (0)
+=======
+    m_numRates (0),
+    m_currentRate (0)
+>>>>>>> origin
 {
   NS_LOG_FUNCTION (this);
   m_uniformRandomVariable = CreateObject<UniformRandomVariable> ();
@@ -160,6 +231,7 @@ MinstrelHtWifiManager::MinstrelHtWifiManager ()
 MinstrelHtWifiManager::~MinstrelHtWifiManager ()
 {
   NS_LOG_FUNCTION (this);
+<<<<<<< HEAD
   if (HasHtSupported ())
     {
       for (uint32_t i = 0; i < m_numGroups; i++)
@@ -167,6 +239,12 @@ MinstrelHtWifiManager::~MinstrelHtWifiManager ()
           m_minstrelGroups[i].ratesFirstMpduTxTimeTable.clear ();
           m_minstrelGroups[i].ratesTxTimeTable.clear ();
         }
+=======
+  for (uint8_t i = 0; i < m_numGroups; i++)
+    {
+      m_minstrelGroups[i].ratesFirstMpduTxTimeTable.clear ();
+      m_minstrelGroups[i].ratesTxTimeTable.clear ();
+>>>>>>> origin
     }
 }
 
@@ -182,32 +260,66 @@ MinstrelHtWifiManager::AssignStreams (int64_t stream)
 }
 
 void
+<<<<<<< HEAD
 MinstrelHtWifiManager::SetupPhy (Ptr<WifiPhy> phy)
 {
   NS_LOG_FUNCTION (this << phy);
   // Setup phy for legacy manager.
+=======
+MinstrelHtWifiManager::SetupPhy (const Ptr<WifiPhy> phy)
+{
+  NS_LOG_FUNCTION (this << phy);
+  // Setup PHY for legacy manager.
+>>>>>>> origin
   m_legacyManager->SetupPhy (phy);
   WifiRemoteStationManager::SetupPhy (phy);
+}
+
+void
+<<<<<<< HEAD
+MinstrelHtWifiManager::DoInitialize ()
+{
+  NS_LOG_FUNCTION (this);
+
+=======
+MinstrelHtWifiManager::SetupMac (const Ptr<WifiMac> mac)
+{
+  NS_LOG_FUNCTION (this << mac);
+  m_legacyManager->SetupMac (mac);
+  WifiRemoteStationManager::SetupMac (mac);
 }
 
 void
 MinstrelHtWifiManager::DoInitialize ()
 {
   NS_LOG_FUNCTION (this);
-
+  if (GetHeSupported ())
+    {
+      NS_FATAL_ERROR ("WifiRemoteStationManager selected does not support HE rates");
+    }
+>>>>>>> origin
   /**
    * Here we initialize m_minstrelGroups with all the possible groups.
    * If a group is not supported by the device, then it is marked as not supported.
    * Then, after all initializations are finished, we check actual support for each receiving station.
    */
 
+<<<<<<< HEAD
   // Check if the device supports HT or VHT
   if (HasHtSupported () || HasVhtSupported ())
+=======
+  // Check if the device supports HT
+  if (GetHtSupported ())
+>>>>>>> origin
     {
       m_numGroups = MAX_SUPPORTED_STREAMS * MAX_HT_STREAM_GROUPS;
       m_numRates = MAX_HT_GROUP_RATES;
 
+<<<<<<< HEAD
       if (HasVhtSupported ())
+=======
+      if (GetVhtSupported ())
+>>>>>>> origin
         {
           m_numGroups += MAX_SUPPORTED_STREAMS * MAX_VHT_STREAM_GROUPS;
           m_numRates = MAX_VHT_GROUP_RATES;
@@ -220,20 +332,32 @@ MinstrelHtWifiManager::DoInitialize ()
        *  - A global continuous index, which identifies all rates within all groups, in [0, m_numGroups * m_numRates]
        *  - A groupId, which indexes a group in the array, in [0, m_numGroups]
        *  - A rateId, which identifies a rate within a group, in [0, m_numRates]
+<<<<<<< HEAD
        *  - A deviceIndex, which indexes a MCS in the phy MCS array.
+=======
+       *  - A deviceIndex, which indexes a MCS in the PHY MCS array.
+>>>>>>> origin
        *  - A mcsIndex, which indexes a MCS in the wifi-remote-station-manager supported MCSs array.
        */
       NS_LOG_DEBUG ("Initialize MCS Groups:");
       m_minstrelGroups = MinstrelMcsGroups (m_numGroups);
 
       // Initialize all HT groups
+<<<<<<< HEAD
       for (uint32_t chWidth = 20; chWidth <= MAX_HT_WIDTH; chWidth *= 2)
+=======
+      for (uint16_t chWidth = 20; chWidth <= MAX_HT_WIDTH; chWidth *= 2)
+>>>>>>> origin
         {
           for (uint8_t sgi = 0; sgi <= 1; sgi++)
             {
               for (uint8_t streams = 1; streams <= MAX_SUPPORTED_STREAMS; streams++)
                 {
+<<<<<<< HEAD
                   uint32_t groupId = GetHtGroupId (streams, sgi, chWidth);
+=======
+                  uint8_t groupId = GetHtGroupId (streams, sgi, chWidth);
+>>>>>>> origin
 
                   m_minstrelGroups[groupId].streams = streams;
                   m_minstrelGroups[groupId].sgi = sgi;
@@ -242,6 +366,7 @@ MinstrelHtWifiManager::DoInitialize ()
                   m_minstrelGroups[groupId].isSupported = false;
 
                   // Check capabilities of the device
+<<<<<<< HEAD
                   if (!(!GetPhy ()->GetGuardInterval () && m_minstrelGroups[groupId].sgi)                   ///Is SGI supported by the transmitter?
                       && (GetPhy ()->GetChannelWidth () >= m_minstrelGroups[groupId].chWidth)               ///Is channel width supported by the transmitter?
                       && (GetPhy ()->GetNumberOfTransmitAntennas () >= m_minstrelGroups[groupId].streams))  ///Are streams supported by the transmitter?
@@ -258,21 +383,50 @@ MinstrelHtWifiManager::DoInitialize ()
                           AddMpduTxTime (groupId, mode, CalculateMpduTxDuration (GetPhy (), streams, sgi, chWidth, mode));
                         }
                       NS_LOG_DEBUG ("Initialized group " << groupId << ": (" << (uint32_t)streams << "," << (uint32_t)sgi << "," << chWidth << ")");
+=======
+                  if (!(!GetShortGuardIntervalSupported () && m_minstrelGroups[groupId].sgi)                   ///Is SGI supported by the transmitter?
+                      && (GetPhy ()->GetChannelWidth () >= m_minstrelGroups[groupId].chWidth)               ///Is channel width supported by the transmitter?
+                      && (GetPhy ()->GetMaxSupportedTxSpatialStreams () >= m_minstrelGroups[groupId].streams))  ///Are streams supported by the transmitter?
+                    {
+                      m_minstrelGroups[groupId].isSupported = true;
+
+                      // Calculate TX time for all rates of the group
+                      WifiModeList htMcsList = GetHtDeviceMcsList ();
+                      for (uint8_t i = 0; i < MAX_HT_GROUP_RATES; i++)
+                        {
+                          uint16_t deviceIndex = i + (m_minstrelGroups[groupId].streams - 1) * 8;
+                          WifiMode mode =  htMcsList[deviceIndex];
+                          AddFirstMpduTxTime (groupId, mode, CalculateMpduTxDuration (GetPhy (), streams, sgi, chWidth, mode, FIRST_MPDU_IN_AGGREGATE));
+                          AddMpduTxTime (groupId, mode, CalculateMpduTxDuration (GetPhy (), streams, sgi, chWidth, mode, MIDDLE_MPDU_IN_AGGREGATE));
+                        }
+                      NS_LOG_DEBUG ("Initialized group " << +groupId << ": (" << +streams << "," << +sgi << "," << chWidth << ")");
+>>>>>>> origin
                     }
                 }
             }
         }
 
+<<<<<<< HEAD
       if (HasVhtSupported ())
         {
           // Initialize all VHT groups
           for (uint32_t chWidth = 20; chWidth <= MAX_VHT_WIDTH; chWidth *= 2)
+=======
+      if (GetVhtSupported ())
+        {
+          // Initialize all VHT groups
+          for (uint16_t chWidth = 20; chWidth <= MAX_VHT_WIDTH; chWidth *= 2)
+>>>>>>> origin
             {
               for (uint8_t sgi = 0; sgi <= 1; sgi++)
                 {
                   for (uint8_t streams = 1; streams <= MAX_SUPPORTED_STREAMS; streams++)
                     {
+<<<<<<< HEAD
                       uint32_t groupId = GetVhtGroupId (streams, sgi, chWidth);
+=======
+                      uint8_t groupId = GetVhtGroupId (streams, sgi, chWidth);
+>>>>>>> origin
 
                       m_minstrelGroups[groupId].streams = streams;
                       m_minstrelGroups[groupId].sgi = sgi;
@@ -281,6 +435,7 @@ MinstrelHtWifiManager::DoInitialize ()
                       m_minstrelGroups[groupId].isSupported = false;
 
                       // Check capabilities of the device
+<<<<<<< HEAD
                       if (!(!GetPhy ()->GetGuardInterval () && m_minstrelGroups[groupId].sgi)                   ///Is SGI supported by the transmitter?
                           && (GetPhy ()->GetChannelWidth () >= m_minstrelGroups[groupId].chWidth)               ///Is channel width supported by the transmitter?
                           && (GetPhy ()->GetNumberOfTransmitAntennas () >= m_minstrelGroups[groupId].streams))  ///Are streams supported by the transmitter?
@@ -288,6 +443,15 @@ MinstrelHtWifiManager::DoInitialize ()
                           m_minstrelGroups[groupId].isSupported = true;
 
                           // Calculate tx time for all rates of the group
+=======
+                      if (!(!GetShortGuardIntervalSupported () && m_minstrelGroups[groupId].sgi)                   ///Is SGI supported by the transmitter?
+                          && (GetPhy ()->GetChannelWidth () >= m_minstrelGroups[groupId].chWidth)               ///Is channel width supported by the transmitter?
+                          && (GetPhy ()->GetMaxSupportedTxSpatialStreams () >= m_minstrelGroups[groupId].streams))  ///Are streams supported by the transmitter?
+                        {
+                          m_minstrelGroups[groupId].isSupported = true;
+
+                          // Calculate TX time for all rates of the group
+>>>>>>> origin
                           WifiModeList vhtMcsList = GetVhtDeviceMcsList ();
                           for (uint8_t i = 0; i < MAX_VHT_GROUP_RATES; i++)
                             {
@@ -295,11 +459,19 @@ MinstrelHtWifiManager::DoInitialize ()
                               // Check for invalid VHT MCSs and do not add time to array.
                               if (IsValidMcs (GetPhy (), streams, chWidth, mode))
                                 {
+<<<<<<< HEAD
                                   AddFirstMpduTxTime (groupId, mode, CalculateFirstMpduTxDuration (GetPhy (), streams, sgi, chWidth, mode));
                                   AddMpduTxTime (groupId, mode, CalculateMpduTxDuration (GetPhy (), streams, sgi, chWidth, mode));
                                 }
                             }
                           NS_LOG_DEBUG ("Initialized group " << groupId << ": (" << (uint32_t)streams << "," << (uint32_t)sgi << "," << chWidth << ")");
+=======
+                                  AddFirstMpduTxTime (groupId, mode, CalculateMpduTxDuration (GetPhy (), streams, sgi, chWidth, mode, FIRST_MPDU_IN_AGGREGATE));
+                                  AddMpduTxTime (groupId, mode, CalculateMpduTxDuration (GetPhy (), streams, sgi, chWidth, mode, MIDDLE_MPDU_IN_AGGREGATE));
+                                }
+                            }
+                          NS_LOG_DEBUG ("Initialized group " << +groupId << ": (" << +streams << "," << +sgi << "," << chWidth << ")");
+>>>>>>> origin
                         }
                     }
                 }
@@ -308,6 +480,7 @@ MinstrelHtWifiManager::DoInitialize ()
     }
 }
 
+<<<<<<< HEAD
 void
 MinstrelHtWifiManager::SetupMac (Ptr<WifiMac> mac)
 {
@@ -321,10 +494,17 @@ MinstrelHtWifiManager::IsValidMcs (Ptr<WifiPhy> phy, uint8_t streams, uint32_t c
 {
   NS_LOG_FUNCTION (this << phy << (int)streams << chWidth << mode);
 
+=======
+bool
+MinstrelHtWifiManager::IsValidMcs (Ptr<WifiPhy> phy, uint8_t streams, uint16_t chWidth, WifiMode mode)
+{
+  NS_LOG_FUNCTION (this << phy << +streams << chWidth << mode);
+>>>>>>> origin
   WifiTxVector txvector;
   txvector.SetNss (streams);
   txvector.SetChannelWidth (chWidth);
   txvector.SetMode (mode);
+<<<<<<< HEAD
   return phy->IsValidTxVector (txvector);
 }
 
@@ -404,13 +584,68 @@ MinstrelHtWifiManager::AddMpduTxTime (uint32_t groupId, WifiMode mode, Time t)
   NS_LOG_FUNCTION (this << groupId << mode << t);
 
   m_minstrelGroups[groupId].ratesTxTimeTable.push_back (std::make_pair (t, mode));
+=======
+  return txvector.IsValid ();
+}
+
+Time
+MinstrelHtWifiManager::CalculateMpduTxDuration (Ptr<WifiPhy> phy, uint8_t streams, uint8_t sgi,
+                                                uint16_t chWidth, WifiMode mode, MpduType mpduType)
+{
+  NS_LOG_FUNCTION (this << phy << +streams << +sgi << chWidth << mode << mpduType);
+  WifiTxVector txvector;
+  txvector.SetNss (streams);
+  txvector.SetGuardInterval (sgi ? 400 : 800);
+  txvector.SetChannelWidth (chWidth);
+  txvector.SetNess (0);
+  txvector.SetStbc (0);
+  txvector.SetMode (mode);
+  txvector.SetPreambleType (WIFI_PREAMBLE_HT_MF);
+  return WifiPhy::CalculatePhyPreambleAndHeaderDuration (txvector)
+         + WifiPhy::GetPayloadDuration (m_frameLength, txvector, phy->GetPhyBand (), mpduType);
+}
+
+Time
+MinstrelHtWifiManager::GetFirstMpduTxTime (uint8_t groupId, WifiMode mode) const
+{
+  NS_LOG_FUNCTION (this << +groupId << mode);
+  auto it = m_minstrelGroups[groupId].ratesFirstMpduTxTimeTable.find (mode);
+  NS_ASSERT (it != m_minstrelGroups[groupId].ratesFirstMpduTxTimeTable.end ());
+  return it->second;
+}
+
+void
+MinstrelHtWifiManager::AddFirstMpduTxTime (uint8_t groupId, WifiMode mode, Time t)
+{
+  NS_LOG_FUNCTION (this << +groupId << mode << t);
+  m_minstrelGroups[groupId].ratesFirstMpduTxTimeTable.insert (std::make_pair (mode, t));
+}
+
+Time
+MinstrelHtWifiManager::GetMpduTxTime (uint8_t groupId, WifiMode mode) const
+{
+  NS_LOG_FUNCTION (this << +groupId << mode);
+  auto it = m_minstrelGroups[groupId].ratesTxTimeTable.find (mode);
+  NS_ASSERT (it != m_minstrelGroups[groupId].ratesTxTimeTable.end ());
+  return it->second;
+}
+
+void
+MinstrelHtWifiManager::AddMpduTxTime (uint8_t groupId, WifiMode mode, Time t)
+{
+  NS_LOG_FUNCTION (this << +groupId << mode << t);
+  m_minstrelGroups[groupId].ratesTxTimeTable.insert (std::make_pair (mode, t));
+>>>>>>> origin
 }
 
 WifiRemoteStation *
 MinstrelHtWifiManager::DoCreateStation (void) const
 {
   NS_LOG_FUNCTION (this);
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin
   MinstrelHtWifiRemoteStation *station = new MinstrelHtWifiRemoteStation ();
 
   // Initialize variables common to both stations.
@@ -443,7 +678,11 @@ MinstrelHtWifiManager::DoCreateStation (void) const
   station->m_ampduPacketCount = 0;
 
   // If the device supports HT
+<<<<<<< HEAD
   if (HasHtSupported () || HasVhtSupported ())
+=======
+  if (GetHtSupported ())
+>>>>>>> origin
     {
       /**
        * Assume the station is HT.
@@ -464,7 +703,10 @@ void
 MinstrelHtWifiManager::CheckInit (MinstrelHtWifiRemoteStation *station)
 {
   NS_LOG_FUNCTION (this << station);
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin
   // Note: we appear to be doing late initialization of the table
   // to make sure that the set of supported rates has been initialized
   // before we perform our own initialization.
@@ -476,6 +718,7 @@ MinstrelHtWifiManager::CheckInit (MinstrelHtWifiRemoteStation *station)
        *  the station will not support HT either.
        *  We save from using another check and variable.
        */
+<<<<<<< HEAD
       if (!GetHtSupported (station) && !GetVhtSupported (station))
         {
           NS_LOG_DEBUG ("Non-HT station " << station);
@@ -484,6 +727,16 @@ MinstrelHtWifiManager::CheckInit (MinstrelHtWifiRemoteStation *station)
           m_legacyManager->SetAttribute ("UpdateStatistics", TimeValue (m_updateStats));
           m_legacyManager->SetAttribute ("LookAroundRate", DoubleValue (m_lookAroundRate));
           m_legacyManager->SetAttribute ("EWMA", DoubleValue (m_ewmaLevel));
+=======
+      if (!GetHtSupported (station))
+        {
+          NS_LOG_INFO ("non-HT station " << station);
+          station->m_isHt = false;
+          // We will use non-HT minstrel for this station. Initialize the manager.
+          m_legacyManager->SetAttribute ("UpdateStatistics", TimeValue (m_legacyUpdateStats));
+          m_legacyManager->SetAttribute ("LookAroundRate", UintegerValue (m_lookAroundRate));
+          m_legacyManager->SetAttribute ("EWMA", UintegerValue (m_ewmaLevel));
+>>>>>>> origin
           m_legacyManager->SetAttribute ("SampleColumn", UintegerValue (m_nSampleCol));
           m_legacyManager->SetAttribute ("PacketLength", UintegerValue (m_frameLength));
           m_legacyManager->SetAttribute ("PrintStats", BooleanValue (m_printStats));
@@ -494,40 +747,62 @@ MinstrelHtWifiManager::CheckInit (MinstrelHtWifiRemoteStation *station)
           NS_LOG_DEBUG ("HT station " << station);
           station->m_isHt = true;
           station->m_nModes = GetNMcsSupported (station);
+<<<<<<< HEAD
           station->m_sampleTable = SampleRate (m_numRates, std::vector<uint32_t> (m_nSampleCol));
           InitSampleTable (station);
           RateInit (station);
           std::ostringstream tmp;
           tmp << "minstrel-ht-stats-" << station->m_state->m_address << ".txt";
           station->m_statsFile.open (tmp.str ().c_str (), std::ios::out);
+=======
+          station->m_minstrelTable = MinstrelRate (station->m_nModes);
+          station->m_sampleTable = SampleRate (m_numRates, std::vector<uint8_t> (m_nSampleCol));
+          InitSampleTable (station);
+          RateInit (station);
+>>>>>>> origin
           station->m_initialized = true;
         }
     }
 }
 
 void
+<<<<<<< HEAD
 MinstrelHtWifiManager::DoReportRxOk (WifiRemoteStation *st,
                                      double rxSnr, WifiMode txMode)
 {
   NS_LOG_FUNCTION (this << st);
 
   NS_LOG_DEBUG ("DoReportRxOk m_txrate=" << ((MinstrelHtWifiRemoteStation *)st)->m_txrate);
+=======
+MinstrelHtWifiManager::DoReportRxOk (WifiRemoteStation *st, double rxSnr, WifiMode txMode)
+{
+  NS_LOG_FUNCTION (this << st);
+  NS_LOG_DEBUG ("DoReportRxOk m_txrate=" << static_cast<MinstrelHtWifiRemoteStation*> (st)->m_txrate);
+>>>>>>> origin
 }
 
 void
 MinstrelHtWifiManager::DoReportRtsFailed (WifiRemoteStation *st)
 {
   NS_LOG_FUNCTION (this << st);
+<<<<<<< HEAD
 
   MinstrelHtWifiRemoteStation *station = (MinstrelHtWifiRemoteStation *)st;
 
+=======
+  MinstrelHtWifiRemoteStation *station = static_cast<MinstrelHtWifiRemoteStation*> (st);
+>>>>>>> origin
   CheckInit (station);
   if (!station->m_initialized)
     {
       return;
     }
+<<<<<<< HEAD
 
   NS_LOG_DEBUG ("DoReportRtsFailed m_txrate=" << station->m_txrate);
+=======
+  NS_LOG_DEBUG ("DoReportRtsFailed m_txrate = " << station->m_txrate);
+>>>>>>> origin
   station->m_shortRetry++;
 }
 
@@ -535,24 +810,35 @@ void
 MinstrelHtWifiManager::DoReportRtsOk (WifiRemoteStation *st, double ctsSnr, WifiMode ctsMode, double rtsSnr)
 {
   NS_LOG_FUNCTION (this << st);
+<<<<<<< HEAD
 
   NS_LOG_DEBUG ("self=" << st << " rts ok");
+=======
+>>>>>>> origin
 }
 
 void
 MinstrelHtWifiManager::DoReportFinalRtsFailed (WifiRemoteStation *st)
 {
   NS_LOG_FUNCTION (this << st);
+<<<<<<< HEAD
 
   MinstrelHtWifiRemoteStation *station = (MinstrelHtWifiRemoteStation *)st;
   NS_LOG_DEBUG ("Final RTS failed");
 
+=======
+  MinstrelHtWifiRemoteStation *station = static_cast<MinstrelHtWifiRemoteStation*> (st);
+  NS_LOG_DEBUG ("Final RTS failed");
+>>>>>>> origin
   CheckInit (station);
   if (!station->m_initialized)
     {
       return;
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin
   UpdateRetry (station);
 }
 
@@ -560,8 +846,12 @@ void
 MinstrelHtWifiManager::DoReportDataFailed (WifiRemoteStation *st)
 {
   NS_LOG_FUNCTION (this << st);
+<<<<<<< HEAD
 
   MinstrelHtWifiRemoteStation *station = (MinstrelHtWifiRemoteStation *)st;
+=======
+  MinstrelHtWifiRemoteStation *station = static_cast<MinstrelHtWifiRemoteStation*> (st);
+>>>>>>> origin
 
   CheckInit (station);
   if (!station->m_initialized)
@@ -569,28 +859,47 @@ MinstrelHtWifiManager::DoReportDataFailed (WifiRemoteStation *st)
       return;
     }
 
+<<<<<<< HEAD
+=======
+  NS_LOG_DEBUG ("DoReportDataFailed " << station << "\t rate " << station->m_txrate << "\tlongRetry \t" << station->m_longRetry);
+
+>>>>>>> origin
   if (!station->m_isHt)
     {
       m_legacyManager->UpdateRate (station);
     }
   else
     {
+<<<<<<< HEAD
       NS_LOG_DEBUG ("DoReportDataFailed " << station << "\t rate " << station->m_txrate << "\tlongRetry \t" << station->m_longRetry);
 
       uint32_t rateId = GetRateId (station->m_txrate);
       uint32_t groupId = GetGroupId (station->m_txrate);
       station->m_groupsTable[groupId].m_ratesTable[rateId].numRateAttempt++; // Increment the attempts counter for the rate used.
 
+=======
+      uint8_t rateId = GetRateId (station->m_txrate);
+      uint8_t groupId = GetGroupId (station->m_txrate);
+      station->m_groupsTable[groupId].m_ratesTable[rateId].numRateAttempt++; // Increment the attempts counter for the rate used.
+>>>>>>> origin
       UpdateRate (station);
     }
 }
 
 void
+<<<<<<< HEAD
 MinstrelHtWifiManager::DoReportDataOk (WifiRemoteStation *st,
                                        double ackSnr, WifiMode ackMode, double dataSnr)
 {
   NS_LOG_FUNCTION (this << st << ackSnr << ackMode << dataSnr);
   MinstrelHtWifiRemoteStation *station = (MinstrelHtWifiRemoteStation *) st;
+=======
+MinstrelHtWifiManager::DoReportDataOk (WifiRemoteStation *st, double ackSnr, WifiMode ackMode,
+                                       double dataSnr, uint16_t dataChannelWidth, uint8_t dataNss)
+{
+  NS_LOG_FUNCTION (this << st << ackSnr << ackMode << dataSnr << dataChannelWidth << +dataNss);
+  MinstrelHtWifiRemoteStation *station = static_cast<MinstrelHtWifiRemoteStation*> (st);
+>>>>>>> origin
 
   CheckInit (station);
   if (!station->m_initialized)
@@ -598,7 +907,11 @@ MinstrelHtWifiManager::DoReportDataOk (WifiRemoteStation *st,
       return;
     }
 
+<<<<<<< HEAD
   NS_LOG_DEBUG ("Data OK - Txrate = " << station->m_txrate  );
+=======
+  NS_LOG_DEBUG ("DoReportDataOk m_txrate = " << station->m_txrate << ", attempt = " << station->m_minstrelTable[station->m_txrate].numRateAttempt << ", success = " << station->m_minstrelTable[station->m_txrate].numRateSuccess << " (before update).");
+>>>>>>> origin
 
   if (!station->m_isHt)
     {
@@ -607,6 +920,11 @@ MinstrelHtWifiManager::DoReportDataOk (WifiRemoteStation *st,
 
       m_legacyManager->UpdatePacketCounters (station);
 
+<<<<<<< HEAD
+=======
+      NS_LOG_DEBUG ("DoReportDataOk m_txrate = " << station->m_txrate << ", attempt = " << station->m_minstrelTable[station->m_txrate].numRateAttempt << ", success = " << station->m_minstrelTable[station->m_txrate].numRateSuccess << " (after update).");
+
+>>>>>>> origin
       UpdateRetry (station);
       m_legacyManager->UpdateStats (station);
 
@@ -617,13 +935,23 @@ MinstrelHtWifiManager::DoReportDataOk (WifiRemoteStation *st,
     }
   else
     {
+<<<<<<< HEAD
       uint32_t rateId = GetRateId (station->m_txrate);
       uint32_t groupId = GetGroupId (station->m_txrate);
+=======
+      uint8_t rateId = GetRateId (station->m_txrate);
+      uint8_t groupId = GetGroupId (station->m_txrate);
+>>>>>>> origin
       station->m_groupsTable[groupId].m_ratesTable[rateId].numRateSuccess++;
       station->m_groupsTable[groupId].m_ratesTable[rateId].numRateAttempt++;
 
       UpdatePacketCounters (station, 1, 0);
 
+<<<<<<< HEAD
+=======
+      NS_LOG_DEBUG ("DoReportDataOk m_txrate = " << station->m_txrate << ", attempt = " << station->m_minstrelTable[station->m_txrate].numRateAttempt << ", success = " << station->m_minstrelTable[station->m_txrate].numRateSuccess << " (after update).");
+
+>>>>>>> origin
       station->m_isSampling = false;
       station->m_sampleDeferred = false;
 
@@ -646,7 +974,11 @@ void
 MinstrelHtWifiManager::DoReportFinalDataFailed (WifiRemoteStation *st)
 {
   NS_LOG_FUNCTION (this << st);
+<<<<<<< HEAD
   MinstrelHtWifiRemoteStation *station = (MinstrelHtWifiRemoteStation *) st;
+=======
+  MinstrelHtWifiRemoteStation *station = static_cast<MinstrelHtWifiRemoteStation*> (st);
+>>>>>>> origin
 
   CheckInit (station);
   if (!station->m_initialized)
@@ -686,6 +1018,7 @@ MinstrelHtWifiManager::DoReportFinalDataFailed (WifiRemoteStation *st)
           station->m_txrate = FindRate (station);
         }
     }
+<<<<<<< HEAD
   NS_LOG_DEBUG ("Next rate to use TxRate = " << station->m_txrate  );
 }
 
@@ -694,6 +1027,17 @@ MinstrelHtWifiManager::DoReportAmpduTxStatus (WifiRemoteStation *st, uint32_t nS
 {
   NS_LOG_FUNCTION (this << st << nSuccessfulMpdus << nFailedMpdus << rxSnr << dataSnr);
   MinstrelHtWifiRemoteStation *station = (MinstrelHtWifiRemoteStation *) st;
+=======
+  NS_LOG_DEBUG ("Next rate to use TxRate = " << station->m_txrate);
+}
+
+void
+MinstrelHtWifiManager::DoReportAmpduTxStatus (WifiRemoteStation *st, uint8_t nSuccessfulMpdus, uint8_t nFailedMpdus,
+                                              double rxSnr, double dataSnr, uint16_t dataChannelWidth, uint8_t dataNss)
+{
+  NS_LOG_FUNCTION (this << st << +nSuccessfulMpdus << +nFailedMpdus << rxSnr << dataSnr << dataChannelWidth << +dataNss);
+  MinstrelHtWifiRemoteStation *station = static_cast<MinstrelHtWifiRemoteStation*> (st);
+>>>>>>> origin
 
   CheckInit (station);
   if (!station->m_initialized)
@@ -701,6 +1045,7 @@ MinstrelHtWifiManager::DoReportAmpduTxStatus (WifiRemoteStation *st, uint32_t nS
       return;
     }
 
+<<<<<<< HEAD
   if (!station->m_isHt)
     {
       NS_ASSERT_MSG (false,"A-MPDU Tx Status called but no HT or VHT supported.");
@@ -708,14 +1053,25 @@ MinstrelHtWifiManager::DoReportAmpduTxStatus (WifiRemoteStation *st, uint32_t nS
 
   NS_LOG_DEBUG ("DoReportAmpduTxStatus. TxRate=" << station->m_txrate << " SuccMpdus= " <<
                 nSuccessfulMpdus << " FailedMpdus= " << nFailedMpdus);
+=======
+  NS_ASSERT_MSG (station->m_isHt, "A-MPDU Tx Status called but no HT or VHT supported.");
+
+  NS_LOG_DEBUG ("DoReportAmpduTxStatus. TxRate=" << station->m_txrate << " SuccMpdus=" <<
+                +nSuccessfulMpdus << " FailedMpdus=" << +nFailedMpdus);
+>>>>>>> origin
 
   station->m_ampduPacketCount++;
   station->m_ampduLen += nSuccessfulMpdus + nFailedMpdus;
 
   UpdatePacketCounters (station, nSuccessfulMpdus, nFailedMpdus);
 
+<<<<<<< HEAD
   uint32_t rateId = GetRateId (station->m_txrate);
   uint32_t groupId = GetGroupId (station->m_txrate);
+=======
+  uint8_t rateId = GetRateId (station->m_txrate);
+  uint8_t groupId = GetGroupId (station->m_txrate);
+>>>>>>> origin
   station->m_groupsTable[groupId].m_ratesTable[rateId].numRateSuccess += nSuccessfulMpdus;
   station->m_groupsTable[groupId].m_ratesTable[rateId].numRateAttempt += nSuccessfulMpdus + nFailedMpdus;
 
@@ -739,7 +1095,11 @@ MinstrelHtWifiManager::DoReportAmpduTxStatus (WifiRemoteStation *st, uint32_t nS
         {
           station->m_txrate = FindRate (station);
         }
+<<<<<<< HEAD
       NS_LOG_DEBUG ("Next rate to use TxRate = " << station->m_txrate  );
+=======
+      NS_LOG_DEBUG ("Next rate to use TxRate = " << station->m_txrate);
+>>>>>>> origin
     }
 }
 
@@ -765,7 +1125,11 @@ MinstrelHtWifiManager::UpdateRate (MinstrelHtWifiRemoteStation *station)
    *  3  |  Best probability       | Best probability
    *
    * Note: For clarity, multiple blocks of if's and else's are used
+<<<<<<< HEAD
    * Following implementation in Linux, in MinstrelHT Lowest baserate is not used.
+=======
+   * Following implementation in Linux, in MinstrelHT lowest base rate is not used.
+>>>>>>> origin
    * Explanation can be found here: http://marc.info/?l=linux-wireless&m=144602778611966&w=2
    */
 
@@ -777,6 +1141,7 @@ MinstrelHtWifiManager::UpdateRate (MinstrelHtWifiRemoteStation *station)
   station->m_longRetry++;
 
   /**
+<<<<<<< HEAD
    * Get the ids for all rates.
    */
   uint32_t maxTpRateId = GetRateId (station->m_maxTpRate);
@@ -785,6 +1150,16 @@ MinstrelHtWifiManager::UpdateRate (MinstrelHtWifiRemoteStation *station)
   uint32_t maxTp2GroupId = GetGroupId (station->m_maxTpRate2);
   uint32_t maxProbRateId = GetRateId (station->m_maxProbRate);
   uint32_t maxProbGroupId = GetGroupId (station->m_maxProbRate);
+=======
+   * Get the IDs for all rates.
+   */
+  uint8_t maxTpRateId = GetRateId (station->m_maxTpRate);
+  uint8_t maxTpGroupId = GetGroupId (station->m_maxTpRate);
+  uint8_t maxTp2RateId = GetRateId (station->m_maxTpRate2);
+  uint8_t maxTp2GroupId = GetGroupId (station->m_maxTpRate2);
+  uint8_t maxProbRateId = GetRateId (station->m_maxProbRate);
+  uint8_t maxProbGroupId = GetGroupId (station->m_maxProbRate);
+>>>>>>> origin
 
   /// For normal rate, we're not currently sampling random rates.
   if (!station->m_isSampling)
@@ -814,7 +1189,11 @@ MinstrelHtWifiManager::UpdateRate (MinstrelHtWifiRemoteStation *station)
         }
       else
         {
+<<<<<<< HEAD
           NS_ASSERT_MSG (false,"Max retries reached and m_longRetry not cleared properly. longRetry= " << station->m_longRetry);
+=======
+          NS_FATAL_ERROR ("Max retries reached and m_longRetry not cleared properly. longRetry= " << station->m_longRetry);
+>>>>>>> origin
         }
     }
 
@@ -838,7 +1217,11 @@ MinstrelHtWifiManager::UpdateRate (MinstrelHtWifiRemoteStation *station)
         }
       else
         {
+<<<<<<< HEAD
           NS_ASSERT_MSG (false,"Max retries reached and m_longRetry not cleared properly. longRetry= " << station->m_longRetry);
+=======
+          NS_FATAL_ERROR ("Max retries reached and m_longRetry not cleared properly. longRetry= " << station->m_longRetry);
+>>>>>>> origin
         }
     }
   NS_LOG_DEBUG ("Next rate to use TxRate = " << station->m_txrate);
@@ -850,6 +1233,7 @@ MinstrelHtWifiManager::UpdateRetry (MinstrelHtWifiRemoteStation *station)
   NS_LOG_FUNCTION (this << station);
   station->m_shortRetry = 0;
   station->m_longRetry = 0;
+<<<<<<< HEAD
 
 }
 
@@ -857,6 +1241,14 @@ void
 MinstrelHtWifiManager::UpdatePacketCounters (MinstrelHtWifiRemoteStation *station, uint32_t nSuccessfulMpdus, uint32_t nFailedMpdus)
 {
   NS_LOG_FUNCTION (this << station << nSuccessfulMpdus << nFailedMpdus);
+=======
+}
+
+void
+MinstrelHtWifiManager::UpdatePacketCounters (MinstrelHtWifiRemoteStation *station, uint8_t nSuccessfulMpdus, uint8_t nFailedMpdus)
+{
+  NS_LOG_FUNCTION (this << station << +nSuccessfulMpdus << +nFailedMpdus);
+>>>>>>> origin
 
   station->m_totalPacketsCount += nSuccessfulMpdus + nFailedMpdus;
   if (station->m_isSampling)
@@ -875,6 +1267,7 @@ MinstrelHtWifiManager::UpdatePacketCounters (MinstrelHtWifiRemoteStation *statio
       station->m_sampleTries = 1;
       station->m_sampleCount--;
     }
+<<<<<<< HEAD
 
 }
 void
@@ -883,13 +1276,19 @@ MinstrelHtWifiManager::DoDisposeStation (WifiRemoteStation *st)
   NS_LOG_FUNCTION (this << st);
   MinstrelHtWifiRemoteStation *station = (MinstrelHtWifiRemoteStation *) st;
   station->DisposeStation ();
+=======
+>>>>>>> origin
 }
 
 WifiTxVector
 MinstrelHtWifiManager::DoGetDataTxVector (WifiRemoteStation *st)
 {
   NS_LOG_FUNCTION (this << st);
+<<<<<<< HEAD
   MinstrelHtWifiRemoteStation *station = (MinstrelHtWifiRemoteStation *) st;
+=======
+  MinstrelHtWifiRemoteStation *station = static_cast<MinstrelHtWifiRemoteStation*> (st);
+>>>>>>> origin
 
   if (!station->m_initialized)
     {
@@ -899,6 +1298,7 @@ MinstrelHtWifiManager::DoGetDataTxVector (WifiRemoteStation *st)
   if (!station->m_isHt)
     {
       WifiTxVector vector = m_legacyManager->GetDataTxVector (station);
+<<<<<<< HEAD
 
       uint64_t dataRate = vector.GetMode ().GetDataRate (vector.GetChannelWidth (), vector.IsShortGuardInterval (), vector.GetNss ());
       if (!station->m_isSampling)
@@ -906,21 +1306,38 @@ MinstrelHtWifiManager::DoGetDataTxVector (WifiRemoteStation *st)
           m_rateChange (dataRate, station->m_state->m_address);
         }
 
+=======
+      uint64_t dataRate = vector.GetMode ().GetDataRate (vector);
+      if (m_currentRate != dataRate && !station->m_isSampling)
+        {
+          NS_LOG_DEBUG ("New datarate: " << dataRate);
+          m_currentRate = dataRate;
+        }
+>>>>>>> origin
       return vector;
     }
   else
     {
       NS_LOG_DEBUG ("DoGetDataMode m_txrate= " << station->m_txrate);
 
+<<<<<<< HEAD
       uint32_t rateId = GetRateId (station->m_txrate);
       uint32_t groupId = GetGroupId (station->m_txrate);
       uint32_t mcsIndex = station->m_groupsTable[groupId].m_ratesTable[rateId].mcsIndex;
 
       NS_LOG_DEBUG ("DoGetDataMode rateId= " << rateId << " groupId= " << groupId << " mode= " << GetMcsSupported (station, mcsIndex));
+=======
+      uint8_t rateId = GetRateId (station->m_txrate);
+      uint8_t groupId = GetGroupId (station->m_txrate);
+      uint8_t mcsIndex = station->m_groupsTable[groupId].m_ratesTable[rateId].mcsIndex;
+
+      NS_LOG_DEBUG ("DoGetDataMode rateId= " << +rateId << " groupId= " << +groupId << " mode= " << GetMcsSupported (station, mcsIndex));
+>>>>>>> origin
 
       McsGroup group = m_minstrelGroups[groupId];
 
       // Check consistency of rate selected.
+<<<<<<< HEAD
       if ((group.sgi && !GetShortGuardInterval (station)) || group.chWidth > GetChannelWidth (station)  ||  (uint32_t) group.streams > GetNumberOfSupportedRxAntennas (station))
         {
           NS_ASSERT_MSG (false,"Inconsistent group selected. Group: (" << (uint32_t)group.streams << "," << (uint32_t)group.sgi << "," << group.chWidth << ")" <<
@@ -935,6 +1352,23 @@ MinstrelHtWifiManager::DoGetDataTxVector (WifiRemoteStation *st)
 
       return WifiTxVector (GetMcsSupported (station, mcsIndex), GetDefaultTxPowerLevel (), GetLongRetryCount (station),
                            group.sgi, group.streams, GetNess (station), group.chWidth, GetAggregation (station) && !station->m_isSampling, GetStbc (station));
+=======
+      if ((group.sgi && !GetShortGuardIntervalSupported (station)) || group.chWidth > GetChannelWidth (station)  ||  group.streams > GetNumberOfSupportedStreams (station))
+        {
+          NS_FATAL_ERROR ("Inconsistent group selected. Group: (" << +group.streams <<
+                         "," << +group.sgi << "," << group.chWidth << ")" <<
+                         " Station capabilities: (" << GetNumberOfSupportedStreams (station) <<
+                         "," << GetShortGuardIntervalSupported (station) << "," << GetChannelWidth (station) << ")");
+        }
+      WifiMode mode = GetMcsSupported (station, mcsIndex);
+      uint64_t dataRate = mode.GetDataRate (group.chWidth, group.sgi ? 400 : 800, group.streams);
+      if (m_currentRate != dataRate && !station->m_isSampling)
+        {
+          NS_LOG_DEBUG ("New datarate: " << dataRate);
+          m_currentRate = dataRate;
+        }
+      return WifiTxVector (mode, GetDefaultTxPowerLevel (), GetPreambleForTransmission (mode.GetModulationClass (), GetShortPreambleEnabled (), UseGreenfieldForDestination (GetAddress (station))), group.sgi ? 400 : 800, GetNumberOfAntennas (), group.streams, GetNess (station), GetChannelWidthForTransmission (mode, group.chWidth), GetAggregation (station) && !station->m_isSampling);
+>>>>>>> origin
     }
 }
 
@@ -942,7 +1376,11 @@ WifiTxVector
 MinstrelHtWifiManager::DoGetRtsTxVector (WifiRemoteStation *st)
 {
   NS_LOG_FUNCTION (this << st);
+<<<<<<< HEAD
   MinstrelHtWifiRemoteStation *station = (MinstrelHtWifiRemoteStation *) st;
+=======
+  MinstrelHtWifiRemoteStation *station = static_cast<MinstrelHtWifiRemoteStation*> (st);
+>>>>>>> origin
 
   if (!station->m_initialized)
     {
@@ -971,6 +1409,7 @@ MinstrelHtWifiManager::DoGetRtsTxVector (WifiRemoteStation *st)
        */
 
       // As we are in Minstrel HT, assume the last rate was an HT rate.
+<<<<<<< HEAD
       uint32_t rateId = GetRateId (station->m_txrate);
       uint32_t groupId = GetGroupId (station->m_txrate);
       uint32_t mcsIndex = station->m_groupsTable[groupId].m_ratesTable[rateId].mcsIndex;
@@ -978,13 +1417,28 @@ MinstrelHtWifiManager::DoGetRtsTxVector (WifiRemoteStation *st)
       WifiMode lastRate = GetMcsSupported (station, mcsIndex);
       uint64_t lastDataRate = lastRate.GetNonHtReferenceRate ();
       uint32_t nBasicRates = GetNBasicModes ();
+=======
+      uint8_t rateId = GetRateId (station->m_txrate);
+      uint8_t groupId = GetGroupId (station->m_txrate);
+      uint8_t mcsIndex = station->m_groupsTable[groupId].m_ratesTable[rateId].mcsIndex;
+
+      WifiMode lastRate = GetMcsSupported (station, mcsIndex);
+      uint64_t lastDataRate = lastRate.GetNonHtReferenceRate ();
+      uint8_t nBasicRates = GetNBasicModes ();
+>>>>>>> origin
 
       WifiMode rtsRate;
       bool rateFound = false;
 
+<<<<<<< HEAD
       for (uint32_t i = 0; i < nBasicRates; i++)
         {
           uint64_t rate = GetBasicMode (i).GetDataRate (20,false,1);
+=======
+      for (uint8_t i = 0; i < nBasicRates; i++)
+        {
+          uint64_t rate = GetBasicMode (i).GetDataRate (20);
+>>>>>>> origin
           if (rate <= lastDataRate)
             {
               rtsRate = GetBasicMode (i);
@@ -995,10 +1449,17 @@ MinstrelHtWifiManager::DoGetRtsTxVector (WifiRemoteStation *st)
       if (!rateFound)
         {
           Ptr<WifiPhy> phy = GetPhy ();
+<<<<<<< HEAD
           uint32_t nSupportRates = phy->GetNModes ();
           for (uint32_t i = 0; i < nSupportRates; i++)
             {
               uint64_t rate = phy->GetMode (i).GetDataRate (20,false,1);
+=======
+          uint8_t nSupportRates = phy->GetNModes ();
+          for (uint8_t i = 0; i < nSupportRates; i++)
+            {
+              uint64_t rate = phy->GetMode (i).GetDataRate (20);
+>>>>>>> origin
               if (rate <= lastDataRate)
                 {
                   rtsRate = phy->GetMode (i);
@@ -1009,17 +1470,30 @@ MinstrelHtWifiManager::DoGetRtsTxVector (WifiRemoteStation *st)
 
       NS_ASSERT (rateFound);
 
+<<<<<<< HEAD
       return WifiTxVector (rtsRate, GetDefaultTxPowerLevel (), GetShortRetryCount (station),
                            false, 1, 0, GetChannelWidth (station), GetAggregation (station), false);
+=======
+      return WifiTxVector (rtsRate, GetDefaultTxPowerLevel (), GetPreambleForTransmission (rtsRate.GetModulationClass (), GetShortPreambleEnabled (), UseGreenfieldForDestination (GetAddress (station))),
+                           800, 1, 1, 0, GetChannelWidthForTransmission (rtsRate, GetChannelWidth (station)), GetAggregation (station));
+>>>>>>> origin
     }
 }
 
 bool
+<<<<<<< HEAD
 MinstrelHtWifiManager::DoNeedDataRetransmission (WifiRemoteStation *st, Ptr<const Packet> packet, bool normally)
 {
   NS_LOG_FUNCTION (this << st << packet << normally);
 
   MinstrelHtWifiRemoteStation *station = (MinstrelHtWifiRemoteStation *)st;
+=======
+MinstrelHtWifiManager::DoNeedRetransmission (WifiRemoteStation *st, Ptr<const Packet> packet, bool normally)
+{
+  NS_LOG_FUNCTION (this << st << packet << normally);
+
+  MinstrelHtWifiRemoteStation *station = static_cast<MinstrelHtWifiRemoteStation*> (st);
+>>>>>>> origin
 
   CheckInit (station);
   if (!station->m_initialized)
@@ -1053,12 +1527,21 @@ MinstrelHtWifiManager::DoNeedDataRetransmission (WifiRemoteStation *st, Ptr<cons
 uint32_t
 MinstrelHtWifiManager::CountRetries (MinstrelHtWifiRemoteStation *station)
 {
+<<<<<<< HEAD
   uint32_t maxProbRateId = GetRateId (station->m_maxProbRate);
   uint32_t maxProbGroupId = GetGroupId (station->m_maxProbRate);
   uint32_t maxTpRateId = GetRateId (station->m_maxTpRate);
   uint32_t maxTpGroupId = GetGroupId (station->m_maxTpRate);
   uint32_t maxTp2RateId = GetRateId (station->m_maxTpRate2);
   uint32_t maxTp2GroupId = GetGroupId (station->m_maxTpRate2);
+=======
+  uint8_t maxProbRateId = GetRateId (station->m_maxProbRate);
+  uint8_t maxProbGroupId = GetGroupId (station->m_maxProbRate);
+  uint8_t maxTpRateId = GetRateId (station->m_maxTpRate);
+  uint8_t maxTpGroupId = GetGroupId (station->m_maxTpRate);
+  uint8_t maxTp2RateId = GetRateId (station->m_maxTpRate2);
+  uint8_t maxTp2GroupId = GetGroupId (station->m_maxTpRate2);
+>>>>>>> origin
 
   if (!station->m_isSampling)
     {
@@ -1073,6 +1556,7 @@ MinstrelHtWifiManager::CountRetries (MinstrelHtWifiRemoteStation *station)
     }
 }
 
+<<<<<<< HEAD
 bool
 MinstrelHtWifiManager::IsLowLatency (void) const
 {
@@ -1097,6 +1581,19 @@ MinstrelHtWifiManager::GetNextSample (MinstrelHtWifiRemoteStation *station)
 
   SetNextSample (station); //Calculate the next sample rate.
 
+=======
+uint16_t
+MinstrelHtWifiManager::GetNextSample (MinstrelHtWifiRemoteStation *station)
+{
+  NS_LOG_FUNCTION (this << station);
+  uint8_t sampleGroup = station->m_sampleGroup;
+  uint8_t index = station->m_groupsTable[sampleGroup].m_index;
+  uint8_t col = station->m_groupsTable[sampleGroup].m_col;
+  uint8_t sampleIndex = station->m_sampleTable[index][col];
+  uint16_t rateIndex = GetIndex (sampleGroup, sampleIndex);
+  NS_LOG_DEBUG ("Next Sample is " << rateIndex);
+  SetNextSample (station); //Calculate the next sample rate.
+>>>>>>> origin
   return rateIndex;
 }
 
@@ -1113,7 +1610,11 @@ MinstrelHtWifiManager::SetNextSample (MinstrelHtWifiRemoteStation *station)
 
   station->m_groupsTable[station->m_sampleGroup].m_index++;
 
+<<<<<<< HEAD
   uint32_t sampleGroup = station->m_sampleGroup;
+=======
+  uint8_t sampleGroup = station->m_sampleGroup;
+>>>>>>> origin
   uint8_t index = station->m_groupsTable[station->m_sampleGroup].m_index;
   uint8_t col = station->m_groupsTable[sampleGroup].m_col;
 
@@ -1128,6 +1629,7 @@ MinstrelHtWifiManager::SetNextSample (MinstrelHtWifiRemoteStation *station)
       index = station->m_groupsTable[station->m_sampleGroup].m_index;
       col = station->m_groupsTable[sampleGroup].m_col;
     }
+<<<<<<< HEAD
   NS_LOG_DEBUG ("New sample set: group= " << sampleGroup << " index= " << station->m_sampleTable[index][col]);
 }
 
@@ -1136,6 +1638,16 @@ MinstrelHtWifiManager::FindRate (MinstrelHtWifiRemoteStation *station)
 {
   NS_LOG_FUNCTION (this << station);
   NS_LOG_DEBUG ("FindRate " << "packet=" << station->m_totalPacketsCount );
+=======
+  NS_LOG_DEBUG ("New sample set: group= " << +sampleGroup << " index= " << +station->m_sampleTable[index][col]);
+}
+
+uint16_t
+MinstrelHtWifiManager::FindRate (MinstrelHtWifiRemoteStation *station)
+{
+  NS_LOG_FUNCTION (this << station);
+  NS_LOG_DEBUG ("FindRate packet=" << station->m_totalPacketsCount);
+>>>>>>> origin
 
   if ((station->m_samplePacketsCount + station->m_totalPacketsCount) == 0)
     {
@@ -1148,12 +1660,21 @@ MinstrelHtWifiManager::FindRate (MinstrelHtWifiRemoteStation *station)
       //SAMPLING
       NS_LOG_DEBUG ("Obtaining a sampling rate");
       /// Now go through the table and find an index rate.
+<<<<<<< HEAD
       uint32_t sampleIdx = GetNextSample (station);
       NS_LOG_DEBUG ("Sampling rate = " << sampleIdx);
 
       //Evaluate if the sampling rate selected should be used.
       uint32_t sampleGroupId = GetGroupId (sampleIdx);
       uint32_t sampleRateId = GetRateId (sampleIdx);
+=======
+      uint16_t sampleIdx = GetNextSample (station);
+      NS_LOG_DEBUG ("Sampling rate = " << sampleIdx);
+
+      //Evaluate if the sampling rate selected should be used.
+      uint8_t sampleGroupId = GetGroupId (sampleIdx);
+      uint8_t sampleRateId = GetRateId (sampleIdx);
+>>>>>>> origin
 
       // If the rate selected is not supported, then don't sample.
       if (station->m_groupsTable[sampleGroupId].m_supported && station->m_groupsTable[sampleGroupId].m_ratesTable[sampleRateId].supported)
@@ -1179,11 +1700,19 @@ MinstrelHtWifiManager::FindRate (MinstrelHtWifiRemoteStation *station)
                * if the link is working perfectly.
                */
 
+<<<<<<< HEAD
               uint32_t maxTpGroupId = GetGroupId (station->m_maxTpRate);
               uint32_t maxTp2GroupId = GetGroupId (station->m_maxTpRate2);
               uint32_t maxTp2RateId = GetRateId (station->m_maxTpRate2);
               uint32_t maxProbGroupId = GetGroupId (station->m_maxProbRate);
               uint32_t maxProbRateId = GetRateId (station->m_maxProbRate);
+=======
+              uint8_t maxTpGroupId = GetGroupId (station->m_maxTpRate);
+              uint8_t maxTp2GroupId = GetGroupId (station->m_maxTpRate2);
+              uint8_t maxTp2RateId = GetRateId (station->m_maxTpRate2);
+              uint8_t maxProbGroupId = GetGroupId (station->m_maxProbRate);
+              uint8_t maxProbRateId = GetRateId (station->m_maxProbRate);
+>>>>>>> origin
 
               uint8_t maxTpStreams = m_minstrelGroups[maxTpGroupId].streams;
               uint8_t sampleStreams = m_minstrelGroups[sampleGroupId].streams;
@@ -1193,8 +1722,13 @@ MinstrelHtWifiManager::FindRate (MinstrelHtWifiRemoteStation *station)
               Time maxProbDuration = station->m_groupsTable[maxProbGroupId].m_ratesTable[maxProbRateId].perfectTxTime;
 
               NS_LOG_DEBUG ("Use sample rate? SampleDuration= " << sampleDuration << " maxTp2Duration= " << maxTp2Duration <<
+<<<<<<< HEAD
                             " maxProbDuration= " << maxProbDuration << " sampleStreams= " << (uint32_t)sampleStreams <<
                             " maxTpStreams= " << (uint32_t)maxTpStreams);
+=======
+                            " maxProbDuration= " << maxProbDuration << " sampleStreams= " << +sampleStreams <<
+                            " maxTpStreams= " << +maxTpStreams);
+>>>>>>> origin
               if (sampleDuration < maxTp2Duration || (sampleStreams < maxTpStreams && sampleDuration < maxProbDuration))
                 {
                   /// Set flag that we are currently sampling.
@@ -1241,8 +1775,11 @@ MinstrelHtWifiManager::UpdateStats (MinstrelHtWifiRemoteStation *station)
 {
   NS_LOG_FUNCTION (this << station);
 
+<<<<<<< HEAD
   NS_LOG_DEBUG ("Updating stats=" << this);
 
+=======
+>>>>>>> origin
   station->m_nextStatsUpdate = Simulator::Now () + m_updateStats;
 
   station->m_numSamplesSlow = 0;
@@ -1252,7 +1789,11 @@ MinstrelHtWifiManager::UpdateStats (MinstrelHtWifiRemoteStation *station)
 
   if (station->m_ampduPacketCount > 0)
     {
+<<<<<<< HEAD
       double newLen = station->m_ampduLen / station->m_ampduPacketCount;
+=======
+      uint32_t newLen = station->m_ampduLen / station->m_ampduPacketCount;
+>>>>>>> origin
       station->m_avgAmpduLen = ( newLen * (100 - m_ewmaLevel) + (station->m_avgAmpduLen * m_ewmaLevel) ) / 100;
       station->m_ampduLen = 0;
       station->m_ampduPacketCount = 0;
@@ -1264,7 +1805,11 @@ MinstrelHtWifiManager::UpdateStats (MinstrelHtWifiRemoteStation *station)
   station->m_maxProbRate = GetLowestIndex (station);
 
   /// Update throughput and EWMA for each rate inside each group.
+<<<<<<< HEAD
   for (uint32_t j = 0; j < m_numGroups; j++)
+=======
+  for (uint8_t j = 0; j < m_numGroups; j++)
+>>>>>>> origin
     {
       if (station->m_groupsTable[j].m_supported)
         {
@@ -1275,13 +1820,21 @@ MinstrelHtWifiManager::UpdateStats (MinstrelHtWifiRemoteStation *station)
           station->m_groupsTable[j].m_maxTpRate2 = GetLowestIndex (station, j);
           station->m_groupsTable[j].m_maxProbRate = GetLowestIndex (station, j);
 
+<<<<<<< HEAD
           for (uint32_t i = 0; i < m_numRates; i++)
+=======
+          for (uint8_t i = 0; i < m_numRates; i++)
+>>>>>>> origin
             {
               if (station->m_groupsTable[j].m_ratesTable[i].supported)
                 {
                   station->m_groupsTable[j].m_ratesTable[i].retryUpdated = false;
 
+<<<<<<< HEAD
                   NS_LOG_DEBUG (i << " " << GetMcsSupported (station,  station->m_groupsTable[j].m_ratesTable[i].mcsIndex) <<
+=======
+                  NS_LOG_DEBUG (+i << " " << GetMcsSupported (station, station->m_groupsTable[j].m_ratesTable[i].mcsIndex) <<
+>>>>>>> origin
                                 "\t attempt=" << station->m_groupsTable[j].m_ratesTable[i].numRateAttempt <<
                                 "\t success=" << station->m_groupsTable[j].m_ratesTable[i].numRateSuccess);
 
@@ -1295,7 +1848,11 @@ MinstrelHtWifiManager::UpdateStats (MinstrelHtWifiRemoteStation *station)
                        */
                       tempProb = (100 * station->m_groupsTable[j].m_ratesTable[i].numRateSuccess) / station->m_groupsTable[j].m_ratesTable[i].numRateAttempt;
 
+<<<<<<< HEAD
                       /// Bookeeping.
+=======
+                      /// Bookkeeping.
+>>>>>>> origin
                       station->m_groupsTable[j].m_ratesTable[i].prob = tempProb;
 
                       if (station->m_groupsTable[j].m_ratesTable[i].successHist == 0)
@@ -1322,7 +1879,11 @@ MinstrelHtWifiManager::UpdateStats (MinstrelHtWifiRemoteStation *station)
                       station->m_groupsTable[j].m_ratesTable[i].numSamplesSkipped++;
                     }
 
+<<<<<<< HEAD
                   /// Bookeeping.
+=======
+                  /// Bookkeeping.
+>>>>>>> origin
                   station->m_groupsTable[j].m_ratesTable[i].prevNumRateSuccess = station->m_groupsTable[j].m_ratesTable[i].numRateSuccess;
                   station->m_groupsTable[j].m_ratesTable[i].prevNumRateAttempt = station->m_groupsTable[j].m_ratesTable[i].numRateAttempt;
                   station->m_groupsTable[j].m_ratesTable[i].numRateSuccess = 0;
@@ -1355,11 +1916,19 @@ MinstrelHtWifiManager::UpdateStats (MinstrelHtWifiRemoteStation *station)
 }
 
 double
+<<<<<<< HEAD
 MinstrelHtWifiManager::CalculateThroughput (MinstrelHtWifiRemoteStation *station, uint32_t groupId, uint32_t rateId, double ewmaProb)
 {
   /**
   * Calculating throughput.
   * Do not account throughput if sucess prob is below 10%
+=======
+MinstrelHtWifiManager::CalculateThroughput (MinstrelHtWifiRemoteStation *station, uint8_t groupId, uint8_t rateId, double ewmaProb)
+{
+  /**
+  * Calculating throughput.
+  * Do not account throughput if probability of success is below 10%
+>>>>>>> origin
   * (as done in minstrel_ht linux implementation).
   */
   if (ewmaProb < 10)
@@ -1385,6 +1954,7 @@ MinstrelHtWifiManager::CalculateThroughput (MinstrelHtWifiRemoteStation *station
 }
 
 void
+<<<<<<< HEAD
 MinstrelHtWifiManager::SetBestProbabilityRate (MinstrelHtWifiRemoteStation *station, uint32_t index)
 {
   GroupInfo *group;
@@ -1395,6 +1965,18 @@ MinstrelHtWifiManager::SetBestProbabilityRate (MinstrelHtWifiRemoteStation *stat
   double currentTh;
   // maximum group probability (GP) variables
   uint32_t maxGPGroupId, maxGPRateId;
+=======
+MinstrelHtWifiManager::SetBestProbabilityRate (MinstrelHtWifiRemoteStation *station, uint16_t index)
+{
+  GroupInfo *group;
+  HtRateInfo rate;
+  uint8_t tmpGroupId, tmpRateId;
+  double tmpTh, tmpProb;
+  uint8_t groupId, rateId;
+  double currentTh;
+  // maximum group probability (GP) variables
+  uint8_t maxGPGroupId, maxGPRateId;
+>>>>>>> origin
   double maxGPTh;
 
   groupId = GetGroupId (index);
@@ -1446,12 +2028,21 @@ MinstrelHtWifiManager::SetBestProbabilityRate (MinstrelHtWifiRemoteStation *stat
  * MCS groups.
  */
 void
+<<<<<<< HEAD
 MinstrelHtWifiManager::SetBestStationThRates (MinstrelHtWifiRemoteStation *station, uint32_t index)
 {
   uint32_t groupId, rateId;
   double th, prob;
   uint32_t maxTpGroupId, maxTpRateId;
   uint32_t maxTp2GroupId, maxTp2RateId;
+=======
+MinstrelHtWifiManager::SetBestStationThRates (MinstrelHtWifiRemoteStation *station, uint16_t index)
+{
+  uint8_t groupId, rateId;
+  double th, prob;
+  uint8_t maxTpGroupId, maxTpRateId;
+  uint8_t maxTp2GroupId, maxTp2RateId;
+>>>>>>> origin
   double maxTpTh, maxTpProb;
   double maxTp2Th, maxTp2Prob;
 
@@ -1508,7 +2099,10 @@ void
 MinstrelHtWifiManager::RateInit (MinstrelHtWifiRemoteStation *station)
 {
   NS_LOG_FUNCTION (this << station);
+<<<<<<< HEAD
   NS_LOG_DEBUG ("RateInit=" << station);
+=======
+>>>>>>> origin
 
   station->m_groupsTable = McsGroupData (m_numGroups);
 
@@ -1516,11 +2110,16 @@ MinstrelHtWifiManager::RateInit (MinstrelHtWifiRemoteStation *station)
   * Initialize groups supported by the receiver.
   */
   NS_LOG_DEBUG ("Supported groups by station:");
+<<<<<<< HEAD
   for (uint32_t groupId = 0; groupId < m_numGroups; groupId++)
+=======
+  for (uint8_t groupId = 0; groupId < m_numGroups; groupId++)
+>>>>>>> origin
     {
       if (m_minstrelGroups[groupId].isSupported)
         {
           station->m_groupsTable[groupId].m_supported = false;
+<<<<<<< HEAD
           if (!(!GetVhtSupported (station) && m_minstrelGroups[groupId].isVht)                  ///Is VHT supported by the receiver?
               && (m_minstrelGroups[groupId].isVht || !GetVhtSupported (station) || !m_useVhtOnly) ///If it is an HT MCS, check if VHT only is disabled
               && !(!GetShortGuardInterval (station) && m_minstrelGroups[groupId].sgi)           ///Is SGI supported by the receiver?
@@ -1529,25 +2128,47 @@ MinstrelHtWifiManager::RateInit (MinstrelHtWifiRemoteStation *station)
             {
               NS_LOG_DEBUG ("Group " << groupId << ": (" << (uint32_t)m_minstrelGroups[groupId].streams <<
                             "," << (uint32_t)m_minstrelGroups[groupId].sgi << "," << m_minstrelGroups[groupId].chWidth << ")");
+=======
+          if (!(!GetVhtSupported (station) && m_minstrelGroups[groupId].isVht)                    ///Is VHT supported by the receiver?
+              && (m_minstrelGroups[groupId].isVht || !GetVhtSupported (station) || !m_useVhtOnly) ///If it is an HT MCS, check if VHT only is disabled
+              && !(!GetShortGuardIntervalSupported (station) && m_minstrelGroups[groupId].sgi)    ///Is SGI supported by the receiver?
+              && (GetChannelWidth (station) >= m_minstrelGroups[groupId].chWidth)                 ///Is channel width supported by the receiver?
+              && (GetNumberOfSupportedStreams (station) >= m_minstrelGroups[groupId].streams))    ///Are streams supported by the receiver?
+            {
+              NS_LOG_DEBUG ("Group " << +groupId << ": (" << +m_minstrelGroups[groupId].streams <<
+                            "," << +m_minstrelGroups[groupId].sgi << "," << m_minstrelGroups[groupId].chWidth << ")");
+>>>>>>> origin
 
               station->m_groupsTable[groupId].m_supported = true;                                ///Group supported.
               station->m_groupsTable[groupId].m_col = 0;
               station->m_groupsTable[groupId].m_index = 0;
 
               station->m_groupsTable[groupId].m_ratesTable = HtMinstrelRate (m_numRates);        ///Create the rate list for the group.
+<<<<<<< HEAD
               for (uint32_t i = 0; i < m_numRates; i++)
+=======
+              for (uint8_t i = 0; i < m_numRates; i++)
+>>>>>>> origin
                 {
                   station->m_groupsTable[groupId].m_ratesTable[i].supported = false;
                 }
 
               // Initialize all modes supported by the remote station that belong to the current group.
+<<<<<<< HEAD
               for (uint32_t i = 0; i < station->m_nModes; i++)
+=======
+              for (uint8_t i = 0; i < station->m_nModes; i++)
+>>>>>>> origin
                 {
                   WifiMode mode = GetMcsSupported (station, i);
 
                   ///Use the McsValue as the index in the rate table.
                   ///This way, MCSs not supported are not initialized.
+<<<<<<< HEAD
                   uint32_t rateId = mode.GetMcsValue ();
+=======
+                  uint8_t rateId = mode.GetMcsValue ();
+>>>>>>> origin
                   if (mode.GetModulationClass () == WIFI_MOD_CLASS_HT)
                     {
                       rateId %= MAX_HT_GROUP_RATES;
@@ -1559,7 +2180,11 @@ MinstrelHtWifiManager::RateInit (MinstrelHtWifiRemoteStation *station)
                           && mode.GetMcsValue () < (m_minstrelGroups[groupId].streams * 8)                                      ///Check if the HT MCS corresponds to groups number of streams.
                           && mode.GetMcsValue () >= ((m_minstrelGroups[groupId].streams - 1) * 8)))
                     {
+<<<<<<< HEAD
                       NS_LOG_DEBUG ("Mode " << i << ": " << mode << " isVht: " << m_minstrelGroups[groupId].isVht);
+=======
+                      NS_LOG_DEBUG ("Mode " << +i << ": " << mode << " isVht: " << m_minstrelGroups[groupId].isVht);
+>>>>>>> origin
 
                       station->m_groupsTable[groupId].m_ratesTable[rateId].supported = true;
                       station->m_groupsTable[groupId].m_ratesTable[rateId].mcsIndex = i;         ///Mapping between rateId and operationalMcsSet
@@ -1588,11 +2213,19 @@ MinstrelHtWifiManager::RateInit (MinstrelHtWifiRemoteStation *station)
 }
 
 void
+<<<<<<< HEAD
 MinstrelHtWifiManager::CalculateRetransmits (MinstrelHtWifiRemoteStation *station, uint32_t index)
 {
   NS_LOG_FUNCTION (this << station << index);
   uint32_t groupId = GetGroupId (index);
   uint32_t rateId = GetRateId (index);
+=======
+MinstrelHtWifiManager::CalculateRetransmits (MinstrelHtWifiRemoteStation *station, uint16_t index)
+{
+  NS_LOG_FUNCTION (this << station << index);
+  uint8_t groupId = GetGroupId (index);
+  uint8_t rateId = GetRateId (index);
+>>>>>>> origin
   if (!station->m_groupsTable[groupId].m_ratesTable[rateId].retryUpdated)
     {
       CalculateRetransmits (station, groupId, rateId);
@@ -1600,16 +2233,27 @@ MinstrelHtWifiManager::CalculateRetransmits (MinstrelHtWifiRemoteStation *statio
 }
 
 void
+<<<<<<< HEAD
 MinstrelHtWifiManager::CalculateRetransmits (MinstrelHtWifiRemoteStation *station, uint32_t groupId, uint32_t rateId)
 {
   NS_LOG_FUNCTION (this << station << groupId << groupId);
   NS_LOG_DEBUG (" Calculating the number of retries");
+=======
+MinstrelHtWifiManager::CalculateRetransmits (MinstrelHtWifiRemoteStation *station, uint8_t groupId, uint8_t rateId)
+{
+  NS_LOG_FUNCTION (this << station << +groupId << +rateId);
+>>>>>>> origin
 
   uint32_t cw = 15;                     // Is an approximation.
   uint32_t cwMax = 1023;
   Time cwTime, txTime, dataTxTime;
+<<<<<<< HEAD
   Time slotTime = GetMac ()->GetSlot ();
   Time ackTime = GetMac ()->GetBasicBlockAckTimeout ();
+=======
+  Time slotTime = GetPhy ()->GetSlot ();
+  Time ackTime = GetPhy ()->GetSifs () + GetPhy ()->GetBlockAckTxTime ();
+>>>>>>> origin
 
   if (station->m_groupsTable[groupId].m_ratesTable[rateId].ewmaProb < 1)
     {
@@ -1648,7 +2292,11 @@ MinstrelHtWifiManager::CalculateRetransmits (MinstrelHtWifiRemoteStation *statio
 }
 
 double
+<<<<<<< HEAD
 MinstrelHtWifiManager::CalculateEwmsd (double oldEwmsd, double currentProb, double ewmaProb, uint32_t weight)
+=======
+MinstrelHtWifiManager::CalculateEwmsd (double oldEwmsd, double currentProb, double ewmaProb, double weight)
+>>>>>>> origin
 {
   double diff, incr, tmp;
 
@@ -1665,6 +2313,7 @@ MinstrelHtWifiManager::CalculateEwmsd (double oldEwmsd, double currentProb, doub
 void
 MinstrelHtWifiManager::InitSampleTable (MinstrelHtWifiRemoteStation *station)
 {
+<<<<<<< HEAD
   NS_LOG_DEBUG ("InitSampleTable=" << this);
 
   station->m_col = station->m_index = 0;
@@ -1676,6 +2325,18 @@ MinstrelHtWifiManager::InitSampleTable (MinstrelHtWifiRemoteStation *station)
   for (uint32_t col = 0; col < m_nSampleCol; col++)
     {
       for (uint32_t i = 0; i < numSampleRates; i++ )
+=======
+  NS_LOG_FUNCTION (this << station);
+  station->m_col = station->m_index = 0;
+
+  //for off-setting to make rates fall between 0 and nModes
+  uint8_t numSampleRates = m_numRates;
+
+  uint16_t newIndex;
+  for (uint8_t col = 0; col < m_nSampleCol; col++)
+    {
+      for (uint8_t i = 0; i < numSampleRates; i++ )
+>>>>>>> origin
         {
           /**
            * The next two lines basically tries to generate a random number
@@ -1697,12 +2358,25 @@ MinstrelHtWifiManager::InitSampleTable (MinstrelHtWifiRemoteStation *station)
 void
 MinstrelHtWifiManager::PrintTable (MinstrelHtWifiRemoteStation *station)
 {
+<<<<<<< HEAD
   NS_LOG_FUNCTION (this << station);
   NS_LOG_DEBUG ("PrintTable=" << station);
 
   station->m_statsFile << "               best   ____________rate__________    ________statistics________    ________last_______    ______sum-of________\n" <<
     " mode guard #  rate  [name   idx airtime  max_tp]  [avg(tp) avg(prob) sd(prob)]  [prob.|retry|suc|att]  [#success | #attempts]\n";
   for (uint32_t i = 0; i < m_numGroups; i++)
+=======
+  if (!station->m_statsFile.is_open ())
+    {
+      std::ostringstream tmp;
+      tmp << "minstrel-ht-stats-" << station->m_state->m_address << ".txt";
+      station->m_statsFile.open (tmp.str ().c_str (), std::ios::out);
+    }
+
+  station->m_statsFile << "               best   ____________rate__________    ________statistics________    ________last_______    ______sum-of________\n" <<
+    " mode guard #  rate  [name   idx airtime  max_tp]  [avg(tp) avg(prob) sd(prob)]  [prob.|retry|suc|att]  [#success | #attempts]\n";
+  for (uint8_t i = 0; i < m_numGroups; i++)
+>>>>>>> origin
     {
       StatsDump (station, i, station->m_statsFile);
     }
@@ -1715,9 +2389,15 @@ MinstrelHtWifiManager::PrintTable (MinstrelHtWifiRemoteStation *station)
 }
 
 void
+<<<<<<< HEAD
 MinstrelHtWifiManager::StatsDump (MinstrelHtWifiRemoteStation *station, uint32_t groupId, std::ofstream &of)
 {
   uint32_t numRates = m_numRates;
+=======
+MinstrelHtWifiManager::StatsDump (MinstrelHtWifiRemoteStation *station, uint8_t groupId, std::ofstream &of)
+{
+  uint8_t numRates = m_numRates;
+>>>>>>> origin
   McsGroup group = m_minstrelGroups[groupId];
   Time txTime;
   char giMode;
@@ -1729,7 +2409,11 @@ MinstrelHtWifiManager::StatsDump (MinstrelHtWifiRemoteStation *station, uint32_t
     {
       giMode = 'L';
     }
+<<<<<<< HEAD
   for (uint32_t i = 0; i < numRates; i++)
+=======
+  for (uint8_t i = 0; i < numRates; i++)
+>>>>>>> origin
     {
       if (station->m_groupsTable[groupId].m_supported && station->m_groupsTable[groupId].m_ratesTable[i].supported)
         {
@@ -1742,11 +2426,19 @@ MinstrelHtWifiManager::StatsDump (MinstrelHtWifiRemoteStation *station, uint32_t
               of << "VHT" << group.chWidth << "   " << giMode << "GI  " << (int)group.streams << "   ";
             }
 
+<<<<<<< HEAD
           uint32_t maxTpRate = station->m_maxTpRate;
           uint32_t maxTpRate2 = station->m_maxTpRate2;
           uint32_t maxProbRate = station->m_maxProbRate;
 
           uint32_t idx = GetIndex (groupId, i);
+=======
+          uint16_t maxTpRate = station->m_maxTpRate;
+          uint16_t maxTpRate2 = station->m_maxTpRate2;
+          uint16_t maxProbRate = station->m_maxProbRate;
+
+          uint16_t idx = GetIndex (groupId, i);
+>>>>>>> origin
           if (idx == maxTpRate)
             {
               of << 'A';
@@ -1778,10 +2470,17 @@ MinstrelHtWifiManager::StatsDump (MinstrelHtWifiRemoteStation *station, uint32_t
             }
           else
             {
+<<<<<<< HEAD
               of << std::setw (7) << "   MCS" << i << "/" << (int) group.streams;
             }
 
           of << "  " << std::setw (3) << idx << "  ";
+=======
+              of << std::setw (7) << "   MCS" << +i << "/" << (int) group.streams;
+            }
+
+          of << "  " << std::setw (3) << +idx << "  ";
+>>>>>>> origin
 
           /* tx_time[rate(i)] in usec */
           txTime = GetFirstMpduTxTime (groupId, GetMcsSupported (station, station->m_groupsTable[groupId].m_ratesTable[i].mcsIndex));
@@ -1800,25 +2499,42 @@ MinstrelHtWifiManager::StatsDump (MinstrelHtWifiRemoteStation *station, uint32_t
         }
     }
 }
+<<<<<<< HEAD
 uint32_t
 MinstrelHtWifiManager::GetIndex (uint32_t groupId, uint32_t rateId)
 {
   NS_LOG_FUNCTION (this << groupId << rateId);
   uint32_t index;
+=======
+uint16_t
+MinstrelHtWifiManager::GetIndex (uint8_t groupId, uint8_t rateId)
+{
+  NS_LOG_FUNCTION (this << +groupId << +rateId);
+  uint16_t index;
+>>>>>>> origin
   index = groupId * m_numRates + rateId;
   return index;
 }
 
+<<<<<<< HEAD
 uint32_t
 MinstrelHtWifiManager::GetRateId (uint32_t index)
 {
   NS_LOG_FUNCTION (this << index);
 
   uint32_t id;
+=======
+uint8_t
+MinstrelHtWifiManager::GetRateId (uint16_t index)
+{
+  NS_LOG_FUNCTION (this << index);
+  uint8_t id;
+>>>>>>> origin
   id = index % m_numRates;
   return id;
 }
 
+<<<<<<< HEAD
 uint32_t
 MinstrelHtWifiManager::GetGroupId (uint32_t index)
 {
@@ -1844,12 +2560,41 @@ MinstrelHtWifiManager::GetVhtGroupId (uint8_t txstreams, uint8_t sgi, uint32_t c
 }
 
 uint32_t
+=======
+uint8_t
+MinstrelHtWifiManager::GetGroupId (uint16_t index)
+{
+  NS_LOG_FUNCTION (this << index);
+  return index / m_numRates;
+}
+
+uint8_t
+MinstrelHtWifiManager::GetHtGroupId (uint8_t txstreams, uint8_t sgi, uint16_t chWidth)
+{
+  NS_LOG_FUNCTION (this << +txstreams << +sgi << chWidth);
+  return MAX_SUPPORTED_STREAMS * 2 * (chWidth == 40 ? 1 : 0) + MAX_SUPPORTED_STREAMS * sgi + txstreams - 1;
+}
+
+uint8_t
+MinstrelHtWifiManager::GetVhtGroupId (uint8_t txstreams, uint8_t sgi, uint16_t chWidth)
+{
+  NS_LOG_FUNCTION (this << +txstreams << +sgi << chWidth);
+  return MAX_HT_STREAM_GROUPS * MAX_SUPPORTED_STREAMS + MAX_SUPPORTED_STREAMS * 2 * (chWidth == 160 ? 3 : chWidth == 80 ? 2 : chWidth == 40 ? 1 : 0) + MAX_SUPPORTED_STREAMS * sgi + txstreams - 1;
+}
+
+uint16_t
+>>>>>>> origin
 MinstrelHtWifiManager::GetLowestIndex (MinstrelHtWifiRemoteStation *station)
 {
   NS_LOG_FUNCTION (this << station);
 
+<<<<<<< HEAD
   uint32_t groupId = 0;
   uint32_t rateId = 0;
+=======
+  uint8_t groupId = 0;
+  uint8_t rateId = 0;
+>>>>>>> origin
   while (groupId < m_numGroups && !station->m_groupsTable[groupId].m_supported)
     {
       groupId++;
@@ -1862,12 +2607,21 @@ MinstrelHtWifiManager::GetLowestIndex (MinstrelHtWifiRemoteStation *station)
   return GetIndex (groupId, rateId);
 }
 
+<<<<<<< HEAD
 uint32_t
 MinstrelHtWifiManager::GetLowestIndex (MinstrelHtWifiRemoteStation *station, uint32_t groupId)
 {
   NS_LOG_FUNCTION (this << station);
 
   uint32_t rateId = 0;
+=======
+uint16_t
+MinstrelHtWifiManager::GetLowestIndex (MinstrelHtWifiRemoteStation *station, uint8_t groupId)
+{
+  NS_LOG_FUNCTION (this << station << +groupId);
+
+  uint8_t rateId = 0;
+>>>>>>> origin
   while (rateId < m_numRates && !station->m_groupsTable[groupId].m_ratesTable[rateId].supported)
     {
       rateId++;
@@ -1876,13 +2630,20 @@ MinstrelHtWifiManager::GetLowestIndex (MinstrelHtWifiRemoteStation *station, uin
   return GetIndex (groupId, rateId);
 }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin
 WifiModeList
 MinstrelHtWifiManager::GetVhtDeviceMcsList (void) const
 {
   WifiModeList vhtMcsList;
   Ptr<WifiPhy> phy = GetPhy ();
+<<<<<<< HEAD
   for (uint32_t i = 0; i < phy->GetNMcs (); i++)
+=======
+  for (uint8_t i = 0; i < phy->GetNMcs (); i++)
+>>>>>>> origin
     {
       WifiMode mode = phy->GetMcs (i);
       if (mode.GetModulationClass () == WIFI_MOD_CLASS_VHT)
@@ -1898,7 +2659,11 @@ MinstrelHtWifiManager::GetHtDeviceMcsList (void) const
 {
   WifiModeList htMcsList;
   Ptr<WifiPhy> phy = GetPhy ();
+<<<<<<< HEAD
   for (uint32_t i = 0; i < phy->GetNMcs (); i++)
+=======
+  for (uint8_t i = 0; i < phy->GetNMcs (); i++)
+>>>>>>> origin
     {
       WifiMode mode = phy->GetMcs (i);
       if (mode.GetModulationClass () == WIFI_MOD_CLASS_HT)
@@ -1910,8 +2675,11 @@ MinstrelHtWifiManager::GetHtDeviceMcsList (void) const
 }
 
 } // namespace ns3
+<<<<<<< HEAD
 
 
 
 
 
+=======
+>>>>>>> origin

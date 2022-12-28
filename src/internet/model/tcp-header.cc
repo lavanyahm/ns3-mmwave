@@ -366,7 +366,11 @@ TcpHeader::Deserialize (Buffer::Iterator start)
   m_sequenceNumber = i.ReadNtohU32 ();
   m_ackNumber = i.ReadNtohU32 ();
   uint16_t field = i.ReadNtohU16 ();
+<<<<<<< HEAD
   m_flags = field & 0x3F;
+=======
+  m_flags = field & 0xFF;
+>>>>>>> origin
   m_length = field >> 12;
   m_windowSize = i.ReadNtohU16 ();
   i.Next (2);
@@ -460,7 +464,7 @@ TcpHeader::CalculateHeaderLength () const
 }
 
 bool
-TcpHeader::AppendOption (Ptr<TcpOption> option)
+TcpHeader::AppendOption (Ptr<const TcpOption> option)
 {
   if (m_optionsLen + option->GetSerializedSize () <= m_maxOptionsLen)
     {
@@ -485,8 +489,14 @@ TcpHeader::AppendOption (Ptr<TcpOption> option)
   return false;
 }
 
-Ptr<TcpOption>
-TcpHeader::GetOption (uint8_t kind) const
+const TcpHeader::TcpOptionList&
+TcpHeader::GetOptionList () const
+{
+  return m_options;
+}
+
+Ptr<const TcpOption>
+TcpHeader::GetOption(uint8_t kind) const
 {
   TcpOptionList::const_iterator i;
 

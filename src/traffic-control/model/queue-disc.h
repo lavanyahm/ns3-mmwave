@@ -22,13 +22,24 @@
 
 #include "ns3/object.h"
 #include "ns3/traced-value.h"
+<<<<<<< HEAD
 #include <ns3/queue.h>
 #include "ns3/net-device.h"
 #include <vector>
+=======
+#include "ns3/traced-callback.h"
+#include "ns3/queue-item.h"
+#include "ns3/queue-size.h"
+#include <vector>
+#include <map>
+#include <functional>
+#include <string>
+>>>>>>> origin
 #include "packet-filter.h"
 
 namespace ns3 {
 
+<<<<<<< HEAD
 class Packet;
 class QueueDisc;
 
@@ -117,6 +128,11 @@ private:
   uint8_t m_txq;          //!< Transmission queue index
 };
 
+=======
+class QueueDisc;
+template <typename Item> class Queue;
+class NetDeviceQueueInterface;
+>>>>>>> origin
 
 /**
  * \ingroup traffic-control
@@ -136,7 +152,11 @@ public:
   static TypeId GetTypeId (void);
 
   QueueDiscClass ();
+<<<<<<< HEAD
   virtual ~QueueDiscClass () {}
+=======
+  virtual ~QueueDiscClass ();
+>>>>>>> origin
 
   /**
    * \brief Get the queue disc attached to this class
@@ -146,6 +166,10 @@ public:
 
   /**
    * \brief Set the queue disc attached to this class
+<<<<<<< HEAD
+=======
+   * \param qd The queue disc to attach to this class
+>>>>>>> origin
    */
   void SetQueueDisc (Ptr<QueueDisc> qd);
 
@@ -159,6 +183,38 @@ private:
   Ptr<QueueDisc> m_queueDisc;        //!< Queue disc attached to this class
 };
 
+<<<<<<< HEAD
+=======
+/**
+ * \ingroup traffic-control
+ * \brief Enumeration of the available policies to handle the queue disc size.
+ *
+ * - SINGLE_INTERNAL_QUEUE is intended to handle the maxSize attribute
+ * of queue discs having a single internal queue. If no internal queue is
+ * yet attached to the queue disc, setting/getting this attribute involves
+ * setting/getting the member variable of the queue disc; otherwise, the
+ * corresponding attribute of the internal queue is set/get.
+ * - SINGLE_CHILD_QUEUE_DISC is intended to handle the maxSize attribute
+ * of queue discs having a single child queue disc. If no child queue disc is
+ * yet attached to the queue disc, setting/getting this attribute involves
+ * setting/getting the member variable of the queue disc; otherwise, the
+ * corresponding attribute of the child queue disc is set/get.
+ * - MULTIPLE_QUEUES is intended to handle the maxSize attribute of queue
+ * discs having multiple internal queues or child queue discs. Setting/getting
+ * this attribute always involves setting/getting the member variable of the
+ * queue disc. Queue discs should warn the user if a packet is dropped by an
+ * internal queue/child queue disc because of lack of space, while the queue
+ * disc limit is not exceeded.
+ */
+enum QueueDiscSizePolicy
+{
+  SINGLE_INTERNAL_QUEUE,       /**< Used by queue discs with single internal queue */
+  SINGLE_CHILD_QUEUE_DISC,     /**< Used by queue discs with single child queue disc */
+  MULTIPLE_QUEUES,             /**< Used by queue discs with multiple internal queues/child queue discs */
+  NO_LIMITS                    /**< Used by queue discs with unlimited size */
+};
+
+>>>>>>> origin
 
 /**
  * \ingroup traffic-control
@@ -191,6 +247,7 @@ private:
  * An attempt is made, also, to enqueue each packet in the "same" queue both within the
  * queue disc and within the device.
  *
+<<<<<<< HEAD
  * The traffic control layer interacts with a queue disc in a simple manner: after requesting
  * to enqueue a packet, the traffic control layer requests the qdisc to "run", i.e., to
  * dequeue a set of packets, until a predefined number ("quota") of packets is dequeued
@@ -198,30 +255,177 @@ private:
  * transmission queue(s) is/are (almost) full. Also, a netdevice may wake the
  * queue disc when its transmission queue(s) is/are (almost) empty. Waking a queue disc
  * is equivalent to make it run.
+=======
+ * The traffic control layer interacts with a queue disc in a simple manner: after
+ * requesting to enqueue a packet, the traffic control layer requests the qdisc to
+ * "run", i.e., to dequeue a set of packets, until a predefined number ("quota")
+ * of packets is dequeued or the netdevice stops the queue disc. A netdevice shall
+ * stop the queue disc when its transmission queue does not have room for another
+ * packet. Also, a netdevice shall wake the queue disc when it detects that there
+ * is room for another packet in its transmission queue, but the transmission queue
+ * is stopped. Waking a queue disc is equivalent to make it run.
+ *
+ * Every queue disc collects statistics about the total number of packets/bytes
+ * received from the upper layers (in case of root queue disc) or from the parent
+ * queue disc (in case of child queue disc), enqueued, dequeued, requeued, dropped,
+ * dropped before enqueue, dropped after dequeue, queued in the queue disc and
+ * sent to the netdevice or to the parent queue disc. Note that packets that are
+ * dequeued may be requeued, i.e., retained by the traffic control infrastructure,
+ * if the netdevice is not ready to receive them. Requeued packets are not part
+ * of the queue disc. The following identities hold:
+ * - dropped = dropped before enqueue + dropped after dequeue
+ * - received = dropped before enqueue + enqueued
+ * - queued = enqueued - dequeued
+ * - sent = dequeued - dropped after dequeue (- 1 if there is a requeued packet)
+ *
+ * Separate counters are also kept for each possible reason to drop a packet.
+ * When a packet is dropped by an internal queue, e.g., because the queue is full,
+ * the reason is "Dropped by internal queue". When a packet is dropped by a child
+ * queue disc, the reason is "(Dropped by child queue disc) " followed by the
+ * reason why the child queue disc dropped the packet.
+ *
+ * The QueueDisc base class provides the SojournTime trace source, which provides
+ * the sojourn time of every packet dequeued from a queue disc, including packets
+ * that are dropped or requeued after being dequeued. The sojourn time is taken
+ * when the packet is dequeued from the queue disc, hence it does not account for
+ * the additional time the packet is retained within the traffic control
+ * infrastructure in case it is requeued.
+>>>>>>> origin
  *
  * The design and implementation of this class is heavily inspired by Linux.
  * For more details, see the traffic-control model page.
  */
 class QueueDisc : public Object {
 public:
+<<<<<<< HEAD
+=======
+
+  /// \brief Structure that keeps the queue disc statistics
+  struct Stats
+  {
+    /// Total received packets
+    uint32_t nTotalReceivedPackets;
+    /// Total received bytes
+    uint64_t nTotalReceivedBytes;
+    /// Total sent packets -- this value is not kept up to date, call GetStats first
+    uint32_t nTotalSentPackets;
+    /// Total sent bytes -- this value is not kept up to date, call GetStats first
+    uint64_t nTotalSentBytes;
+    /// Total enqueued packets
+    uint32_t nTotalEnqueuedPackets;
+    /// Total enqueued bytes
+    uint64_t nTotalEnqueuedBytes;
+    /// Total dequeued packets
+    uint32_t nTotalDequeuedPackets;
+    /// Total dequeued bytes
+    uint64_t nTotalDequeuedBytes;
+    /// Total dropped packets
+    uint32_t nTotalDroppedPackets;
+    /// Total packets dropped before enqueue
+    uint32_t nTotalDroppedPacketsBeforeEnqueue;
+    /// Packets dropped before enqueue, for each reason
+    std::map<std::string, uint32_t> nDroppedPacketsBeforeEnqueue;
+    /// Total packets dropped after dequeue
+    uint32_t nTotalDroppedPacketsAfterDequeue;
+    /// Packets dropped after dequeue, for each reason
+    std::map<std::string, uint32_t> nDroppedPacketsAfterDequeue;
+    /// Total dropped bytes
+    uint64_t nTotalDroppedBytes;
+    /// Total bytes dropped before enqueue
+    uint64_t nTotalDroppedBytesBeforeEnqueue;
+    /// Bytes dropped before enqueue, for each reason
+    std::map<std::string, uint64_t> nDroppedBytesBeforeEnqueue;
+    /// Total bytes dropped after dequeue
+    uint64_t nTotalDroppedBytesAfterDequeue;
+    /// Bytes dropped after dequeue, for each reason
+    std::map<std::string, uint64_t> nDroppedBytesAfterDequeue;
+    /// Total requeued packets
+    uint32_t nTotalRequeuedPackets;
+    /// Total requeued bytes
+    uint64_t nTotalRequeuedBytes;
+    /// Total marked packets
+    uint32_t nTotalMarkedPackets;
+    /// Marked packets, for each reason
+    std::map<std::string, uint32_t> nMarkedPackets;
+    /// Total marked bytes
+    uint32_t nTotalMarkedBytes;
+    /// Marked bytes, for each reason
+    std::map<std::string, uint64_t> nMarkedBytes;
+
+    /// constructor
+    Stats ();
+
+    /**
+     * \brief Get the number of packets dropped for the given reason
+     * \param reason the reason why packets were dropped
+     * \return the number of packets dropped for the given reason
+     */
+    uint32_t GetNDroppedPackets (std::string reason) const;
+    /**
+     * \brief Get the amount of bytes dropped for the given reason
+     * \param reason the reason why packets were dropped
+     * \return the amount of bytes dropped for the given reason
+     */
+    uint64_t GetNDroppedBytes (std::string reason) const;
+    /**
+     * \brief Get the number of packets marked for the given reason
+     * \param reason the reason why packets were marked
+     * \return the number of packets marked for the given reason
+     */
+    uint32_t GetNMarkedPackets (std::string reason) const;
+    /**
+     * \brief Get the amount of bytes marked for the given reason
+     * \param reason the reason why packets were marked
+     * \return the amount of bytes marked for the given reason
+     */
+    uint64_t GetNMarkedBytes (std::string reason) const;
+    /**
+     * \brief Print the statistics.
+     * \param os output stream in which the data should be printed.
+     */
+    void Print (std::ostream &os) const;
+  };
+
+>>>>>>> origin
   /**
    * \brief Get the type ID.
    * \return the object TypeId
    */
   static TypeId GetTypeId (void);
 
+<<<<<<< HEAD
   QueueDisc ();
+=======
+  /**
+   * \brief Constructor
+   * \param policy the policy to handle the queue disc size
+   */
+  QueueDisc (QueueDiscSizePolicy policy = QueueDiscSizePolicy::SINGLE_INTERNAL_QUEUE);
+
+  /**
+   * \brief Constructor
+   * \param policy the policy to handle the queue disc size
+   * \param unit The fixed operating mode of this queue disc
+   */
+  QueueDisc (QueueDiscSizePolicy policy, QueueSizeUnit unit);
+
+  virtual ~QueueDisc ();
+>>>>>>> origin
 
   /**
    * \brief Get the number of packets stored by the queue disc
    * \return the number of packets stored by the queue disc.
    *
+<<<<<<< HEAD
    * Note that the number of packets stored by the queue disc is updated as soon
    * as a packet is received by the queue disc and before actually enqueuing the
    * packet (i.e., before calling DoEnqueue). Thus, while implementing the DoEnqueue
    * method of a subclass, keep in mind that GetNPackets returns the number of
    * packets stored in the queue disc, including the packet that we are trying
    * to enqueue.
+=======
+   * The requeued packet, if any, is counted.
+>>>>>>> origin
    */
   uint32_t GetNPackets (void) const;
 
@@ -229,16 +433,21 @@ public:
    * \brief Get the amount of bytes stored by the queue disc
    * \return the amount of bytes stored by the queue disc.
    *
+<<<<<<< HEAD
    * Note that the amount of bytes stored by the queue disc is updated as soon
    * as a packet is received by the queue disc and before actually enqueuing the
    * packet (i.e., before calling DoEnqueue). Thus, while implementing the DoEnqueue
    * method of a subclass, keep in mind that GetNBytes returns the amount of
    * bytes stored in the queue disc, including the size of the packet that we are
    * trying to enqueue.
+=======
+   * The requeued packet, if any, is counted.
+>>>>>>> origin
    */
   uint32_t GetNBytes (void) const;
 
   /**
+<<<<<<< HEAD
    * \brief Get the total number of received packets
    * \return the total number of received packets.
    */
@@ -285,6 +494,74 @@ public:
    * \return the NetDevice on which this queue discipline is installed.
    */
   Ptr<NetDevice> GetNetDevice (void) const;
+=======
+   * \brief Get the maximum size of the queue disc.
+   *
+   * \returns the maximum size of the queue disc.
+   */
+  QueueSize GetMaxSize (void) const;
+
+  /**
+   * \brief Set the maximum size of the queue disc.
+   *
+   * Trying to set a null size has no effect.
+   *
+   * \param size the maximum size.
+   * \returns true if setting the size succeeded, false otherwise.
+   */
+  bool SetMaxSize (QueueSize size);
+
+  /**
+   * \brief Get the current size of the queue disc in bytes, if
+   *        operating in bytes mode, or packets, otherwise.
+   *
+   * Do not call this method if the queue disc size is not limited.
+   *
+   * \returns The queue disc size in bytes or packets.
+   */
+  QueueSize GetCurrentSize (void);
+
+  /**
+   * \brief Retrieve all the collected statistics.
+   * \return the collected statistics.
+   */
+  const Stats& GetStats (void);
+
+  /**
+   * \param ndqi the NetDeviceQueueInterface aggregated to the receiving object.
+   *
+   * Set the pointer to the NetDeviceQueueInterface object aggregated to the
+   * object receiving the packets dequeued from this queue disc.
+   */
+  void SetNetDeviceQueueInterface (Ptr<NetDeviceQueueInterface> ndqi);
+
+  /**
+   * \return the NetDeviceQueueInterface aggregated to the receiving object.
+   *
+   * Get the pointer to the NetDeviceQueueInterface object aggregated to the
+   * object receiving the packets dequeued from this queue disc.
+   */
+  Ptr<NetDeviceQueueInterface> GetNetDeviceQueueInterface (void) const;
+
+  /// Callback invoked to send a packet to the receiving object when Run is called
+  typedef std::function<void (Ptr<QueueDiscItem>)> SendCallback;
+
+  /**
+   * \param func the callback to send a packet to the receiving object.
+   *
+   * Set the callback used by the Transmit method (called eventually by the Run
+   * method) to send a packet to the receiving object.
+   */
+  void SetSendCallback (SendCallback func);
+
+  /**
+   * \return the callback to send a packet to the receiving object.
+   *
+   * Get the callback used by the Transmit method (called eventually by the Run
+   * method) to send a packet to the receiving object.
+   */
+  SendCallback GetSendCallback (void) const;
+>>>>>>> origin
 
   /**
    * \brief Set the maximum number of dequeue operations following a packet enqueue
@@ -308,20 +585,37 @@ public:
   bool Enqueue (Ptr<QueueDiscItem> item);
 
   /**
+<<<<<<< HEAD
    * Request the queue discipline to extract a packet. This function only updates
    * the statistics and calls the (private) DoDequeue function, which must be
    * implemented by derived classes.
+=======
+   * Extract from the queue disc the packet that has been dequeued by calling
+   * Peek, if any, or call the private DoDequeue method (which must be
+   * implemented by derived classes) to dequeue a packet, otherwise.
+   *
+>>>>>>> origin
    * \return 0 if the operation was not successful; the item otherwise.
    */
   Ptr<QueueDiscItem> Dequeue (void);
 
   /**
+<<<<<<< HEAD
    * Get a copy of the next packet the queue discipline will extract, without
    * actually extracting the packet. This function only calls the (private)
    * DoPeek function, which must be implemented by derived classes.
    * \return 0 if the operation was not successful; the item otherwise.
    */
   Ptr<const QueueDiscItem> Peek (void) const;
+=======
+   * Get a copy of the next packet the queue discipline will extract. This
+   * function only calls the (private) DoPeek function. This base class provides
+   * a default implementation of DoPeek, which dequeues the next packet but
+   * retains it into the queue disc.
+   * \return 0 if the operation was not successful; the item otherwise.
+   */
+  Ptr<const QueueDiscItem> Peek (void);
+>>>>>>> origin
 
   /**
    * Modelled after the Linux function __qdisc_run (net/sched/sch_generic.c)
@@ -330,24 +624,42 @@ public:
    */
   void Run (void);
 
+<<<<<<< HEAD
+=======
+  /// Internal queues store QueueDiscItem objects
+  typedef Queue<QueueDiscItem> InternalQueue;
+
+>>>>>>> origin
   /**
    * \brief Add an internal queue to the tail of the list of queues.
    * \param queue the queue to be added
    */
+<<<<<<< HEAD
   void AddInternalQueue (Ptr<Queue> queue);
+=======
+  void AddInternalQueue (Ptr<InternalQueue> queue);
+>>>>>>> origin
 
   /**
    * \brief Get the i-th internal queue
    * \param i the index of the queue
    * \return the i-th internal queue.
    */
+<<<<<<< HEAD
   Ptr<Queue> GetInternalQueue (uint32_t i) const;
+=======
+  Ptr<InternalQueue> GetInternalQueue (std::size_t i) const;
+>>>>>>> origin
 
   /**
    * \brief Get the number of internal queues
    * \return the number of internal queues.
    */
+<<<<<<< HEAD
   uint32_t GetNInternalQueues (void) const;
+=======
+  std::size_t GetNInternalQueues (void) const;
+>>>>>>> origin
 
   /**
    * \brief Add a packet filter to the tail of the list of filters used to classify packets.
@@ -360,13 +672,21 @@ public:
    * \param i the index of the packet filter
    * \return the i-th packet filter.
    */
+<<<<<<< HEAD
   Ptr<PacketFilter> GetPacketFilter (uint32_t i) const;
+=======
+  Ptr<PacketFilter> GetPacketFilter (std::size_t i) const;
+>>>>>>> origin
 
   /**
    * \brief Get the number of packet filters
    * \return the number of packet filters.
    */
+<<<<<<< HEAD
   uint32_t GetNPacketFilters (void) const;
+=======
+  std::size_t GetNPacketFilters (void) const;
+>>>>>>> origin
 
   /**
    * \brief Add a queue disc class to the tail of the list of classes.
@@ -379,13 +699,21 @@ public:
    * \param i the index of the queue disc class
    * \return the i-th queue disc class.
    */
+<<<<<<< HEAD
   Ptr<QueueDiscClass> GetQueueDiscClass (uint32_t i) const;
+=======
+  Ptr<QueueDiscClass> GetQueueDiscClass (std::size_t i) const;
+>>>>>>> origin
 
   /**
    * \brief Get the number of queue disc classes
    * \return the number of queue disc classes.
    */
+<<<<<<< HEAD
   uint32_t GetNQueueDiscClasses (void) const;
+=======
+  std::size_t GetNQueueDiscClasses (void) const;
+>>>>>>> origin
 
   /**
    * Classify a packet by calling the packet filters, one at a time, until either
@@ -419,6 +747,7 @@ public:
    *
    * \return the wake mode adopted by this queue disc.
    */
+<<<<<<< HEAD
   WakeMode GetWakeMode (void);
 
   /// Callback invoked by a child queue disc to notify the parent of a packet drop
@@ -432,6 +761,14 @@ public:
    * callback to the Drop method of the parent queue disc.
    */
   virtual void SetParentDropCallback (ParentDropCallback cb);
+=======
+  virtual WakeMode GetWakeMode (void) const;
+
+  // Reasons for dropping packets
+  static constexpr const char* INTERNAL_QUEUE_DROP = "Dropped by internal queue";    //!< Packet dropped by an internal queue
+  static constexpr const char* CHILD_QUEUE_DISC_DROP = "(Dropped by child queue disc) "; //!< Packet dropped by a child queue disc
+  static constexpr const char* CHILD_QUEUE_DISC_MARK = "(Marked by child queue disc) "; //!< Packet marked by a child queue disc
+>>>>>>> origin
 
 protected:
   /**
@@ -441,6 +778,7 @@ protected:
 
   /**
    * \brief Check whether the configuration is correct and initialize parameters
+<<<<<<< HEAD
    */
   virtual void DoInitialize (void);
 
@@ -457,6 +795,63 @@ private:
    *  \param item item that was dropped
    */
   void NotifyParentDrop (Ptr<QueueItem> item);
+=======
+   *
+   * This method is not virtual to prevent subclasses from redefining it.
+   * Subclasses must instead provide the implementation of the CheckConfig
+   * and InitializeParams methods (which are called by this method).
+   * \sa QueueDisc::InitializeParams
+   * \sa QueueDisc::CheckConfig
+   */
+  void DoInitialize (void);
+
+  /**
+   *  \brief Perform the actions required when the queue disc is notified of
+   *         a packet dropped before enqueue
+   *  \param item item that was dropped
+   *  \param reason the reason why the item was dropped
+   *  This method must be called by subclasses to record that a packet was
+   *  dropped before enqueue for the specified reason
+   */
+  void DropBeforeEnqueue (Ptr<const QueueDiscItem> item, const char* reason);
+
+  /**
+   *  \brief Perform the actions required when the queue disc is notified of
+   *         a packet dropped after dequeue
+   *  \param item item that was dropped
+   *  \param reason the reason why the item was dropped
+   *  This method must be called by subclasses to record that a packet was
+   *  dropped after dequeue for the specified reason
+   */
+  void DropAfterDequeue (Ptr<const QueueDiscItem> item, const char* reason);
+
+  /**
+   *  \brief Marks the given packet and, if successful, updates the counters
+   *         associated with the given reason
+   *  \param item item that has to be marked
+   *  \param reason the reason why the item has to be marked
+   *  \return true if the item was successfully marked, false otherwise
+   */
+  bool Mark (Ptr<QueueDiscItem> item, const char* reason);
+
+private:
+  /**
+   * \brief Copy constructor
+   * \param o object to copy
+   *
+   * Defined and unimplemented to avoid misuse
+   */
+  QueueDisc (const QueueDisc &o);
+
+  /**
+   * \brief Assignment operator
+   * \param o object to copy
+   * \returns the copied object
+   *
+   * Defined and unimplemented to avoid misuse
+   */
+  QueueDisc &operator = (const QueueDisc &o);
+>>>>>>> origin
 
   /**
    * This function actually enqueues a packet into the queue disc.
@@ -472,21 +867,58 @@ private:
   virtual Ptr<QueueDiscItem> DoDequeue (void) = 0;
 
   /**
+<<<<<<< HEAD
    * This function returns a copy of the next packet the queue disc will extract.
    * \return 0 if the operation was not successful; the packet otherwise.
    */
   virtual Ptr<const QueueDiscItem> DoPeek (void) const = 0;
+=======
+   * \brief Return a copy of the next packet the queue disc will extract.
+   *
+   * The implementation of this method is based on the qdisc_peek_dequeued
+   * function of the Linux kernel, which dequeues a packet and retains it in the
+   * queue disc as a requeued packet. The packet is not traced as requeued, nor
+   * is the total count of requeued packets increased. The packet is still
+   * considered to be part of the queue disc and the dequeue trace is fired
+   * when Dequeue is called and the packet is actually extracted from the
+   * queue disc.
+   *
+   * This approach is especially recommended for queue discs for which it is not
+   * obvious what is the next packet that will be dequeued (e.g., queue discs
+   * having multiple internal queues or child queue discs or queue discs that
+   * drop packets after dequeue). Subclasses can however provide their own
+   * implementation of this method that overrides the default one.
+   *
+   * \return 0 if the operation was not successful; the packet otherwise.
+   */
+  virtual Ptr<const QueueDiscItem> DoPeek (void);
+>>>>>>> origin
 
   /**
    * Check whether the current configuration is correct. Default objects (such
    * as internal queues) might be created by this method to ensure the
+<<<<<<< HEAD
    * configuration is correct.
+=======
+   * configuration is correct.  This method is automatically called at
+   * simulation initialization time, and it is called before
+   * the InitializeParams () method.  It is appropriate to promote parameter
+   * initialization to this method if it aids in checking for correct
+   * configuration.
+   * \sa QueueDisc::InitializeParams
+>>>>>>> origin
    * \return true if the configuration is correct, false otherwise
    */
   virtual bool CheckConfig (void) = 0;
 
   /**
    * Initialize parameters (if any) before the first packet is enqueued.
+<<<<<<< HEAD
+=======
+   * This method is automatically called at simulation initialization time,
+   * after the CheckConfig() method has been called.
+   * \sa QueueDisc::CheckConfig
+>>>>>>> origin
    */
   virtual void InitializeParams (void) = 0;
 
@@ -531,14 +963,35 @@ private:
    */
   bool Transmit (Ptr<QueueDiscItem> item);
 
+<<<<<<< HEAD
   static const uint32_t DEFAULT_QUOTA = 64; //!< Default quota (as in /proc/sys/net/core/dev_weight)
 
   std::vector<Ptr<Queue> > m_queues;            //!< Internal queues
+=======
+  /**
+   *  \brief Perform the actions required when the queue disc is notified of
+   *         a packet enqueue
+   *  \param item item that was enqueued
+   */
+  void PacketEnqueued (Ptr<const QueueDiscItem> item);
+
+  /**
+   *  \brief Perform the actions required when the queue disc is notified of
+   *         a packet dequeue
+   *  \param item item that was dequeued
+   */
+  void PacketDequeued (Ptr<const QueueDiscItem> item);
+
+  static const uint32_t DEFAULT_QUOTA = 64; //!< Default quota (as in /proc/sys/net/core/dev_weight)
+
+  std::vector<Ptr<InternalQueue> > m_queues;    //!< Internal queues
+>>>>>>> origin
   std::vector<Ptr<PacketFilter> > m_filters;    //!< Packet filters
   std::vector<Ptr<QueueDiscClass> > m_classes;  //!< Classes
 
   TracedValue<uint32_t> m_nPackets; //!< Number of packets in the queue
   TracedValue<uint32_t> m_nBytes;   //!< Number of bytes in the queue
+<<<<<<< HEAD
 
   uint32_t m_nTotalReceivedPackets; //!< Total received packets
   uint32_t m_nTotalReceivedBytes;   //!< Total received bytes
@@ -563,6 +1016,66 @@ private:
   TracedCallback<Ptr<const QueueItem> > m_traceDrop;
 };
 
+=======
+  TracedCallback<Time> m_sojourn;   //!< Sojourn time of the latest dequeued packet
+  QueueSize m_maxSize;              //!< max queue size
+
+  Stats m_stats;                    //!< The collected statistics
+  uint32_t m_quota;                 //!< Maximum number of packets dequeued in a qdisc run
+  Ptr<NetDeviceQueueInterface> m_devQueueIface;   //!< NetDevice queue interface
+  SendCallback m_send;              //!< Callback used to send a packet to the receiving object
+  bool m_running;                   //!< The queue disc is performing multiple dequeue operations
+  Ptr<QueueDiscItem> m_requeued;    //!< The last packet that failed to be transmitted
+  bool m_peeked;                    //!< A packet was dequeued because Peek was called
+  std::string m_childQueueDiscDropMsg;  //!< Reason why a packet was dropped by a child queue disc
+  std::string m_childQueueDiscMarkMsg;  //!< Reason why a packet was marked by a child queue disc
+  QueueDiscSizePolicy m_sizePolicy;     //!< The queue disc size policy
+  bool m_prohibitChangeMode;            //!< True if changing mode is prohibited
+
+  /// Traced callback: fired when a packet is enqueued
+  TracedCallback<Ptr<const QueueDiscItem> > m_traceEnqueue;
+  /// Traced callback: fired when a packet is dequeued
+  TracedCallback<Ptr<const QueueDiscItem> > m_traceDequeue;
+  /// Traced callback: fired when a packet is requeued
+  TracedCallback<Ptr<const QueueDiscItem> > m_traceRequeue;
+  /// Traced callback: fired when a packet is dropped
+  TracedCallback<Ptr<const QueueDiscItem> > m_traceDrop;
+  /// Traced callback: fired when a packet is dropped before enqueue
+  TracedCallback<Ptr<const QueueDiscItem>, const char* > m_traceDropBeforeEnqueue;
+  /// Traced callback: fired when a packet is dropped after dequeue
+  TracedCallback<Ptr<const QueueDiscItem>, const char* > m_traceDropAfterDequeue;
+  /// Traced callback: fired when a packet is marked
+  TracedCallback<Ptr<const QueueDiscItem>, const char* > m_traceMark;
+
+  /// Type for the function objects notifying that a packet has been dropped by an internal queue
+  typedef std::function<void (Ptr<const QueueDiscItem>)> InternalQueueDropFunctor;
+  /// Type for the function objects notifying that a packet has been dropped by a child queue disc
+  typedef std::function<void (Ptr<const QueueDiscItem>, const char*)> ChildQueueDiscDropFunctor;
+  /// Type for the function objects notifying that a packet has been marked by a child queue disc
+  typedef std::function<void (Ptr<const QueueDiscItem>, const char*)> ChildQueueDiscMarkFunctor;
+
+  /// Function object called when an internal queue dropped a packet before enqueue
+  InternalQueueDropFunctor m_internalQueueDbeFunctor;
+  /// Function object called when an internal queue dropped a packet after dequeue
+  InternalQueueDropFunctor m_internalQueueDadFunctor;
+  /// Function object called when a child queue disc dropped a packet before enqueue
+  ChildQueueDiscDropFunctor m_childQueueDiscDbeFunctor;
+  /// Function object called when a child queue disc dropped a packet after dequeue
+  ChildQueueDiscDropFunctor m_childQueueDiscDadFunctor;
+  /// Function object called when a child queue disc marked a packet
+  ChildQueueDiscMarkFunctor m_childQueueDiscMarkFunctor;
+};
+
+/**
+ * \brief Stream insertion operator.
+ *
+ * \param os the stream
+ * \param stats the queue disc statistics
+ * \returns a reference to the stream
+ */
+std::ostream& operator<< (std::ostream& os, const QueueDisc::Stats &stats);
+
+>>>>>>> origin
 } // namespace ns3
 
 #endif /* QueueDisc */

@@ -175,7 +175,11 @@ RxDrop (Ptr<const Packet> p)
 int 
 main (int argc, char *argv[])
 {
+<<<<<<< HEAD
   CommandLine cmd;
+=======
+  CommandLine cmd (__FILE__);
+>>>>>>> origin
   cmd.Parse (argc, argv);
   
   NodeContainer nodes;

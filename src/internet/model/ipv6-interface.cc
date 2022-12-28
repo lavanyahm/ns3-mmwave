@@ -24,6 +24,10 @@
 #include "ns3/net-device.h"
 #include "ns3/mac16-address.h"
 #include "ns3/mac64-address.h"
+<<<<<<< HEAD
+=======
+#include "ns3/traffic-control-layer.h"
+>>>>>>> origin
 
 #include "ipv6-interface.h"
 #include "ipv6-queue-disc-item.h"
@@ -67,12 +71,11 @@ Ipv6Interface::Ipv6Interface ()
 
 Ipv6Interface::~Ipv6Interface ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
 }
 
 void Ipv6Interface::DoDispose ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   m_node = 0;
   m_device = 0;
   m_tc = 0;
@@ -82,7 +85,7 @@ void Ipv6Interface::DoDispose ()
 
 void Ipv6Interface::DoSetup ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   if (m_node == 0 || m_device == 0)
     {
@@ -93,6 +96,7 @@ void Ipv6Interface::DoSetup ()
   if (!DynamicCast<LoopbackNetDevice> (m_device)) /* no autoconf for ip6-localhost */
     {
       Address addr = GetDevice ()->GetAddress ();
+<<<<<<< HEAD
 
       if (Mac64Address::IsMatchingType (addr))
         {
@@ -116,18 +120,19 @@ void Ipv6Interface::DoSetup ()
         {
           NS_FATAL_ERROR ("IPv6 autoconf for this kind of address not implemented.");
         }
+=======
+      Ipv6InterfaceAddress ifaddr = Ipv6InterfaceAddress (Ipv6Address::MakeAutoconfiguredLinkLocalAddress (addr), Ipv6Prefix (64));
+      AddAddress (ifaddr);
+      m_linkLocalAddress = ifaddr;
+>>>>>>> origin
     }
   else
     {
       return; /* no NDISC cache for ip6-localhost */
     }
+  int32_t interfaceId = m_node->GetObject<Ipv6> ()->GetInterfaceForDevice (m_device);
+  Ptr<Icmpv6L4Protocol> icmpv6 = DynamicCast<Icmpv6L4Protocol> (m_node->GetObject<Ipv6> ()->GetProtocol (Icmpv6L4Protocol::GetStaticProtocolNumber (), interfaceId));
 
-  Ptr<IpL4Protocol> proto = m_node->GetObject<Ipv6> ()->GetProtocol (Icmpv6L4Protocol::GetStaticProtocolNumber ());
-  Ptr<Icmpv6L4Protocol> icmpv6;
-  if (proto)
-    {
-      icmpv6 = proto->GetObject <Icmpv6L4Protocol> ();
-    }
   if (icmpv6 && !m_ndCache)
     {
       m_ndCache = icmpv6->CreateCache (m_device, this);
@@ -138,14 +143,19 @@ void Ipv6Interface::SetNode (Ptr<Node> node)
 {
   NS_LOG_FUNCTION (this << node);
   m_node = node;
-  DoSetup ();
 }
 
 void Ipv6Interface::SetDevice (Ptr<NetDevice> device)
 {
   NS_LOG_FUNCTION (this << device);
   m_device = device;
-  DoSetup ();
+}
+
+void
+Ipv6Interface::SetTrafficControl (Ptr<TrafficControlLayer> tc)
+{
+  NS_LOG_FUNCTION (this << tc);
+  m_tc = tc;
 }
 
 void
@@ -157,7 +167,7 @@ Ipv6Interface::SetTrafficControl (Ptr<TrafficControlLayer> tc)
 
 Ptr<NetDevice> Ipv6Interface::GetDevice () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   return m_device;
 }
 
@@ -169,25 +179,25 @@ void Ipv6Interface::SetMetric (uint16_t metric)
 
 uint16_t Ipv6Interface::GetMetric () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   return m_metric;
 }
 
 bool Ipv6Interface::IsUp () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   return m_ifup;
 }
 
 bool Ipv6Interface::IsDown () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   return !m_ifup;
 }
 
 void Ipv6Interface::SetUp ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
 
   if (m_ifup)
     {
@@ -199,7 +209,7 @@ void Ipv6Interface::SetUp ()
 
 void Ipv6Interface::SetDown ()
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   m_ifup = false;
   m_addresses.clear ();
   m_ndCache->Flush ();
@@ -207,7 +217,7 @@ void Ipv6Interface::SetDown ()
 
 bool Ipv6Interface::IsForwarding () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   return m_forwarding;
 }
 
@@ -219,7 +229,7 @@ void Ipv6Interface::SetForwarding (bool forwarding)
 
 bool Ipv6Interface::AddAddress (Ipv6InterfaceAddress iface)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this << iface);
   Ipv6Address addr = iface.GetAddress ();
 
   /* DAD handling */
@@ -239,17 +249,21 @@ bool Ipv6Interface::AddAddress (Ipv6InterfaceAddress iface)
       if (!addr.IsAny () || !addr.IsLocalhost ())
         {
           /* DAD handling */
-          Ptr<IpL4Protocol> proto = m_node->GetObject<Ipv6> ()->GetProtocol (Icmpv6L4Protocol::GetStaticProtocolNumber ());
-          Ptr<Icmpv6L4Protocol> icmpv6;
-          if (proto)
-            {
-              icmpv6 = proto->GetObject <Icmpv6L4Protocol> ();
-            }
 
-          if (icmpv6 && icmpv6->IsAlwaysDad ())
+          int32_t interfaceId = m_node->GetObject<Ipv6> ()->GetInterfaceForDevice (m_device);
+          Ptr<Icmpv6L4Protocol> icmpv6 = DynamicCast<Icmpv6L4Protocol> (m_node->GetObject<Ipv6> ()->GetProtocol (Icmpv6L4Protocol::GetStaticProtocolNumber (), interfaceId));
+
+          if (icmpv6)
             {
-              Simulator::Schedule (Seconds (0.), &Icmpv6L4Protocol::DoDAD, icmpv6, addr, this);
-              Simulator::Schedule (Seconds (1.), &Icmpv6L4Protocol::FunctionDadTimeout, icmpv6, this, addr);
+              if (icmpv6->IsAlwaysDad ())
+                {
+                  Simulator::Schedule (Seconds (0.), &Icmpv6L4Protocol::DoDAD, icmpv6, addr, this);
+                  Simulator::Schedule (Seconds (1.), &Icmpv6L4Protocol::FunctionDadTimeout, icmpv6, this, addr);
+                }
+              else
+                {
+                  Simulator::Schedule (Seconds (0.), &Icmpv6L4Protocol::FunctionDadTimeout, icmpv6, this, addr);
+                }
             }
         }
       return true;
@@ -262,7 +276,15 @@ bool Ipv6Interface::AddAddress (Ipv6InterfaceAddress iface)
 Ipv6InterfaceAddress Ipv6Interface::GetLinkLocalAddress () const
 {
   /* IPv6 interface has always at least one IPv6 link-local address */
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
+
+  return m_linkLocalAddress;
+}
+
+bool Ipv6Interface::IsSolicitedMulticastAddress (Ipv6Address address) const
+{
+  /* IPv6 interface has always at least one IPv6 Solicited Multicast address */
+  NS_LOG_FUNCTION (this << address);
 
   return m_linkLocalAddress;
 }
@@ -309,7 +331,7 @@ Ipv6InterfaceAddress Ipv6Interface::GetAddress (uint32_t index) const
 
 uint32_t Ipv6Interface::GetNAddresses () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   return m_addresses.size ();
 }
 
@@ -423,8 +445,11 @@ void Ipv6Interface::Send (Ptr<Packet> p, const Ipv6Header & hdr, Ipv6Address des
   /* other address */
   if (m_device->NeedsArp ())
     {
-      NS_LOG_LOGIC ("Needs ARP" << " " << dest);
-      Ptr<Icmpv6L4Protocol> icmpv6 = ipv6->GetIcmpv6 ();
+      NS_LOG_LOGIC ("Needs NDISC " << dest);
+
+      int32_t interfaceId = m_node->GetObject<Ipv6> ()->GetInterfaceForDevice (m_device);
+      Ptr<Icmpv6L4Protocol> icmpv6 = DynamicCast<Icmpv6L4Protocol> (m_node->GetObject<Ipv6> ()->GetProtocol (Icmpv6L4Protocol::GetStaticProtocolNumber (), interfaceId));
+
       Address hardwareDestination;
       bool found = false;
 
@@ -452,7 +477,11 @@ void Ipv6Interface::Send (Ptr<Packet> p, const Ipv6Header & hdr, Ipv6Address des
     }
   else
     {
+<<<<<<< HEAD
       NS_LOG_LOGIC ("Doesn't need ARP");
+=======
+      NS_LOG_LOGIC ("Doesn't need NDISC");
+>>>>>>> origin
       m_tc->Send (m_device, Create<Ipv6QueueDiscItem> (p, m_device->GetBroadcast (), Ipv6L3Protocol::PROT_NUMBER, hdr));
     }
 }
@@ -465,7 +494,7 @@ void Ipv6Interface::SetCurHopLimit (uint8_t curHopLimit)
 
 uint8_t Ipv6Interface::GetCurHopLimit () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   return m_curHopLimit;
 }
 
@@ -477,7 +506,7 @@ void Ipv6Interface::SetBaseReachableTime (uint16_t baseReachableTime)
 
 uint16_t Ipv6Interface::GetBaseReachableTime () const
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   return m_baseReachableTime;
 }
 
@@ -489,7 +518,7 @@ void Ipv6Interface::SetReachableTime (uint16_t reachableTime)
 
 uint16_t Ipv6Interface::GetReachableTime () const
 {
-  NS_LOG_FUNCTION_NOARGS (); 
+  NS_LOG_FUNCTION (this);
   return m_reachableTime;
 }
 
@@ -501,7 +530,7 @@ void Ipv6Interface::SetRetransTimer (uint16_t retransTimer)
 
 uint16_t Ipv6Interface::GetRetransTimer () const
 {
-  NS_LOG_FUNCTION_NOARGS (); 
+  NS_LOG_FUNCTION (this);
   return m_retransTimer;
 }
 

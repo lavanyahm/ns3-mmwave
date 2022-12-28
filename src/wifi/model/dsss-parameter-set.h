@@ -21,10 +21,14 @@
 #ifndef DSSS_PARAMETER_SET_H
 #define DSSS_PARAMETER_SET_H
 
+<<<<<<< HEAD
 #include <stdint.h>
 #include <ostream>
 #include "ns3/buffer.h"
 #include "ns3/wifi-information-element.h"
+=======
+#include "wifi-information-element.h"
+>>>>>>> origin
 
 namespace ns3 {
 
@@ -38,6 +42,7 @@ class DsssParameterSet : public WifiInformationElement
 {
 public:
   DsssParameterSet ();
+<<<<<<< HEAD
   void SetDsssSupported (uint8_t DsssSupported);
   
   /**
@@ -54,10 +59,15 @@ public:
    */
   uint8_t GetCurrentChannel (void) const;
   
+=======
+
+  // Implementations of pure virtual methods of WifiInformationElement
+>>>>>>> origin
   WifiInformationElementId ElementId () const;
   uint8_t GetInformationFieldSize () const;
   void SerializeInformationField (Buffer::Iterator start) const;
   uint8_t DeserializeInformationField (Buffer::Iterator start, uint8_t length);
+<<<<<<< HEAD
     
   /**
    * This information element is a bit special in that it is only
@@ -89,6 +99,36 @@ std::istream &operator >> (std::istream &is, DsssParameterSet &dsssParameterSet)
 
 ATTRIBUTE_HELPER_HEADER (DsssParameterSet);
 
+=======
+  /* This information element is a bit special in that it is only
+     included if the STA does support DSSS. To support this we
+     override the Serialize and GetSerializedSize methods of
+     WifiInformationElement. */
+  Buffer::Iterator Serialize (Buffer::Iterator start) const;
+  uint16_t GetSerializedSize () const;
+
+  /**
+   * Set DSSS supported
+   * \param dsssSupported the DSSS supported indicator
+   */
+  void SetDsssSupported (uint8_t dsssSupported);
+
+  /**
+   * Set the Current Channel field in the DsssParameterSet information element.
+   *
+   * \param currentChannel the CurrentChannel field in the DsssParameterSet information element
+   */
+  void SetCurrentChannel (uint8_t currentChannel);
+
+
+private:
+  uint8_t m_currentChannel; ///< current channel number
+
+  /// This is used to decide whether this element should be added to the frame or not
+  bool m_dsssSupported;
+};
+
+>>>>>>> origin
 } //namespace ns3
 
 #endif /* DSSS_PARAMETER_SET_H */

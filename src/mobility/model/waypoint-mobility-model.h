@@ -111,12 +111,14 @@ public:
 
   /**
    * Get the waypoint that this object is traveling towards.
+   * \returns The waypoint
    */
   Waypoint GetNextWaypoint (void) const;
 
   /**
    * Get the number of waypoints left for this object, excluding
    * the next one.
+   * \returns The number of waypoints left
    */
   uint32_t WaypointsLeft (void) const;
 
@@ -134,7 +136,7 @@ private:
   /**
    * Update the underlying state corresponding to the stored waypoints
    */
-  void Update (void) const;
+  virtual void Update (void) const;
   /**
    * \brief The dispose method.
    * 
@@ -157,6 +159,7 @@ private:
    */
   virtual Vector DoGetVelocity (void) const;
 
+protected:
   /**
    * \brief This variable is set to true if there are no waypoints in the std::deque
    */

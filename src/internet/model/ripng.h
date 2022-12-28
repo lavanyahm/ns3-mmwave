@@ -199,7 +199,7 @@ public:
   virtual void NotifyRemoveRoute (Ipv6Address dst, Ipv6Prefix mask, Ipv6Address nextHop,
                                   uint32_t interface, Ipv6Address prefixToUse = Ipv6Address::GetZero ());
   virtual void SetIpv6 (Ptr<Ipv6> ipv6);
-  virtual void PrintRoutingTable (Ptr<OutputStreamWrapper> stream) const;
+  virtual void PrintRoutingTable (Ptr<OutputStreamWrapper> stream, Time::Unit unit = Time::S) const;
 
   /**
    * Split Horizon strategy type. See \RFC{2080}.
@@ -346,6 +346,7 @@ private:
 
   /**
    * \brief Send Routing Updates on all interfaces.
+   * \param periodic true for periodic update, else triggered.
    */
   void DoSendRouteUpdate (bool periodic);
 
@@ -394,8 +395,8 @@ private:
   /// Socket list type const iterator
   typedef std::map<Ptr<Socket>, uint32_t>::const_iterator SocketListCI;
 
-  SocketList m_sendSocketList; //!< list of sockets for sending (socket, interface index)
-  Ptr<Socket> m_recvSocket; //!< receive socket
+  SocketList m_unicastSocketList; //!< list of sockets for unicast messages (socket, interface index)
+  Ptr<Socket> m_multicastRecvSocket; //!< multicast receive socket
 
   EventId m_nextUnsolicitedUpdate; //!< Next Unsolicited Update event
   EventId m_nextTriggeredUpdate; //!< Next Triggered Update event

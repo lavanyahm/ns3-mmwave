@@ -17,7 +17,7 @@
  *
  * Author:  Biljana Bojovic<bbojovic@cttc.es>
  *          Dizhi Zhou <dizhi.zhou@gmail.com>
- * 			Marco Miozzo <marco.miozzo@cttc.es>,
+ *       Marco Miozzo <marco.miozzo@cttc.es>,
  *          Nicola Baldo <nbaldo@cttc.es>
  *
  */
@@ -36,6 +36,7 @@
 #include <ns3/ptr.h>
 #include "ns3/radio-bearer-stats-calculator.h"
 #include <ns3/constant-position-mobility-model.h>
+#include <ns3/ff-mac-scheduler.h>
 #include <ns3/eps-bearer.h>
 #include <ns3/node-container.h>
 #include <ns3/mobility-helper.h>
@@ -82,7 +83,7 @@ LenaTestCqaFfMacSchedulerSuite::LenaTestCqaFfMacSchedulerSuite ()
   // DOWNLINK -> DISTANCE 0 -> MCS 28 -> Itbs 26 (from table 7.1.7.2.1-1 of 36.2    13)
   // Traffic info
   //   UDP traffic: payload size = 200 bytes, interval = 1 ms
-  //   UDP rate in scheduler: (payload + RLC header + PDCP header + IP header + UDP header) * 1000 byte/sec -> 232000 byte/rate 
+  //   UDP rate in scheduler: (payload + RLC header + PDCP header + IP header + UDP header) * 1000 byte/sec -> 232000 byte/rate
   // Totol bandwidth: 24 PRB at Itbs 26 -> 2196 -> 2196000 byte/sec
   // 1 user -> 232000 * 1 = 232000 < 2196000 -> throughput = 232000 byte/sec
   // 3 user -> 232000 * 3 = 696000 < 2196000 -> througphut = 232000 byte/sec
@@ -90,7 +91,7 @@ LenaTestCqaFfMacSchedulerSuite::LenaTestCqaFfMacSchedulerSuite ()
   // 12 user -> 232000 * 12 = 2784000 > 2196000 -> throughput = 2196000 / 12 = 183000 byte/sec
   // UPLINK -> DISTANCE 0 -> MCS 28 -> Itbs 26 (from table 7.1.7.2.1-1 of 36.2    13)
   // 1 user -> 25 PRB at Itbs 26 -> 2292 -> 2292000 > 232000 -> throughput = 232000 bytes/sec
-  // 3 users -> 8 PRB at Itbs 26 -> 749 -> 749000 > 232000 -> throughput = 232000 bytes/sec 
+  // 3 users -> 8 PRB at Itbs 26 -> 749 -> 749000 > 232000 -> throughput = 232000 bytes/sec
   // 6 users -> 4 PRB at Itbs 26 -> 373 -> 373000 > 232000 -> throughput = 232000 bytes/sec
   // 12 users -> 2 PRB at Itbs 26 -> 185 -> 185000 < 232000 -> throughput = 185000 bytes/sec
   AddTestCase (new LenaCqaFfMacSchedulerTestCase1 (1,0,232000,232000,200,1,errorModel), TestCase::EXTENSIVE);
@@ -102,7 +103,7 @@ LenaTestCqaFfMacSchedulerSuite::LenaTestCqaFfMacSchedulerSuite ()
   // DOWNLINK - DISTANCE 4800 -> MCS 22 -> Itbs 20 (from table 7.1.7.2.1-1 of 36.213)
   // Traffic info
   //   UDP traffic: payload size = 200 bytes, interval = 1 ms
-  //   UDP rate in scheduler: (payload + RLC header + PDCP header + IP header + UDP header) * 1000 byte/sec -> 232000 byte/rate 
+  //   UDP rate in scheduler: (payload + RLC header + PDCP header + IP header + UDP header) * 1000 byte/sec -> 232000 byte/rate
   // Totol bandwidth: 24 PRB at Itbs 20 -> 1383 -> 1383000 byte/sec
   // 1 user -> 903000 * 1 = 232000 < 1383000 -> throughput = 232000 byte/sec
   // 3 user -> 232000 * 3 = 696000 < 1383000 -> througphut = 232000 byte/sec
@@ -122,7 +123,7 @@ LenaTestCqaFfMacSchedulerSuite::LenaTestCqaFfMacSchedulerSuite ()
   // DOWNLINK - DISTANCE 6000 -> MCS 20 -> Itbs 18 (from table 7.1.7.2.1-1 of 36.213)
   // Traffic info
   //   UDP traffic: payload size = 200 bytes, interval = 1 ms
-  //   UDP rate in scheduler: (payload + RLC header + PDCP header + IP header + UDP header) * 1000 byte/sec -> 232000 byte/rate 
+  //   UDP rate in scheduler: (payload + RLC header + PDCP header + IP header + UDP header) * 1000 byte/sec -> 232000 byte/rate
   // Totol bandwidth: 24 PRB at Itbs 18 -> 1191 -> 1191000 byte/sec
   // 1 user -> 903000 * 1 = 232000 < 1191000 -> throughput = 232000 byte/sec
   // 3 user -> 232000 * 3 = 696000 < 1191000 -> througphut = 232000 byte/sec
@@ -143,7 +144,7 @@ LenaTestCqaFfMacSchedulerSuite::LenaTestCqaFfMacSchedulerSuite ()
   // DOWNLINK - DISTANCE 10000 -> MCS 14 -> Itbs 13 (from table 7.1.7.2.1-1 of 36.213)
   // Traffic info
   //   UDP traffic: payload size = 200 bytes, interval = 1 ms
-  //   UDP rate in scheduler: (payload + RLC header + PDCP header + IP header + UDP header) * 1000 byte/sec -> 232000 byte/rate 
+  //   UDP rate in scheduler: (payload + RLC header + PDCP header + IP header + UDP header) * 1000 byte/sec -> 232000 byte/rate
   // Totol bandwidth: 24 PRB at Itbs 13 -> 775 -> 775000 byte/sec
   // 1 user -> 903000 * 1 = 232000 < 775000 -> throughput = 232000 byte/sec
   // 3 user -> 232000 * 3 = 696000 > 775000 -> througphut = 232000 byte/sec
@@ -160,13 +161,18 @@ LenaTestCqaFfMacSchedulerSuite::LenaTestCqaFfMacSchedulerSuite ()
   AddTestCase (new LenaCqaFfMacSchedulerTestCase1 (6,10000,129166,67000,200,1,errorModel), TestCase::EXTENSIVE);
   //AddTestCase (new LenaCqaFfMacSchedulerTestCase1 (12,10000,64583,32667,200,1,errorModel));// simulation time = 1.5, otherwise, ul test will fail
 
+
+  // DOWNLINK - DISTANCE 100000 -> CQI == 0 -> out of range -> 0 bytes/sec
+  // UPLINK - DISTANCE 100000 -> CQI == 0 -> out of range -> 0 bytes/sec
+  AddTestCase (new LenaCqaFfMacSchedulerTestCase1 (1,100000,0,0,200,1,errorModel), TestCase::QUICK);
+
   // Test Case 2: homogeneous flow test in CQA (different distance)
   // Traffic1 info
   //   UDP traffic: payload size = 100 bytes, interval = 1 ms
-  //   UDP rate in scheduler: (payload + RLC header + PDCP header + IP header + UDP header) * 1000 byte/sec -> 132000 byte/rate 
+  //   UDP rate in scheduler: (payload + RLC header + PDCP header + IP header + UDP header) * 1000 byte/sec -> 132000 byte/rate
   // Maximum throughput = 4 / ( 1/2196000 + 1/1191000 + 1/1383000 + 1/775000 ) = 1209046 byte/s
   // 132000 * 4 = 528000 < 1209046 -> estimated throughput in downlink = 132000 byte/sec
-  std::vector<uint16_t> dist1;
+  std::vector<double> dist1;
   dist1.push_back (0);       // User 0 distance --> MCS 28
   dist1.push_back (4800);    // User 1 distance --> MCS 22
   dist1.push_back (6000);    // User 2 distance --> MCS 20
@@ -185,10 +191,10 @@ LenaTestCqaFfMacSchedulerSuite::LenaTestCqaFfMacSchedulerSuite ()
 
   // Traffic2 info
   //   UDP traffic: payload size = 200 bytes, interval = 1 ms
-  //   UDP rate in scheduler: (payload + RLC header + PDCP header + IP header + UDP header) * 1000 byte/sec -> 232000 byte/rate 
+  //   UDP rate in scheduler: (payload + RLC header + PDCP header + IP header + UDP header) * 1000 byte/sec -> 232000 byte/rate
   // Maximum throughput = 4 / ( 1/2196000 + 1/1191000 + 1/1383000 + 1/775000 ) = 1209046 byte/s
   // 232000 * 4 = 928000 < 1209046 -> estimated throughput in downlink = 928000 / 4 = 230000 byte/sec
-  std::vector<uint16_t> dist2;
+  std::vector<double> dist2;
   dist2.push_back (0);       // User 0 distance --> MCS 28
   dist2.push_back (4800);    // User 1 distance --> MCS 22
   dist2.push_back (6000);    // User 2 distance --> MCS 20
@@ -210,7 +216,7 @@ LenaTestCqaFfMacSchedulerSuite::LenaTestCqaFfMacSchedulerSuite ()
   //   UDP rate in scheduler: (payload + RLC header + PDCP header + IP header + UDP header) * 1000 byte/sec -> [132000, 232000, 332000] byte/rate
   // Maximum throughput = 3 / ( 1/2196000 + 1/1191000 + 1/1383000) = 1486569 byte/s
   // 132000 + 232000 + 332000 = 696000 < 1486569 -> estimated throughput in downlink = [132000, 232000, 332000] byte/sec
-  std::vector<uint16_t> dist3;
+  std::vector<double> dist3;
   dist3.push_back (0);    // User 0 distance --> MCS 28
   dist3.push_back (4800);    // User 1 distance --> MCS 22
   dist3.push_back (6000);    // User 2 distance --> MCS 20
@@ -231,8 +237,8 @@ static LenaTestCqaFfMacSchedulerSuite lenaTestCqaFfMacSchedulerSuite;
 // --------------- T E S T - C A S E   # 1 ------------------------------
 
 
-std::string 
-LenaCqaFfMacSchedulerTestCase1::BuildNameString (uint16_t nUser, uint16_t dist)
+std::string
+LenaCqaFfMacSchedulerTestCase1::BuildNameString (uint16_t nUser, double dist)
 {
   std::ostringstream oss;
   oss << nUser << " UEs, distance " << dist << " m";
@@ -240,7 +246,7 @@ LenaCqaFfMacSchedulerTestCase1::BuildNameString (uint16_t nUser, uint16_t dist)
 }
 
 
-LenaCqaFfMacSchedulerTestCase1::LenaCqaFfMacSchedulerTestCase1 (uint16_t nUser, uint16_t dist, double thrRefDl, double thrRefUl, uint16_t packetSize, uint16_t interval,bool errorModelEnabled)
+LenaCqaFfMacSchedulerTestCase1::LenaCqaFfMacSchedulerTestCase1 (uint16_t nUser, double dist, double thrRefDl, double thrRefUl, uint16_t packetSize, uint16_t interval,bool errorModelEnabled)
   : TestCase (BuildNameString (nUser, dist)),
     m_nUser (nUser),
     m_dist (dist),
@@ -268,6 +274,8 @@ LenaCqaFfMacSchedulerTestCase1::DoRun (void)
     }
 
   Config::SetDefault ("ns3::LteHelper::UseIdealRrc", BooleanValue (true));
+  Config::SetDefault ("ns3::PointToPointEpcHelper::S1apLinkDelay", TimeValue(Seconds(0)));
+  Config::SetDefault ("ns3::LteEnbRrc::SrsPeriodicity", UintegerValue (40));
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
   Ptr<PointToPointEpcHelper>  epcHelper = CreateObject<PointToPointEpcHelper> ();
@@ -308,8 +316,8 @@ LenaCqaFfMacSchedulerTestCase1::DoRun (void)
   //Config::SetDefault ("ns3::LteEnbRrc::EpsBearerToRlcMapping", EnumValue (LteHelper::RLC_UM_ALWAYS));
 
 //   LogComponentDisableAll (LOG_LEVEL_ALL);
-  //LogComponentEnable ("LenaTestCqaFfMacCheduler", LOG_LEVEL_ALL);
-   
+  //LogComponentEnable ("LenaTestCqaFfMacScheduler", LOG_LEVEL_ALL);
+
   lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisSpectrumPropagationLossModel"));
 
   // Create Nodes: eNodeB and UE
@@ -329,6 +337,7 @@ LenaCqaFfMacSchedulerTestCase1::DoRun (void)
   NetDeviceContainer enbDevs;
   NetDeviceContainer ueDevs;
   lteHelper->SetSchedulerType ("ns3::CqaFfMacScheduler");
+  lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::SRS_UL_CQI));
   enbDevs = lteHelper->InstallEnbDevice (enbNodes);
   ueDevs = lteHelper->InstallUeDevice (ueNodes);
 
@@ -375,31 +384,32 @@ LenaCqaFfMacSchedulerTestCase1::DoRun (void)
       qos.gbrUl = (m_packetSize + 32) * (1000 / m_interval) * 8;
       qos.mbrDl = 0;
       qos.mbrUl = 0;
-      
+
       enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
       EpsBearer bearer (q, qos);
-      lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());  
+      lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
     }
 
-  // Install downlind and uplink applications
+  // Install downlink and uplink applications
   uint16_t dlPort = 1234;
   uint16_t ulPort = 2000;
-  PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-  PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
+  PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
       ++ulPort;
-      serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get (u))); // receive packets from remotehost
+      PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
       serverApps.Add (ulPacketSinkHelper.Install (remoteHost));  // receive packets from UEs
+      serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get (u))); // receive packets from remotehost
 
-      UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort); // uplink packets generator
+      UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort); // downlink packets generator
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds (m_interval)));
       dlClient.SetAttribute ("MaxPackets", UintegerValue (1000000));
       dlClient.SetAttribute ("PacketSize", UintegerValue (m_packetSize));
 
-      UdpClientHelper ulClient (remoteHostAddr, ulPort);           // downlink packets generator
+      UdpClientHelper ulClient (remoteHostAddr, ulPort);           // uplink packets generator
       ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds (m_interval)));
       ulClient.SetAttribute ("MaxPackets", UintegerValue (1000000));
       ulClient.SetAttribute ("PacketSize", UintegerValue (m_packetSize));
@@ -411,8 +421,8 @@ LenaCqaFfMacSchedulerTestCase1::DoRun (void)
   serverApps.Start (Seconds (0.030));
   clientApps.Start (Seconds (0.030));
 
-  double statsStartTime = 0.04; // need to allow for RRC connection establishment + SRS
-  double statsDuration = 0.5;
+  double statsStartTime = 0.300; // need to allow for RRC connection establishment + SRS
+  double statsDuration = 0.6;
   double tolerance = 0.1;
   Simulator::Stop (Seconds (statsStartTime + statsDuration - 0.0001));
 
@@ -424,9 +434,6 @@ LenaCqaFfMacSchedulerTestCase1::DoRun (void)
 
   Simulator::Run ();
 
-  /**
-   * Check that the downlink assignation is done in a "token bank fair queue" manner
-   */
 
   NS_LOG_INFO ("DL - Test with " << m_nUser << " user(s) at distance " << m_dist);
   std::vector <uint64_t> dlDataRxed;
@@ -475,12 +482,12 @@ LenaCqaFfMacSchedulerTestCase1::DoRun (void)
 // --------------- T E S T - C A S E   # 2 ------------------------------
 
 
-std::string 
-LenaCqaFfMacSchedulerTestCase2::BuildNameString (uint16_t nUser, std::vector<uint16_t> dist)
+std::string
+LenaCqaFfMacSchedulerTestCase2::BuildNameString (uint16_t nUser, std::vector<double> dist)
 {
   std::ostringstream oss;
   oss << "distances (m) = [ " ;
-  for (std::vector<uint16_t>::iterator it = dist.begin (); it != dist.end (); ++it)
+  for (std::vector<double>::iterator it = dist.begin (); it != dist.end (); ++it)
     {
       oss << *it << " ";
     }
@@ -489,7 +496,7 @@ LenaCqaFfMacSchedulerTestCase2::BuildNameString (uint16_t nUser, std::vector<uin
 }
 
 
-LenaCqaFfMacSchedulerTestCase2::LenaCqaFfMacSchedulerTestCase2 (std::vector<uint16_t> dist, std::vector<uint32_t> estThrCqaDl, std::vector<uint16_t> packetSize, uint16_t interval,bool errorModelEnabled)
+LenaCqaFfMacSchedulerTestCase2::LenaCqaFfMacSchedulerTestCase2 (std::vector<double> dist, std::vector<uint32_t> estThrCqaDl, std::vector<uint16_t> packetSize, uint16_t interval,bool errorModelEnabled)
   : TestCase (BuildNameString (dist.size (), dist)),
     m_nUser (dist.size ()),
     m_dist (dist),
@@ -515,6 +522,8 @@ LenaCqaFfMacSchedulerTestCase2::DoRun (void)
     }
 
   Config::SetDefault ("ns3::LteHelper::UseIdealRrc", BooleanValue (true));
+  Config::SetDefault ("ns3::PointToPointEpcHelper::S1apLinkDelay", TimeValue(Seconds(0)));
+  Config::SetDefault ("ns3::LteEnbRrc::SrsPeriodicity", UintegerValue (40));
 
 
   Ptr<LteHelper> lteHelper = CreateObject<LteHelper> ();
@@ -548,8 +557,8 @@ LenaCqaFfMacSchedulerTestCase2::DoRun (void)
 
 
 //   LogComponentDisableAll (LOG_LEVEL_ALL);
-  //LogComponentEnable ("LenaTestCqaFfMacCheduler", LOG_LEVEL_ALL);
-   
+  //LogComponentEnable ("LenaTestCqaFfMacScheduler", LOG_LEVEL_ALL);
+
   lteHelper->SetAttribute ("PathlossModel", StringValue ("ns3::FriisSpectrumPropagationLossModel"));
 
   // Create Nodes: eNodeB and UE
@@ -569,6 +578,7 @@ LenaCqaFfMacSchedulerTestCase2::DoRun (void)
   NetDeviceContainer enbDevs;
   NetDeviceContainer ueDevs;
   lteHelper->SetSchedulerType ("ns3::CqaFfMacScheduler");
+  lteHelper->SetSchedulerAttribute ("UlCqiFilter", EnumValue (FfMacScheduler::SRS_UL_CQI));
   enbDevs = lteHelper->InstallEnbDevice (enbNodes);
   ueDevs = lteHelper->InstallUeDevice (ueNodes);
 
@@ -615,32 +625,33 @@ LenaCqaFfMacSchedulerTestCase2::DoRun (void)
       qos.gbrUl = (m_packetSize.at (u) + 32) * (1000 / m_interval) * 8;
       qos.mbrDl = qos.gbrDl;
       qos.mbrUl = qos.gbrUl;
-  
+
       enum EpsBearer::Qci q = EpsBearer::GBR_CONV_VOICE;
       EpsBearer bearer (q, qos);
-      lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());  
+      lteHelper->ActivateDedicatedEpsBearer (ueDevice, bearer, EpcTft::Default ());
     }
 
 
-  // Install downlind and uplink applications
+  // Install downlink and uplink applications
   uint16_t dlPort = 1234;
   uint16_t ulPort = 2000;
-  PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
-  PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
   ApplicationContainer clientApps;
   ApplicationContainer serverApps;
+  PacketSinkHelper dlPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), dlPort));
+
   for (uint32_t u = 0; u < ueNodes.GetN (); ++u)
     {
       ++ulPort;
-      serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get (u))); // receive packets from remotehost
+      PacketSinkHelper ulPacketSinkHelper ("ns3::UdpSocketFactory", InetSocketAddress (Ipv4Address::GetAny (), ulPort));
       serverApps.Add (ulPacketSinkHelper.Install (remoteHost));  // receive packets from UEs
+      serverApps.Add (dlPacketSinkHelper.Install (ueNodes.Get (u))); // receive packets from remotehost
 
-      UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort); // uplink packets generator
+      UdpClientHelper dlClient (ueIpIface.GetAddress (u), dlPort); // downlink packets generator
       dlClient.SetAttribute ("Interval", TimeValue (MilliSeconds (m_interval)));
       dlClient.SetAttribute ("MaxPackets", UintegerValue (1000000));
       dlClient.SetAttribute ("PacketSize", UintegerValue (m_packetSize.at (u)));
 
-      UdpClientHelper ulClient (remoteHostAddr, ulPort);           // downlink packets generator
+      UdpClientHelper ulClient (remoteHostAddr, ulPort);           // uplink packets generator
       ulClient.SetAttribute ("Interval", TimeValue (MilliSeconds (m_interval)));
       ulClient.SetAttribute ("MaxPackets", UintegerValue (1000000));
       ulClient.SetAttribute ("PacketSize", UintegerValue (m_packetSize.at (u)));
@@ -666,7 +677,7 @@ LenaCqaFfMacSchedulerTestCase2::DoRun (void)
   Simulator::Run ();
 
   /**
-   * Check that the downlink assignation is done in a "token bank fair queue" manner
+   * Check that the downlink resource assignment is done according to CQA algorithm among users with different SINRs
    */
 
   NS_LOG_INFO ("DL - Test with " << m_nUser << " user(s)");

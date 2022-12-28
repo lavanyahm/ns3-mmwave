@@ -24,7 +24,10 @@
 #include "ns3/simulator.h"
 #include "ns3/simple-channel.h"
 #include "ns3/simple-net-device.h"
+<<<<<<< HEAD
 #include "ns3/drop-tail-queue.h"
+=======
+>>>>>>> origin
 #include "ns3/socket.h"
 #include "ns3/boolean.h"
 #include "ns3/enum.h"
@@ -48,18 +51,49 @@
 
 using namespace ns3;
 
+<<<<<<< HEAD
 // Ipv4RipTest
 
 class Ipv4RipTest : public TestCase
 {
   Ptr<Packet> m_receivedPacket;
   void DoSendData (Ptr<Socket> socket, std::string to);
+=======
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv4 RIP Test
+ */
+class Ipv4RipTest : public TestCase
+{
+  Ptr<Packet> m_receivedPacket; //!< Received packet
+
+  /**
+   * \brief Send data.
+   * \param socket The sending socket.
+   * \param to Destination address.
+   */
+  void DoSendData (Ptr<Socket> socket, std::string to);
+  /**
+   * \brief Send data.
+   * \param socket The sending socket.
+   * \param to Destination address.
+   */
+>>>>>>> origin
   void SendData (Ptr<Socket> socket, std::string to);
 
 public:
   virtual void DoRun (void);
   Ipv4RipTest ();
 
+<<<<<<< HEAD
+=======
+  /**
+   * \brief Receive data.
+   * \param socket The receiving socket.
+   */
+>>>>>>> origin
   void ReceivePkt (Ptr<Socket> socket);
 };
 
@@ -250,18 +284,50 @@ Ipv4RipTest::DoRun (void)
   Simulator::Destroy ();
 }
 
+<<<<<<< HEAD
 // Ipv4RipCountToInfinityTest
 
 class Ipv4RipCountToInfinityTest : public TestCase
 {
   Ptr<Packet> m_receivedPacket;
   void DoSendData (Ptr<Socket> socket, std::string to);
+=======
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv4 RIP count to infinity Test
+ */
+class Ipv4RipCountToInfinityTest : public TestCase
+{
+  Ptr<Packet> m_receivedPacket; //!< Received packet
+
+  /**
+   * \brief Send data.
+   * \param socket The sending socket.
+   * \param to Destination address.
+   */
+  void DoSendData (Ptr<Socket> socket, std::string to);
+  /**
+   * \brief Send data.
+   * \param socket The sending socket.
+   * \param to Destination address.
+   */
+>>>>>>> origin
   void SendData (Ptr<Socket> socket, std::string to);
 
 public:
   virtual void DoRun (void);
   Ipv4RipCountToInfinityTest ();
 
+<<<<<<< HEAD
+=======
+  /**
+   * \brief Receive data.
+   * \param socket The receiving socket.
+   */
+>>>>>>> origin
   void ReceivePkt (Ptr<Socket> socket);
 };
 
@@ -457,6 +523,7 @@ Ipv4RipCountToInfinityTest::DoRun (void)
   Simulator::Destroy ();
 }
 
+<<<<<<< HEAD
 // Ipv4RipSplitHorizonStrategyTest
 
 class Ipv4RipSplitHorizonStrategyTest : public TestCase
@@ -468,6 +535,33 @@ public:
   virtual void DoRun (void);
   Ipv4RipSplitHorizonStrategyTest (Rip::SplitHorizonType_e strategy);
 
+=======
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv4 RIP SplitHorizon strategy Test
+ */
+class Ipv4RipSplitHorizonStrategyTest : public TestCase
+{
+  Rip::SplitHorizonType_e m_setStrategy;      //!< Strategy set.
+  Rip::SplitHorizonType_e m_detectedStrategy; //!< Strategy detected.
+
+public:
+  virtual void DoRun (void);
+
+  /**
+   * \brief Constructor.
+   * \param strategy The SplitHorizon strategy.
+   */
+  Ipv4RipSplitHorizonStrategyTest (Rip::SplitHorizonType_e strategy);
+
+  /**
+   * \brief Receive data.
+   * \param socket The receiving socket.
+   */
+>>>>>>> origin
   void ReceivePktProbe (Ptr<Socket> socket);
 };
 
@@ -613,8 +707,13 @@ Ipv4RipSplitHorizonStrategyTest::DoRun (void)
   // Create the UDP sockets
   Ptr<SocketFactory> rxSocketFactory = listener->GetObject<UdpSocketFactory> ();
   Ptr<Socket> rxSocket = rxSocketFactory->CreateSocket ();
+<<<<<<< HEAD
   NS_TEST_EXPECT_MSG_EQ (rxSocket->Bind (InetSocketAddress (Ipv4Address ("224.0.0.9"), 520)), 0, "trivial");
   rxSocket->BindToNetDevice (listenerDev);
+=======
+  rxSocket->BindToNetDevice (listenerDev);
+  NS_TEST_EXPECT_MSG_EQ (rxSocket->Bind (InetSocketAddress (Ipv4Address ("224.0.0.9"), 520)), 0, "trivial");
+>>>>>>> origin
   rxSocket->SetRecvCallback (MakeCallback (&Ipv4RipSplitHorizonStrategyTest::ReceivePktProbe, this));
 
   // ------ Now the tests ------------
@@ -630,8 +729,17 @@ Ipv4RipSplitHorizonStrategyTest::DoRun (void)
 }
 
 
+<<<<<<< HEAD
 //-----------------------------------------------------------------------------
 //-----------------------------------------------------------------------------
+=======
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv4 RIP TestSuite
+ */
+>>>>>>> origin
 class Ipv4RipTestSuite : public TestSuite
 {
 public:
@@ -643,4 +751,10 @@ public:
     AddTestCase (new Ipv4RipSplitHorizonStrategyTest (Rip::SPLIT_HORIZON), TestCase::QUICK);
     AddTestCase (new Ipv4RipSplitHorizonStrategyTest (Rip::NO_SPLIT_HORIZON), TestCase::QUICK);
   }
+<<<<<<< HEAD
 } g_ipv4ripTestSuite;
+=======
+};
+
+static Ipv4RipTestSuite g_ipv4ripTestSuite; //!< Static variable for test initialization
+>>>>>>> origin

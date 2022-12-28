@@ -26,6 +26,7 @@
 #include <cstdlib>
 
 #include "fatal-impl.h"
+#include "log.h"  // NS_LOG_APPEND...
 
 /**
  * \file
@@ -61,6 +62,8 @@
  * printed to \c stderr, including the file name and line number.
  * Optionally, if \c fatal is true, the macro
  * will invoke \c std::terminate().  If \c fatal is false,
+<<<<<<< HEAD
+=======
  * the invoking function should return an error code to its caller,
  * which is expected to call NS_FATAL_ERROR to cause termination.
  *
@@ -69,6 +72,38 @@
  * This macro is enabled unconditionally in all builds,
  * including debug and optimized builds.
  */
+#define NS_FATAL_ERROR_IMPL_NO_MSG(fatal) \
+  do                                                      \
+    {                                                     \
+      NS_LOG_APPEND_TIME_PREFIX_IMPL;                     \
+      NS_LOG_APPEND_NODE_PREFIX_IMPL;                     \
+      std::cerr << "file=" << __FILE__ << ", line=" <<    \
+        __LINE__ << std::endl;                            \
+      ::ns3::FatalImpl::FlushStreams ();                  \
+      if (fatal) std::terminate ();                       \
+    }                                                     \
+  while (false)
+
+
+/**
+ * \ingroup fatal
+ *
+ * \brief Fatal error reporting with a message, implementation.
+ *
+ * When this macro is hit at runtime the error details will
+ * printed to \c stderr, including the message, file name and line number.
+ * Optionally, if \c fatal is true, the macro
+ * will invoke \c std::terminate().  If \c fatal is false,
+>>>>>>> origin
+ * the invoking function should return an error code to its caller,
+ * which is expected to call NS_FATAL_ERROR to cause termination.
+ *
+ * \param [in] fatal Call \c std::terminate() if true.
+ *
+ * This macro is enabled unconditionally in all builds,
+ * including debug and optimized builds.
+ */
+<<<<<<< HEAD
 #define NS_FATAL_ERROR_IMPL_NO_MSG(fatal) \
   do                                                      \
     {                                                     \
@@ -98,6 +133,8 @@
  * This macro is enabled unconditionally in all builds,
  * including debug and optimized builds.
  */
+=======
+>>>>>>> origin
 #define NS_FATAL_ERROR_IMPL(msg,fatal) \
   do                                                    \
     {                                                   \

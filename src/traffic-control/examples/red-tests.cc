@@ -79,7 +79,11 @@ std::stringstream filePlotQueueAvg;
 void
 CheckQueueSize (Ptr<QueueDisc> queue)
 {
+<<<<<<< HEAD
   uint32_t qSize = StaticCast<RedQueueDisc> (queue)->GetQueueSize ();
+=======
+  uint32_t qSize = queue->GetCurrentSize ().GetValue ();
+>>>>>>> origin
 
   avgQueueSize += qSize;
   checkTimes++;
@@ -279,7 +283,7 @@ main (int argc, char *argv[])
   redTest = 1;
   // Will only save in the directory if enable opts below
   pathOut = "."; // Current directory
-  CommandLine cmd;
+  CommandLine cmd (__FILE__);
   cmd.AddValue ("testNumber", "Run test 1, 3, 4 or 5", redTest);
   cmd.AddValue ("pathOut", "Path to save results from --writeForPlot/--writePcap/--writeFlowMonitor", pathOut);
   cmd.AddValue ("writeForPlot", "<0/1> to write results for plot (gnuplot)", writeForPlot);
@@ -317,14 +321,21 @@ main (int argc, char *argv[])
 
   // RED params
   NS_LOG_INFO ("Set RED params");
+<<<<<<< HEAD
   Config::SetDefault ("ns3::RedQueueDisc::Mode", StringValue ("QUEUE_MODE_PACKETS"));
+=======
+  Config::SetDefault ("ns3::RedQueueDisc::MaxSize", StringValue ("1000p"));
+>>>>>>> origin
   Config::SetDefault ("ns3::RedQueueDisc::MeanPktSize", UintegerValue (meanPktSize));
   Config::SetDefault ("ns3::RedQueueDisc::Wait", BooleanValue (true));
   Config::SetDefault ("ns3::RedQueueDisc::Gentle", BooleanValue (true));
   Config::SetDefault ("ns3::RedQueueDisc::QW", DoubleValue (0.002));
   Config::SetDefault ("ns3::RedQueueDisc::MinTh", DoubleValue (5));
   Config::SetDefault ("ns3::RedQueueDisc::MaxTh", DoubleValue (15));
+<<<<<<< HEAD
   Config::SetDefault ("ns3::RedQueueDisc::QueueLimit", UintegerValue (1000));
+=======
+>>>>>>> origin
 
   if (redTest == 3) // test like 1, but with bad params
     {
@@ -333,11 +344,19 @@ main (int argc, char *argv[])
     }
   else if (redTest == 5) // test 5, same of test 4, but in byte mode
     {
+<<<<<<< HEAD
       Config::SetDefault ("ns3::RedQueueDisc::Mode", StringValue ("QUEUE_MODE_BYTES"));
       Config::SetDefault ("ns3::RedQueueDisc::Ns1Compat", BooleanValue (true));
       Config::SetDefault ("ns3::RedQueueDisc::MinTh", DoubleValue (5 * meanPktSize));
       Config::SetDefault ("ns3::RedQueueDisc::MaxTh", DoubleValue (15 * meanPktSize));
       Config::SetDefault ("ns3::RedQueueDisc::QueueLimit", UintegerValue (1000 * meanPktSize));
+=======
+      Config::SetDefault ("ns3::RedQueueDisc::MaxSize",
+                          QueueSizeValue (QueueSize (QueueSizeUnit::BYTES, 1000 * meanPktSize)));
+      Config::SetDefault ("ns3::RedQueueDisc::Ns1Compat", BooleanValue (true));
+      Config::SetDefault ("ns3::RedQueueDisc::MinTh", DoubleValue (5 * meanPktSize));
+      Config::SetDefault ("ns3::RedQueueDisc::MaxTh", DoubleValue (15 * meanPktSize));
+>>>>>>> origin
     }
 
   NS_LOG_INFO ("Install internet stack on all nodes.");
@@ -346,7 +365,11 @@ main (int argc, char *argv[])
 
   TrafficControlHelper tchPfifo;
   uint16_t handle = tchPfifo.SetRootQueueDisc ("ns3::PfifoFastQueueDisc");
+<<<<<<< HEAD
   tchPfifo.AddInternalQueues (handle, 3, "ns3::DropTailQueue", "MaxPackets", UintegerValue (1000));
+=======
+  tchPfifo.AddInternalQueues (handle, 3, "ns3::DropTailQueue", "MaxSize", StringValue ("1000p"));
+>>>>>>> origin
 
   TrafficControlHelper tchRed;
   tchRed.SetRootQueueDisc ("ns3::RedQueueDisc", "LinkBandwidth", StringValue (redLinkDataRate),
@@ -412,9 +435,14 @@ main (int argc, char *argv[])
       // like in ns2 test, r2 -> r1, have a queue in packet mode
       Ptr<QueueDisc> queue = queueDiscs.Get (1);
 
+<<<<<<< HEAD
       StaticCast<RedQueueDisc> (queue)->SetMode (Queue::QUEUE_MODE_PACKETS);
       StaticCast<RedQueueDisc> (queue)->SetTh (5, 15);
       StaticCast<RedQueueDisc> (queue)->SetQueueLimit (1000);
+=======
+      queue->SetMaxSize (QueueSize ("1000p"));
+      StaticCast<RedQueueDisc> (queue)->SetTh (5, 15);
+>>>>>>> origin
     }
 
   BuildAppsTest (redTest);
@@ -458,6 +486,7 @@ main (int argc, char *argv[])
 
   if (printRedStats)
     {
+<<<<<<< HEAD
       RedQueueDisc::Stats st = StaticCast<RedQueueDisc> (queueDiscs.Get (0))->GetStats ();
       std::cout << "*** RED stats from Node 2 queue ***" << std::endl;
       std::cout << "\t " << st.unforcedDrop << " drops due prob mark" << std::endl;
@@ -469,6 +498,15 @@ main (int argc, char *argv[])
       std::cout << "\t " << st.unforcedDrop << " drops due prob mark" << std::endl;
       std::cout << "\t " << st.forcedDrop << " drops due hard mark" << std::endl;
       std::cout << "\t " << st.qLimDrop << " drops due queue full" << std::endl;
+=======
+      QueueDisc::Stats st = queueDiscs.Get (0)->GetStats ();
+      std::cout << "*** RED stats from Node 2 queue disc ***" << std::endl;
+      std::cout << st << std::endl;
+
+      st = queueDiscs.Get (1)->GetStats ();
+      std::cout << "*** RED stats from Node 3 queue disc ***" << std::endl;
+      std::cout << st << std::endl;
+>>>>>>> origin
     }
 
   Simulator::Destroy ();

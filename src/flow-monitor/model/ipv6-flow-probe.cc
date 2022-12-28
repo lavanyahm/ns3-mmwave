@@ -224,12 +224,16 @@ Ipv6FlowProbe::Ipv6FlowProbe (Ptr<FlowMonitor> monitor,
 
   std::ostringstream qd;
   qd << "/NodeList/" << node->GetId () << "/$ns3::TrafficControlLayer/RootQueueDiscList/*/Drop";
+<<<<<<< HEAD
   Config::ConnectWithoutContext (qd.str (), MakeCallback (&Ipv6FlowProbe::QueueDiscDropLogger, Ptr<Ipv6FlowProbe> (this)));
+=======
+  Config::ConnectWithoutContextFailSafe (qd.str (), MakeCallback (&Ipv6FlowProbe::QueueDiscDropLogger, Ptr<Ipv6FlowProbe> (this)));
+>>>>>>> origin
 
   // code copied from point-to-point-helper.cc
   std::ostringstream oss;
   oss << "/NodeList/" << node->GetId () << "/DeviceList/*/TxQueue/Drop";
-  Config::ConnectWithoutContext (oss.str (), MakeCallback (&Ipv6FlowProbe::QueueDropLogger, Ptr<Ipv6FlowProbe> (this)));
+  Config::ConnectWithoutContextFailSafe (oss.str (), MakeCallback (&Ipv6FlowProbe::QueueDropLogger, Ptr<Ipv6FlowProbe> (this)));
 }
 
 /* static */
@@ -341,7 +345,7 @@ Ipv6FlowProbe::DropLogger (const Ipv6Header &ipHeader, Ptr<const Packet> ipPaylo
 
       uint32_t size = (ipPayload->GetSize () + ipHeader.GetSerializedSize ());
       NS_LOG_DEBUG ("Drop ("<<this<<", "<<flowId<<", "<<packetId<<", "<<size<<", " << reason 
-                            << ", destIp=" << ipHeader.GetDestinationAddress () << "); "
+                            << ", destIp=" << ipHeader.GetDestination () << "); "
                             << "HDR: " << ipHeader << " PKT: " << *ipPayload);
 
       DropReason myReason;
@@ -412,7 +416,11 @@ Ipv6FlowProbe::QueueDropLogger (Ptr<const Packet> ipPayload)
 }
 
 void
+<<<<<<< HEAD
 Ipv6FlowProbe::QueueDiscDropLogger (Ptr<const QueueItem> item)
+=======
+Ipv6FlowProbe::QueueDiscDropLogger (Ptr<const QueueDiscItem> item)
+>>>>>>> origin
 {
   Ipv6FlowProbeTag fTag;
   bool tagFound = item->GetPacket ()->FindFirstMatchingByteTag (fTag);

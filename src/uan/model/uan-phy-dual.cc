@@ -111,7 +111,7 @@ UanPhyCalcSinrDual::CalcSinrDb (Ptr<Packet> pkt,
 
   double totalIntDb = KpToDb (intKp + DbToKp (ambNoiseDb));
 
-  NS_LOG_DEBUG (Simulator::Now ().GetSeconds () << " Calculating SINR:  RxPower = " << rxPowerDb << " dB.  Number of interferers = " << arrivalList.size () << "  Interference + noise power = " << totalIntDb << " dB.  SINR = " << rxPowerDb - totalIntDb << " dB.");
+  NS_LOG_DEBUG (Now ().As (Time::S) << " Calculating SINR:  RxPower = " << rxPowerDb << " dB.  Number of interferers = " << arrivalList.size () << "  Interference + noise power = " << totalIntDb << " dB.  SINR = " << rxPowerDb - totalIntDb << " dB.");
   return rxPowerDb - totalIntDb;
 }
 
@@ -181,16 +181,6 @@ UanPhyDual::GetTypeId (void)
                    "Transmission output power in dB of Phy2.",
                    DoubleValue (190),
                    MakeDoubleAccessor (&UanPhyDual::GetTxPowerDbPhy2, &UanPhyDual::SetTxPowerDbPhy2),
-                   MakeDoubleChecker<double> ())
-    .AddAttribute ("RxGainPhy1",
-                   "Gain added to incoming signal at receiver of Phy1.",
-                   DoubleValue (0),
-                   MakeDoubleAccessor (&UanPhyDual::GetRxGainDbPhy1, &UanPhyDual::SetRxGainDbPhy1),
-                   MakeDoubleChecker<double> ())
-    .AddAttribute ("RxGainPhy2",
-                   "Gain added to incoming signal at receiver of Phy2.",
-                   DoubleValue (0),
-                   MakeDoubleAccessor (&UanPhyDual::GetRxGainDbPhy2, &UanPhyDual::SetRxGainDbPhy2),
                    MakeDoubleChecker<double> ())
     .AddAttribute ("SupportedModesPhy1",
                    "List of modes supported by Phy1.",
@@ -263,14 +253,14 @@ UanPhyDual::SendPacket (Ptr<Packet> pkt, uint32_t modeNum)
 {
   if (modeNum <= m_phy1->GetNModes () - 1)
     {
-      NS_LOG_DEBUG (Simulator::Now ().GetSeconds () << " Sending packet on Phy1 with mode number " << modeNum);
+      NS_LOG_DEBUG (Now ().As (Time::S) << " Sending packet on Phy1 with mode number " << modeNum);
       m_txLogger (pkt, m_phy1->GetTxPowerDb (), m_phy1->GetMode (modeNum));
       m_phy1->SendPacket (pkt, modeNum);
 
     }
   else
     {
-      NS_LOG_DEBUG (Simulator::Now ().GetSeconds () << " Sending packet on Phy2 with mode number " << modeNum - m_phy1->GetNModes ());
+      NS_LOG_DEBUG (Now ().As (Time::S) << " Sending packet on Phy2 with mode number " << modeNum - m_phy1->GetNModes ());
       m_txLogger (pkt, m_phy2->GetTxPowerDb (), m_phy2->GetMode (modeNum - m_phy1->GetNModes ()));
       m_phy2->SendPacket (pkt, modeNum - m_phy1->GetNModes ());
     }
@@ -285,6 +275,7 @@ UanPhyDual::RegisterListener (UanPhyListener *listener)
 void
 UanPhyDual::StartRxPacket (Ptr<Packet> pkt, double rxPowerDb, UanTxMode txMode, UanPdp pdp)
 {
+  NS_UNUSED (rxPowerDb);
   // Not called.  StartRxPacket in m_phy1 and m_phy2 are called directly from Transducer.
 }
 
@@ -302,23 +293,6 @@ UanPhyDual::SetReceiveErrorCallback (RxErrCallback cb)
   m_phy2->SetReceiveErrorCallback (cb);
 }
 
-void
-UanPhyDual::SetRxGainDb (double gain)
-{
-  m_phy1->SetRxGainDb (gain);
-  m_phy2->SetRxGainDb (gain);
-}
-void
-UanPhyDual::SetRxGainDbPhy1 (double gain)
-{
-  m_phy1->SetRxGainDb (gain);
-}
-
-void
-UanPhyDual::SetRxGainDbPhy2 (double gain)
-{
-  m_phy2->SetRxGainDb (gain);
-}
 
 void
 UanPhyDual::SetTxPowerDb (double txpwr)
@@ -341,7 +315,6 @@ UanPhyDual::SetTxPowerDbPhy2 (double txpwr)
 void
 UanPhyDual::SetRxThresholdDb (double thresh)
 {
-  NS_LOG_WARN ("SetRxThresholdDb is deprecated and has no effect.  Look at PER Functor attribute");
   m_phy1->SetRxThresholdDb (thresh);
   m_phy2->SetRxThresholdDb (thresh);
 }
@@ -363,22 +336,6 @@ UanPhyDual::SetCcaThresholdPhy2 (double thresh)
   m_phy2->SetCcaThresholdDb (thresh);
 }
 
-double
-UanPhyDual::GetRxGainDb (void)
-{
-  NS_LOG_WARN ("Warning: UanPhyDual::GetRxGainDb returns RxGain of Phy 1");
-  return m_phy1->GetRxGainDb ();
-}
-double
-UanPhyDual::GetRxGainDbPhy1 (void) const
-{
-  return m_phy1->GetRxGainDb ();
-}
-double
-UanPhyDual::GetRxGainDbPhy2 (void) const
-{
-  return m_phy2->GetRxGainDb ();
-}
 
 double
 UanPhyDual::GetTxPowerDb (void)
@@ -529,7 +486,7 @@ UanPhyDual::SetMac (Ptr<UanMac> mac)
 void
 UanPhyDual::NotifyTransStartTx (Ptr<Packet> packet, double txPowerDb, UanTxMode txMode)
 {
-
+  NS_UNUSED (txPowerDb);
 }
 void
 UanPhyDual::NotifyIntChange (void)
@@ -656,7 +613,7 @@ UanPhyDual::SetSinrModelPhy2 (Ptr<UanPhyCalcSinr> sinr)
 void
 UanPhyDual::RxOkFromSubPhy (Ptr<Packet> pkt, double sinr, UanTxMode mode)
 {
-  NS_LOG_DEBUG (Simulator::Now ().GetSeconds () << " Received packet");
+  NS_LOG_DEBUG (Now ().As (Time::S) << " Received packet");
   m_recOkCb (pkt, sinr, mode);
   m_rxOkLogger (pkt, sinr, mode);
 }

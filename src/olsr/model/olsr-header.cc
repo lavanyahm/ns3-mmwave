@@ -50,8 +50,14 @@ SecondsToEmf (double seconds)
 {
   int a, b = 0;
 
+  NS_ASSERT_MSG (seconds >= OLSR_C, "SecondsToEmf - Can not convert a value less than OLSR_C");
+
   // find the largest integer 'b' such that: T/C >= 2^b
+<<<<<<< HEAD
   for (b = 0; (seconds / OLSR_C) >= (1 << b); ++b)
+=======
+  for (b = 1; (seconds / OLSR_C) >= (1 << b); ++b)
+>>>>>>> origin
     {
     }
   NS_ASSERT ((seconds / OLSR_C) < (1 << b));
@@ -133,7 +139,7 @@ PacketHeader::GetSerializedSize (void) const
 void
 PacketHeader::Print (std::ostream &os) const
 {
-  /// \todo
+  os << "len: " << m_packetLength	<< " seqNo: " << m_packetSequenceNumber;
 }
 
 void
@@ -211,7 +217,46 @@ MessageHeader::GetSerializedSize (void) const
 void
 MessageHeader::Print (std::ostream &os) const
 {
-  /// \todo
+  switch (m_messageType)
+  {
+    case HELLO_MESSAGE:
+      os << "type: HELLO";
+      break;
+    case TC_MESSAGE:
+      os << "type: TC";
+      break;
+    case MID_MESSAGE:
+      os << "type: MID";
+      break;
+    case HNA_MESSAGE:
+      os << "type: HNA";
+      break;
+  }
+
+  os << " TTL: " << +m_timeToLive;
+  os << " Orig: " << m_originatorAddress;
+  os << " SeqNo: " << m_messageSequenceNumber;
+  os << " Validity: " << +m_vTime;
+  os << " Hop count: " << +m_hopCount;
+  os << " Size: " << m_messageSize;
+
+  switch (m_messageType)
+    {
+    case MID_MESSAGE:
+      m_message.mid.Print (os);
+      break;
+    case HELLO_MESSAGE:
+      m_message.hello.Print (os);
+      break;
+    case TC_MESSAGE:
+      m_message.tc.Print (os);
+      break;
+    case HNA_MESSAGE:
+      m_message.hna.Print (os);
+      break;
+    default:
+      NS_ASSERT (false);
+    }
 }
 
 void
@@ -292,7 +337,21 @@ MessageHeader::Mid::GetSerializedSize (void) const
 void
 MessageHeader::Mid::Print (std::ostream &os) const
 {
-  /// \todo
+  bool first = true;
+  os << " [";
+  for (const auto& iAddr : interfaceAddresses)
+    {
+      if (first)
+        {
+          first = false;
+        }
+      else
+        {
+          os << ", ";
+        }
+      os << iAddr;
+    }
+  os << "]";
 }
 
 void
@@ -346,7 +405,30 @@ MessageHeader::Hello::GetSerializedSize (void) const
 void
 MessageHeader::Hello::Print (std::ostream &os) const
 {
-  /// \todo
+  os << " Interval: " << +hTime << " (" << EmfToSeconds (hTime) << "s)";
+  os << " Willingness: " << +willingness;
+
+  for (const auto& ilinkMessage : linkMessages)
+  	{
+  	  const LinkMessage &lm = ilinkMessage;
+  	  os << " Link code: " << +(lm.linkCode);
+  	  os << " [";
+  	  bool first = true;
+  	  for (const auto& neigh_iter : lm.neighborInterfaceAddresses)
+  	    {
+  	      if (first)
+  	        {
+  	          first = false;
+  	        }
+  	      else
+  	        {
+  	          os << ", ";
+  	        }
+  	      os << neigh_iter;
+  	    }
+      os << "]";
+  	}
+
 }
 
 void
@@ -429,7 +511,22 @@ MessageHeader::Tc::GetSerializedSize (void) const
 void
 MessageHeader::Tc::Print (std::ostream &os) const
 {
-  /// \todo
+  os << " Adv. SeqNo: " << ansn;
+  os << " [";
+  bool first = true;
+  for (const auto& iAddr : neighborAddresses)
+    {
+      if (first)
+        {
+          first = false;
+        }
+      else
+        {
+          os << ", ";
+        }
+      os << iAddr;
+    }
+  os << "]";
 }
 
 void
@@ -481,7 +578,21 @@ MessageHeader::Hna::GetSerializedSize (void) const
 void
 MessageHeader::Hna::Print (std::ostream &os) const
 {
-  /// \todo
+  os << " [";
+  bool first = true;
+  for (const auto& iAssoc : associations)
+  	{
+      if (first)
+        {
+          first = false;
+        }
+      else
+        {
+          os << ", ";
+        }
+  	  os << iAssoc.address << "/" << iAssoc.mask.GetPrefixLength ();
+  	}
+  os << "]";
 }
 
 void

@@ -21,8 +21,8 @@
 #ifndef ONOE_WIFI_MANAGER_H
 #define ONOE_WIFI_MANAGER_H
 
+#include "ns3/traced-value.h"
 #include "wifi-remote-station-manager.h"
-#include "ns3/nstime.h"
 
 namespace ns3 {
 
@@ -39,22 +39,33 @@ struct OnoeWifiRemoteStation;
  * any publication or reference about this algorithm beyond the madwifi
  * source code.
  *
+<<<<<<< HEAD
  * This RAA does not support HT or VHT modes and will error exit
  * if the user tries to configure this RAA with a Wi-Fi MAC that
  * has VhtSupported or HtSupported set.
+=======
+ * This RAA does not support HT modes and will error
+ * exit if the user tries to configure this RAA with a Wi-Fi MAC
+ * that supports 802.11n or higher.
+>>>>>>> origin
  */
 class OnoeWifiManager : public WifiRemoteStationManager
 {
 public:
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
   static TypeId GetTypeId (void);
-
   OnoeWifiManager ();
+  virtual ~OnoeWifiManager ();
 
   // Inherited from WifiRemoteStationManager
   virtual void SetHtSupported (bool enable);
   virtual void SetVhtSupported (bool enable);
 
 private:
+<<<<<<< HEAD
   //overriden from base class
   virtual WifiRemoteStation * DoCreateStation (void) const;
   virtual void DoReportRxOk (WifiRemoteStation *station,
@@ -70,18 +81,42 @@ private:
   virtual WifiTxVector DoGetDataTxVector (WifiRemoteStation *station);
   virtual WifiTxVector DoGetRtsTxVector (WifiRemoteStation *station);
   virtual bool IsLowLatency (void) const;
+=======
+  // Overridden from base class.
+  void DoInitialize (void);
+  WifiRemoteStation * DoCreateStation (void) const;
+  void DoReportRxOk (WifiRemoteStation *station,
+                     double rxSnr, WifiMode txMode);
+  void DoReportRtsFailed (WifiRemoteStation *station);
+  void DoReportDataFailed (WifiRemoteStation *station);
+  void DoReportRtsOk (WifiRemoteStation *station,
+                      double ctsSnr, WifiMode ctsMode, double rtsSnr);
+  void DoReportDataOk (WifiRemoteStation *station, double ackSnr, WifiMode ackMode,
+                       double dataSnr, uint16_t dataChannelWidth, uint8_t dataNss);
+  void DoReportFinalRtsFailed (WifiRemoteStation *station);
+  void DoReportFinalDataFailed (WifiRemoteStation *station);
+  WifiTxVector DoGetDataTxVector (WifiRemoteStation *station);
+  WifiTxVector DoGetRtsTxVector (WifiRemoteStation *station);
+>>>>>>> origin
 
   /**
    * Update the number of retry (both short and long).
    *
-   * \param station
+   * \param station the ONOE wifi remote station
    */
   void UpdateRetry (OnoeWifiRemoteStation *station);
+  /**
+   * Update the mode.
+   *
+   * \param station the ONOE wifi remote station
+   */
   void UpdateMode (OnoeWifiRemoteStation *station);
 
-  Time m_updatePeriod;
-  uint32_t m_addCreditThreshold;
-  uint32_t m_raiseThreshold;
+  Time m_updatePeriod; ///< update period
+  uint32_t m_addCreditThreshold; ///< add credit threshold
+  uint32_t m_raiseThreshold; ///< raise threshold
+
+  TracedValue<uint64_t> m_currentRate; //!< Trace rate changes
 };
 
 } //namespace ns3

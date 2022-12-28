@@ -1,3 +1,4 @@
+<<<<<<< HEAD
  /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
  /*
  *   Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
@@ -24,6 +25,34 @@
  *        	 	  Russell Ford <russell.ford@nyu.edu>
  *        		  Menglei Zhang <menglei@nyu.edu>
  */
+=======
+/* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
+/*
+*   Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
+*   Copyright (c) 2015, NYU WIRELESS, Tandon School of Engineering, New York University
+*
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License version 2 as
+*   published by the Free Software Foundation;
+*
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
+*
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+*   Author: Marco Miozzo <marco.miozzo@cttc.es>
+*           Nicola Baldo  <nbaldo@cttc.es>
+*
+*   Modified by: Marco Mezzavilla < mezzavilla@nyu.edu>
+*                         Sourjya Dutta <sdutta@nyu.edu>
+*                         Russell Ford <russell.ford@nyu.edu>
+*                         Menglei Zhang <menglei@nyu.edu>
+*/
+>>>>>>> origin
 
 
 #ifndef MMWAVE_MAC_PDU_HEADER_H
@@ -36,27 +65,37 @@ namespace ns3 {
 
 class Tag;
 
+namespace mmwave {
+
 struct MacSubheader
 {
-	MacSubheader (uint8_t lcid, uint16_t size) :
-		m_lcid (lcid), m_size (size)
-	{
-	}
+  MacSubheader ()
+    : m_lcid (0),
+      m_size (0)
+  {
 
-	uint32_t GetSize ()
-	{
-		if (m_size > 127)
-		{
-			return 3;
-		}
-		else
-		{
-			return 2;
-		}
-	}
+  }
+
+  MacSubheader (uint8_t lcid, uint32_t size)
+    : m_lcid (lcid),
+      m_size (size)
+  {
+  }
+
+  uint32_t GetSize ()
+  {
+    if (m_size > 127)
+      {
+        return 3;
+      }
+    else
+      {
+        return 2;
+      }
+  }
 
   uint8_t   m_lcid;
-  uint32_t  m_size;		// 22 bits
+  uint32_t  m_size;             // 22 bits
 };
 
 class MmWaveMacPduHeader : public Header
@@ -80,12 +119,12 @@ public:
 
   void SetSubheaders (std::vector<MacSubheader> macSubheaderList)
   {
-  	m_subheaderList = macSubheaderList;
+    m_subheaderList = macSubheaderList;
   }
 
-	std::vector<MacSubheader> GetSubheaders (void)
+  std::vector<MacSubheader> GetSubheaders (void)
   {
-		return m_subheaderList;
+    return m_subheaderList;
   }
 
 protected:
@@ -93,6 +132,8 @@ protected:
   uint32_t m_headerSize;
 };
 
-} //namespace ns3
+} // namespace mmwave
+
+} // namespace ns3
 
 #endif /* MMWAVE_MAC_PDU_HEADER_H */

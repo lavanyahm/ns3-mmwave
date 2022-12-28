@@ -122,7 +122,11 @@ public:
    *
    * \returns the number of Ptr<QueueDisc> stored in this container.
    */
+<<<<<<< HEAD
   uint32_t GetN (void) const;
+=======
+  std::size_t GetN (void) const;
+>>>>>>> origin
 
   /**
    * \brief Get the Ptr<QueueDisc> stored in this container at a given
@@ -145,7 +149,11 @@ public:
    * \param i the index of the requested queue disc pointer.
    * \returns the requested queue disc pointer.
    */
+<<<<<<< HEAD
   Ptr<QueueDisc> Get (uint32_t i) const;
+=======
+  Ptr<QueueDisc> Get (std::size_t i) const;
+>>>>>>> origin
 
   /**
    * \brief Append the contents of another QueueDiscContainer to the end of

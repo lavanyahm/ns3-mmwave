@@ -18,11 +18,10 @@
  *         Junling Bu <linlinjavaer@gmail.com>
  */
 #include <algorithm>
-#include "ns3/wifi-channel.h"
-#include "ns3/llc-snap-header.h"
-#include "ns3/uinteger.h"
 #include "ns3/node.h"
-#include "ns3/trace-source-accessor.h"
+#include "ns3/wifi-phy.h"
+#include "ns3/llc-snap-header.h"
+#include "ns3/channel.h"
 #include "ns3/log.h"
 #include "ns3/socket.h"
 #include "ns3/object-map.h"
@@ -51,7 +50,7 @@ WaveNetDevice::GetTypeId (void)
     .AddAttribute ("Channel", "The channel attached to this device",
                    PointerValue (),
                    MakePointerAccessor (&WaveNetDevice::GetChannel),
-                   MakePointerChecker<WifiChannel> ())
+                   MakePointerChecker<Channel> ())
     .AddAttribute ("PhyEntities", "The PHY entities attached to this device.",
                    ObjectVectorValue (),
                    MakeObjectVectorAccessor (&WaveNetDevice::m_phyEntities),
@@ -118,6 +117,7 @@ WaveNetDevice::DoDispose (void)
       mac->Dispose ();
     }
   m_macEntities.clear ();
+  m_phyEntities.clear ();
   m_channelCoordinator->Dispose ();
   m_channelManager->Dispose ();
   m_channelScheduler->Dispose ();
@@ -127,7 +127,7 @@ WaveNetDevice::DoDispose (void)
   m_channelScheduler = 0;
   m_vsaManager = 0;
   // chain up.
-  NetDevice::DoDispose ();
+  WifiNetDevice::DoDispose ();
 }
 
 void
@@ -411,6 +411,7 @@ WaveNetDevice::SendX (Ptr<Packet> packet, const Address & dest, uint32_t protoco
       txVector.SetChannelWidth (10);
       txVector.SetTxPowerLevel (txInfo.txPowerLevel);
       txVector.SetMode (txInfo.dataRate);
+      txVector.SetPreambleType (txInfo.preamble);
       HigherLayerTxVectorTag tag = HigherLayerTxVectorTag (txVector, false);
       packet->AddPacketTag (tag);
     }
@@ -618,6 +619,7 @@ WaveNetDevice::Send (Ptr<Packet> packet, const Address& dest, uint16_t protocol)
       WifiTxVector txVector;
       txVector.SetTxPowerLevel (m_txProfile->txPowerLevel);
       txVector.SetMode (m_txProfile->dataRate);
+      txVector.SetPreambleType (m_txProfile->preamble);
       HigherLayerTxVectorTag tag = HigherLayerTxVectorTag (txVector, m_txProfile->adaptable);
       packet->AddPacketTag (tag);
     }
@@ -634,16 +636,6 @@ WaveNetDevice::Send (Ptr<Packet> packet, const Address& dest, uint16_t protocol)
   return true;
 }
 
-Ptr<Node>
-WaveNetDevice::GetNode (void) const
-{
-  return m_node;
-}
-void
-WaveNetDevice::SetNode (Ptr<Node> node)
-{
-  m_node = node;
-}
 bool
 WaveNetDevice::NeedsArp (void) const
 {
@@ -675,11 +667,12 @@ WaveNetDevice::IsAvailableChannel (uint32_t channelNumber) const
 }
 
 void
-WaveNetDevice::ForwardUp (Ptr<Packet> packet, Mac48Address from, Mac48Address to)
+WaveNetDevice::ForwardUp (Ptr<const Packet> packet, Mac48Address from, Mac48Address to)
 {
   NS_LOG_FUNCTION (this << packet << from << to);
+  Ptr<Packet> copy = packet->Copy ();
   LlcSnapHeader llc;
-  packet->RemoveHeader (llc);
+  copy->RemoveHeader (llc);
   enum NetDevice::PacketType type;
   if (to.IsBroadcast ())
     {
@@ -703,8 +696,8 @@ WaveNetDevice::ForwardUp (Ptr<Packet> packet, Mac48Address from, Mac48Address to
       // currently we cannot know from which MAC entity the packet is received,
       // so we use the MAC entity for CCH as it receives this packet.
       Ptr<OcbWifiMac> mac = GetMac (CCH);
-      mac->NotifyRx (packet);
-      m_forwardUp (this, packet, llc.GetType (), from);
+      mac->NotifyRx (copy);
+      m_forwardUp (this, copy, llc.GetType (), from);
     }
 
   if (!m_promiscRx.IsNull ())
@@ -712,8 +705,8 @@ WaveNetDevice::ForwardUp (Ptr<Packet> packet, Mac48Address from, Mac48Address to
       // currently we cannot know from which MAC entity the packet is received,
       // so we use the MAC entity for CCH as it receives this packet.
       Ptr<OcbWifiMac> mac = GetMac (CCH);
-      mac->NotifyPromiscRx (packet);
-      m_promiscRx (this, packet, llc.GetType (), from, to, type);
+      mac->NotifyPromiscRx (copy);
+      m_promiscRx (this, copy, llc.GetType (), from, to, type);
     }
 }
 

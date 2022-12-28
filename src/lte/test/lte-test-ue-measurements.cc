@@ -62,7 +62,7 @@ NS_LOG_COMPONENT_DEFINE ("LteUeMeasurementsTest");
 void
 ReportUeMeasurementsCallback (LteUeMeasurementsTestCase *testcase,
                               std::string path, uint16_t rnti, uint16_t cellId,
-                              double rsrp, double rsrq, bool servingCell)
+                              double rsrp, double rsrq, bool servingCell, uint8_t componentCarrierId)
 {
   testcase->ReportUeMeasurements (rnti, cellId, rsrp, rsrq, servingCell);
 }
@@ -196,16 +196,15 @@ LteUeMeasurementsTestCase::DoRun (void)
   EpsBearer bearer (q);
   lteHelper->ActivateDataRadioBearer (ueDevs1, bearer);
   lteHelper->ActivateDataRadioBearer (ueDevs2, bearer);
-
-
-  Config::Connect ("/NodeList/2/DeviceList/0/LteUePhy/ReportUeMeasurements",
+  
+  Config::ConnectFailSafe ("/NodeList/2/DeviceList/0/LteUePhy/ReportUeMeasurements",
                    MakeBoundCallback (&ReportUeMeasurementsCallback, this));
-  Config::Connect ("/NodeList/0/DeviceList/0/LteEnbRrc/RecvMeasurementReport",
+  Config::ConnectFailSafe ("/NodeList/0/DeviceList/0/LteEnbRrc/RecvMeasurementReport",
                    MakeBoundCallback (&RecvMeasurementReportCallback, this));
 
-  Config::Connect ("/NodeList/3/DeviceList/0/LteUePhy/ReportUeMeasurements",
+  Config::ConnectFailSafe ("/NodeList/3/DeviceList/0/LteUePhy/ReportUeMeasurements",
                    MakeBoundCallback (&ReportUeMeasurementsCallback, this));
-  Config::Connect ("/NodeList/1/DeviceList/0/LteEnbRrc/RecvMeasurementReport",
+  Config::ConnectFailSafe ("/NodeList/1/DeviceList/0/LteEnbRrc/RecvMeasurementReport",
                    MakeBoundCallback (&RecvMeasurementReportCallback, this));
 
   // need to allow for RRC connection establishment + SRS
@@ -553,6 +552,10 @@ LteUeMeasurementsPiecewiseTestCase1::DoRun ()
   lteHelper->SetAttribute ("PathlossModel",
                            StringValue ("ns3::FriisSpectrumPropagationLossModel"));
   lteHelper->SetAttribute ("UseIdealRrc", BooleanValue (true));
+
+  // set DL and UL bandwidth.
+  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
+  lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (25));
 
   //Disable Uplink Power Control
   Config::SetDefault ("ns3::LteUePhy::EnableUplinkPowerControl", BooleanValue (false));
@@ -1139,6 +1142,10 @@ LteUeMeasurementsPiecewiseTestCase2::DoRun ()
                            StringValue ("ns3::FriisSpectrumPropagationLossModel"));
   lteHelper->SetAttribute ("UseIdealRrc", BooleanValue (true));
 
+  // set DL and UL bandwidth.
+  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
+  lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (25));
+
   //Disable Uplink Power Control
   Config::SetDefault ("ns3::LteUePhy::EnableUplinkPowerControl", BooleanValue (false));
 
@@ -1692,6 +1699,10 @@ LteUeMeasurementsHandoverTestCase::DoRun ()
                            StringValue ("ns3::FriisSpectrumPropagationLossModel"));
   lteHelper->SetAttribute ("UseIdealRrc", BooleanValue (true));
 
+  // set DL and UL bandwidth
+  lteHelper->SetEnbDeviceAttribute ("DlBandwidth", UintegerValue (25));
+  lteHelper->SetEnbDeviceAttribute ("UlBandwidth", UintegerValue (25));
+
   //Disable Uplink Power Control
   Config::SetDefault ("ns3::LteUePhy::EnableUplinkPowerControl", BooleanValue (false));
 
@@ -1801,12 +1812,16 @@ LteUeMeasurementsHandoverTestCase::DoRun ()
   lteHelper->AddX2Interface (enbNodes);
 
   // Connect to trace sources in source eNodeB
-  Config::Connect ("/NodeList/1/DeviceList/0/LteEnbRrc/RecvMeasurementReport",
+  uint16_t sourceEnbId = enbNodes.Get (0)->GetId ();
+  std::string sourceEnbPath = "/NodeList/" + std::to_string (sourceEnbId) + "/DeviceList/0/LteEnbRrc/RecvMeasurementReport";
+  Config::Connect (sourceEnbPath,
                    MakeCallback (&LteUeMeasurementsHandoverTestCase::RecvMeasurementReportCallback,
                                  this));
 
   // Connect to trace sources in target eNodeB
-  Config::Connect ("/NodeList/2/DeviceList/0/LteEnbRrc/RecvMeasurementReport",
+  uint16_t targetEnbId = enbNodes.Get (1)->GetId ();
+  std::string targetEnbPath = "/NodeList/" + std::to_string (targetEnbId) + "/DeviceList/0/LteEnbRrc/RecvMeasurementReport";
+  Config::Connect (targetEnbPath,
                    MakeCallback (&LteUeMeasurementsHandoverTestCase::RecvMeasurementReportCallback,
                                  this));
 

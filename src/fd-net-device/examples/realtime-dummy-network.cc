@@ -35,7 +35,11 @@ NS_LOG_COMPONENT_DEFINE ("RealtimeDummyNetworkExample");
 int
 main (int argc, char *argv[])
 {
+<<<<<<< HEAD
   CommandLine cmd;
+=======
+  CommandLine cmd (__FILE__);
+>>>>>>> origin
   cmd.Parse (argc, argv);
 
   GlobalValue::Bind ("SimulatorImplementationType", StringValue ("ns3::RealtimeSimulatorImpl"));

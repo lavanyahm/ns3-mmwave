@@ -19,8 +19,6 @@
  */
 
 #include "status-code.h"
-#include <string>
-#include <ostream>
 
 namespace ns3 {
 
@@ -66,14 +64,6 @@ StatusCode::Deserialize (Buffer::Iterator start)
   return start;
 }
 
-/**
- * Serialize StatusCode to the given ostream.
- *
- * \param os
- * \param code
- *
- * \return std::ostream
- */
 std::ostream &
 operator << (std::ostream &os, const StatusCode &code)
 {

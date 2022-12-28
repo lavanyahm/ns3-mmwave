@@ -83,7 +83,11 @@ GoodputSampling (std::string fileName, ApplicationContainer app, Ptr<OutputStrea
 {
   Simulator::Schedule (Seconds (period), &GoodputSampling, fileName, app, stream, period);
   double goodput;
+<<<<<<< HEAD
   uint32_t totalPackets = DynamicCast<PacketSink> (app.Get (0))->GetTotalRx ();
+=======
+  uint64_t totalPackets = DynamicCast<PacketSink> (app.Get (0))->GetTotalRx ();
+>>>>>>> origin
   goodput = totalPackets * 8 / (Simulator::Now ().GetSeconds () * 1024); // Kbit/s
   *stream->GetStream () << Simulator::Now ().GetSeconds () << " " << goodput << std::endl;
 }
@@ -99,12 +103,17 @@ int main (int argc, char *argv[])
   std::string delay = "5ms";
   std::string queueDiscType = "PfifoFast";
   uint32_t queueDiscSize = 1000;
+<<<<<<< HEAD
   uint32_t netdevicesQueueSize = 100;
+=======
+  uint32_t netdevicesQueueSize = 50;
+>>>>>>> origin
   bool bql = false;
 
   std::string flowsDatarate = "20Mbps";
   uint32_t flowsPacketsSize = 1000;
 
+<<<<<<< HEAD
   float startTime = 0.1; // in s
   float simDuration = 60;
   float samplingPeriod = 1;
@@ -113,6 +122,16 @@ int main (int argc, char *argv[])
   cmd.AddValue ("bandwidth", "Bottleneck bandwidth", bandwidth);
   cmd.AddValue ("delay", "Bottleneck delay", delay);
   cmd.AddValue ("queueDiscType", "Bottleneck queue disc type in {PfifoFast, ARED, CoDel, FqCoDel, PIE}", queueDiscType);
+=======
+  float startTime = 0.1f; // in s
+  float simDuration = 60;
+  float samplingPeriod = 1;
+
+  CommandLine cmd (__FILE__);
+  cmd.AddValue ("bandwidth", "Bottleneck bandwidth", bandwidth);
+  cmd.AddValue ("delay", "Bottleneck delay", delay);
+  cmd.AddValue ("queueDiscType", "Bottleneck queue disc type in {PfifoFast, ARED, CoDel, FqCoDel, PIE, prio}", queueDiscType);
+>>>>>>> origin
   cmd.AddValue ("queueDiscSize", "Bottleneck queue disc size in packets", queueDiscSize);
   cmd.AddValue ("netdevicesQueueSize", "Bottleneck netdevices queue size in packets", netdevicesQueueSize);
   cmd.AddValue ("bql", "Enable byte queue limits on bottleneck netdevices", bql);
@@ -135,23 +154,36 @@ int main (int argc, char *argv[])
   PointToPointHelper accessLink;
   accessLink.SetDeviceAttribute ("DataRate", StringValue ("100Mbps"));
   accessLink.SetChannelAttribute ("Delay", StringValue ("0.1ms"));
+<<<<<<< HEAD
+=======
+  accessLink.SetQueue ("ns3::DropTailQueue", "MaxSize", StringValue ("100p"));
+>>>>>>> origin
 
   PointToPointHelper bottleneckLink;
   bottleneckLink.SetDeviceAttribute ("DataRate", StringValue (bandwidth));
   bottleneckLink.SetChannelAttribute ("Delay", StringValue (delay));
+<<<<<<< HEAD
+=======
+  bottleneckLink.SetQueue ("ns3::DropTailQueue", "MaxSize", StringValue (std::to_string (netdevicesQueueSize) + "p"));
+>>>>>>> origin
 
   InternetStackHelper stack;
   stack.InstallAll ();
 
   // Access link traffic control configuration
   TrafficControlHelper tchPfifoFastAccess;
+<<<<<<< HEAD
   uint32_t handle = tchPfifoFastAccess.SetRootQueueDisc ("ns3::PfifoFastQueueDisc", "Limit", UintegerValue (1000));
+=======
+  tchPfifoFastAccess.SetRootQueueDisc ("ns3::PfifoFastQueueDisc", "MaxSize", StringValue ("1000p"));
+>>>>>>> origin
 
   // Bottleneck link traffic control configuration
   TrafficControlHelper tchBottleneck;
 
   if (queueDiscType.compare ("PfifoFast") == 0)
     {
+<<<<<<< HEAD
       tchBottleneck.SetRootQueueDisc ("ns3::PfifoFastQueueDisc", "Limit", UintegerValue (queueDiscSize));
     }
   else if (queueDiscType.compare ("ARED") == 0)
@@ -179,6 +211,43 @@ int main (int argc, char *argv[])
       handle = tchBottleneck.SetRootQueueDisc ("ns3::PieQueueDisc");
       Config::SetDefault ("ns3::PieQueueDisc::Mode", EnumValue (Queue::QUEUE_MODE_PACKETS));
       Config::SetDefault ("ns3::PieQueueDisc::QueueLimit", UintegerValue (queueDiscSize));
+=======
+      tchBottleneck.SetRootQueueDisc ("ns3::PfifoFastQueueDisc", "MaxSize",
+                                      QueueSizeValue (QueueSize (QueueSizeUnit::PACKETS, queueDiscSize)));
+    }
+  else if (queueDiscType.compare ("ARED") == 0)
+    {
+      tchBottleneck.SetRootQueueDisc ("ns3::RedQueueDisc");
+      Config::SetDefault ("ns3::RedQueueDisc::ARED", BooleanValue (true));
+      Config::SetDefault ("ns3::RedQueueDisc::MaxSize",
+                          QueueSizeValue (QueueSize (QueueSizeUnit::PACKETS, queueDiscSize)));
+    }
+  else if (queueDiscType.compare ("CoDel") == 0)
+    {
+      tchBottleneck.SetRootQueueDisc ("ns3::CoDelQueueDisc");
+      Config::SetDefault ("ns3::CoDelQueueDisc::MaxSize",
+                          QueueSizeValue (QueueSize (QueueSizeUnit::PACKETS, queueDiscSize)));
+    }
+  else if (queueDiscType.compare ("FqCoDel") == 0)
+    {
+      tchBottleneck.SetRootQueueDisc ("ns3::FqCoDelQueueDisc");
+      Config::SetDefault ("ns3::FqCoDelQueueDisc::MaxSize",
+                          QueueSizeValue (QueueSize (QueueSizeUnit::PACKETS, queueDiscSize)));
+    }
+  else if (queueDiscType.compare ("PIE") == 0)
+    {
+      tchBottleneck.SetRootQueueDisc ("ns3::PieQueueDisc");
+      Config::SetDefault ("ns3::PieQueueDisc::MaxSize",
+                          QueueSizeValue (QueueSize (QueueSizeUnit::PACKETS, queueDiscSize)));
+    }
+  else if (queueDiscType.compare ("prio") == 0)
+    {
+      uint16_t handle = tchBottleneck.SetRootQueueDisc ("ns3::PrioQueueDisc", "Priomap",
+                                                        StringValue ("0 1 0 1 0 1 0 1 0 1 0 1 0 1 0 1"));
+      TrafficControlHelper::ClassIdList cid = tchBottleneck.AddQueueDiscClasses (handle, 2, "ns3::QueueDiscClass");
+      tchBottleneck.AddChildQueueDisc (handle, cid[0], "ns3::FifoQueueDisc");
+      tchBottleneck.AddChildQueueDisc (handle, cid[1], "ns3::RedQueueDisc");
+>>>>>>> origin
     }
   else
     {
@@ -190,9 +259,12 @@ int main (int argc, char *argv[])
       tchBottleneck.SetQueueLimits ("ns3::DynamicQueueLimits");
     }
 
+<<<<<<< HEAD
   Config::SetDefault ("ns3::Queue::Mode", StringValue ("QUEUE_MODE_PACKETS"));
   Config::SetDefault ("ns3::Queue::MaxPackets", UintegerValue (100));
 
+=======
+>>>>>>> origin
   NetDeviceContainer devicesAccessLink = accessLink.Install (n1.Get (0), n2.Get (0));
   tchPfifoFastAccess.Install (devicesAccessLink);
   Ipv4AddressHelper address;
@@ -200,8 +272,11 @@ int main (int argc, char *argv[])
   address.NewNetwork ();
   Ipv4InterfaceContainer interfacesAccess = address.Assign (devicesAccessLink);
 
+<<<<<<< HEAD
   Config::SetDefault ("ns3::Queue::MaxPackets", UintegerValue (netdevicesQueueSize));
 
+=======
+>>>>>>> origin
   NetDeviceContainer devicesBottleneckLink = bottleneckLink.Install (n2.Get (0), n3.Get (0));
   QueueDiscContainer qdiscs;
   qdiscs = tchBottleneck.Install (devicesBottleneckLink);
@@ -220,7 +295,11 @@ int main (int argc, char *argv[])
       Ptr<OutputStreamWrapper> streamLimits = ascii.CreateFileStream (queueDiscType + "-limits.txt");
       queueLimits->TraceConnectWithoutContext ("Limit",MakeBoundCallback (&LimitsTrace, streamLimits));
     }
+<<<<<<< HEAD
   Ptr<Queue> queue = StaticCast<PointToPointNetDevice> (devicesBottleneckLink.Get (0))->GetQueue ();
+=======
+  Ptr<Queue<Packet> > queue = StaticCast<PointToPointNetDevice> (devicesBottleneckLink.Get (0))->GetQueue ();
+>>>>>>> origin
   Ptr<OutputStreamWrapper> streamBytesInQueue = ascii.CreateFileStream (queueDiscType + "-bytesInQueue.txt");
   queue->TraceConnectWithoutContext ("BytesInQueue",MakeBoundCallback (&BytesInQueueTrace, streamBytesInQueue));
 

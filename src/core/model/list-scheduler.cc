@@ -28,7 +28,7 @@
 /**
  * \file
  * \ingroup scheduler
- * Implementation of ns3::ListScheduler class.
+ * ns3::ListScheduler implementation.
  */
 
 namespace ns3 {
@@ -53,8 +53,7 @@ ListScheduler::ListScheduler ()
   NS_LOG_FUNCTION (this);
 }
 ListScheduler::~ListScheduler ()
-{
-}
+{}
 
 void
 ListScheduler::Insert (const Event &ev)

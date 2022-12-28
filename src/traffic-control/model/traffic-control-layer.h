@@ -23,14 +23,23 @@
 #include "ns3/address.h"
 #include "ns3/net-device.h"
 #include "ns3/node.h"
+<<<<<<< HEAD
 #include "queue-disc.h"
+=======
+#include "ns3/queue-item.h"
+>>>>>>> origin
 #include <map>
 #include <vector>
 
 namespace ns3 {
 
 class Packet;
+<<<<<<< HEAD
 class QueueDiscItem;
+=======
+class QueueDisc;
+class NetDeviceQueueInterface;
+>>>>>>> origin
 
 /**
  * \defgroup traffic-control
@@ -105,6 +114,11 @@ public:
    */
   TrafficControlLayer ();
 
+<<<<<<< HEAD
+=======
+  virtual ~TrafficControlLayer ();
+
+>>>>>>> origin
   /**
    * \brief Register an IN handler
    *
@@ -130,6 +144,7 @@ public:
   typedef std::vector<Ptr<QueueDisc> > QueueDiscVector;
 
   /**
+<<<<<<< HEAD
    * \brief Perform the operations that the traffic control layer needs to do when
    *        an IPv4/v6 interface is added to a device
    * \param device the device which the IPv4/v6 interface has been added to
@@ -137,6 +152,15 @@ public:
    * This method creates a NetDeviceQueueInterface for the device
    */
   virtual void SetupDevice (Ptr<NetDevice> device);
+=======
+   * \brief Collect information needed to determine how to handle packets
+   *        destined to each of the NetDevices of this node
+   *
+   * Checks whether a NetDeviceQueueInterface objects is aggregated to each of
+   * the NetDevices of this node and sets the required callbacks properly.
+   */
+  virtual void ScanDevices (void);
+>>>>>>> origin
 
   /**
    * \brief This method can be used to set the root queue disc installed on a device
@@ -177,7 +201,11 @@ public:
    * \param device network device
    * \param p the packet
    * \param protocol next header value
+<<<<<<< HEAD
    * \param from address of the correspondant
+=======
+   * \param from address of the correspondent
+>>>>>>> origin
    * \param to address of the destination
    * \param packetType type of the packet
    */
@@ -192,9 +220,12 @@ public:
    */
   virtual void Send (Ptr<NetDevice> device, Ptr<QueueDiscItem> item);
 
+<<<<<<< HEAD
   /// Callback invoked to determine the tx queue selected for a given packet
   typedef Callback< uint8_t, Ptr<QueueItem> > SelectQueueCallback;
 
+=======
+>>>>>>> origin
 protected:
 
   virtual void DoDispose (void);
@@ -209,6 +240,10 @@ private:
   TrafficControlLayer (TrafficControlLayer const &);
   /**
    * \brief Assignment operator
+<<<<<<< HEAD
+=======
+   * \return this object
+>>>>>>> origin
    * Disable default implementation to avoid misuse
    */
   TrafficControlLayer& operator= (TrafficControlLayer const &);
@@ -226,11 +261,19 @@ private:
   /**
    * \brief Information to store for each device
    */
+<<<<<<< HEAD
   struct NetDeviceInfo {
     Ptr<QueueDisc> rootQueueDisc;       //!< the root queue disc on the device
     Ptr<NetDeviceQueueInterface> ndqi;  //!< the netdevice queue interface
     QueueDiscVector queueDiscsToWake;   //!< the vector of queue discs to wake
     SelectQueueCallback selectQueueCallback;  //!< the select queue callback
+=======
+  struct NetDeviceInfo
+  {
+    Ptr<QueueDisc> m_rootQueueDisc;       //!< the root queue disc on the device
+    Ptr<NetDeviceQueueInterface> m_ndqi;  //!< the netdevice queue interface
+    QueueDiscVector m_queueDiscsToWake;   //!< the vector of queue discs to wake
+>>>>>>> origin
   };
 
   /// Typedef for protocol handlers container

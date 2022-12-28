@@ -18,6 +18,7 @@
  * Author: Stefano Avallone <stavallo@unina.it>
  */
 
+<<<<<<< HEAD
 #include "ns3/test.h"
 #include "ns3/simulator.h"
 #include "ns3/log.h"
@@ -35,24 +36,60 @@
 #include "ns3/wifi-mac.h"
 #include "ns3/wifi-mac-queue.h"
 #include "ns3/edca-txop-n.h"
+=======
+#include "ns3/string.h"
+#include "ns3/test.h"
+#include "ns3/pointer.h"
+#include "ns3/ssid.h"
+#include "ns3/packet-sink.h"
+#include "ns3/wifi-net-device.h"
+#include "ns3/wifi-mac.h"
+#include "ns3/wifi-mac-queue.h"
+#include "ns3/qos-txop.h"
+>>>>>>> origin
 #include "ns3/yans-wifi-helper.h"
 #include "ns3/mobility-helper.h"
 #include "ns3/internet-stack-helper.h"
 #include "ns3/ipv4-address-helper.h"
 #include "ns3/packet-sink-helper.h"
 #include "ns3/on-off-helper.h"
+<<<<<<< HEAD
+=======
+#include "ns3/traffic-control-helper.h"
+#include "ns3/traffic-control-layer.h"
+#include "ns3/llc-snap-header.h"
+>>>>>>> origin
 
 using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE ("WifiAcMappingTest");
 
+<<<<<<< HEAD
 class WifiAcMappingTest : public TestCase
 {
 public:
+=======
+/**
+ * \ingroup wifi-test
+ * \ingroup tests
+ *
+ * \brief Test for User priority to Access Category mapping
+ */
+class WifiAcMappingTest : public TestCase
+{
+public:
+  /**
+   * Constructor for WifiAcMappingTest
+   *
+   * \param tos the type of service
+   * \param expectedQueue the expected queue disc index
+   */
+>>>>>>> origin
   WifiAcMappingTest (uint8_t tos, uint8_t expectedQueue);
   virtual void DoRun (void);
 
 private:
+<<<<<<< HEAD
   uint8_t m_tos;
   uint8_t m_expectedQueue;
 };
@@ -62,6 +99,72 @@ WifiAcMappingTest::WifiAcMappingTest (uint8_t tos, uint8_t expectedQueue)
     m_tos (tos),
     m_expectedQueue (expectedQueue)
 {
+=======
+  /**
+   * Function called whenever a packet is enqueued in
+   * a queue disc.
+   *
+   * \param tos the type of service
+   * \param count the pointer to the packet counter
+   * \param item the enqueued item
+   */
+  static void PacketEnqueuedInQueueDisc (uint8_t tos, uint16_t* count, Ptr<const QueueDiscItem> item);
+  /**
+   * Function called whenever a packet is enqueued in
+   * a Wi-Fi MAC queue.
+   *
+   * \param tos the type of service
+   * \param count the pointer to the packet counter
+   * \param item the enqueued item
+   */
+  static void PacketEnqueuedInWifiMacQueue (uint8_t tos, uint16_t* count, Ptr<const WifiMacQueueItem> item);
+  uint8_t m_tos; //!< type of service
+  uint16_t m_expectedQueue; //!< expected queue disc index
+  uint16_t m_QueueDiscCount[4]; //!< packet counter per queue disc
+  uint16_t m_WifiMacQueueCount[4]; //!< packet counter per Wi-Fi MAC queue
+};
+
+WifiAcMappingTest::WifiAcMappingTest (uint8_t tos, uint8_t expectedQueue)
+  : TestCase ("User priority to Access Category mapping test. Checks that packets are "
+              "enqueued in the correct child queue disc of the mq root queue disc and "
+              "in the correct wifi MAC queue"),
+    m_tos (tos),
+    m_expectedQueue (expectedQueue)
+{
+  for (uint8_t i = 0; i < 4; i++)
+    {
+      m_QueueDiscCount[i] = 0;
+      m_WifiMacQueueCount[i] = 0;
+    }
+}
+
+void
+WifiAcMappingTest::PacketEnqueuedInQueueDisc (uint8_t tos, uint16_t* count, Ptr<const QueueDiscItem> item)
+{
+  uint8_t val;
+  if (item->GetUint8Value (QueueItem::IP_DSFIELD, val) && val == tos)
+    {
+      (*count)++;
+    }
+}
+
+void
+WifiAcMappingTest::PacketEnqueuedInWifiMacQueue (uint8_t tos, uint16_t* count, Ptr<const WifiMacQueueItem> item)
+{
+  LlcSnapHeader llc;
+  Ptr<Packet> packet = item->GetPacket ()->Copy ();
+  packet->RemoveHeader (llc);
+
+  if (llc.GetType () == Ipv4L3Protocol::PROT_NUMBER)
+    {
+      Ipv4Header iph;
+      packet->PeekHeader (iph);
+      if (iph.GetTos () == tos)
+        {
+          (*count)++;
+        }
+    }
+>>>>>>> origin
 }
 
 void
@@ -69,7 +172,11 @@ WifiAcMappingTest::DoRun (void)
 {
   WifiHelper wifi;
   WifiMacHelper wifiMac;
+<<<<<<< HEAD
   YansWifiPhyHelper wifiPhy = YansWifiPhyHelper::Default ();
+=======
+  YansWifiPhyHelper wifiPhy;
+>>>>>>> origin
   YansWifiChannelHelper wifiChannel = YansWifiChannelHelper::Default ();
   wifiPhy.SetChannel (wifiChannel.Create ());
 
@@ -111,6 +218,16 @@ WifiAcMappingTest::DoRun (void)
   stack.Install (ap);
   stack.Install (sta);
 
+<<<<<<< HEAD
+=======
+  TrafficControlHelper tch;
+  uint16_t handle = tch.SetRootQueueDisc ("ns3::MqQueueDisc");
+  TrafficControlHelper::ClassIdList cls = tch.AddQueueDiscClasses (handle, 4, "ns3::QueueDiscClass");
+  tch.AddChildQueueDiscs (handle, cls, "ns3::FqCoDelQueueDisc");
+  tch.Install (apDev);
+  tch.Install (staDev);
+
+>>>>>>> origin
   Ipv4AddressHelper address;
   address.SetBase ("192.168.0.0", "255.255.255.0");
   Ipv4InterfaceContainer staNodeInterface, apNodeInterface;
@@ -123,7 +240,11 @@ WifiAcMappingTest::DoRun (void)
                                InetSocketAddress (Ipv4Address::GetAny (), udpPort));
   ApplicationContainer sinkApp = packetSink.Install (sta.Get (0));
   sinkApp.Start (Seconds (0));
+<<<<<<< HEAD
   sinkApp.Stop (Seconds (3.0));
+=======
+  sinkApp.Stop (Seconds (4.0));
+>>>>>>> origin
 
   // The packet source is an on-off application on the AP device
   InetSocketAddress dest (staNodeInterface.GetAddress (0), udpPort);
@@ -132,6 +253,7 @@ WifiAcMappingTest::DoRun (void)
   onoff.SetConstantRate (DataRate ("5kbps"), 500);
   ApplicationContainer sourceApp = onoff.Install (ap.Get (0));
   sourceApp.Start (Seconds (1.0));
+<<<<<<< HEAD
   sourceApp.Stop (Seconds (3.0));
 
   // The first packet will be transmitted at time 1+(500*8)/5000 = 1.8s.
@@ -167,6 +289,51 @@ WifiAcMappingTest::DoRun (void)
   queues[3] = ptr.Get<EdcaTxopN> ()->GetEdcaQueue ();
   queues[3]->SetAttribute ("MaxDelay", TimeValue (Seconds (10.0)));
 
+=======
+  sourceApp.Stop (Seconds (4.0));
+
+  // The first packet will be transmitted at time 1+(500*8)/5000 = 1.8s.
+  // The second packet will be transmitted at time 1.8+(500*8)/5000 = 2.6s.
+  // The third packet will be transmitted at time 2.6+(500*8)/5000 = 3.4s.
+
+  Simulator::Stop (Seconds (5.0));
+
+  Ptr<QueueDisc> root = ap.Get (0)->GetObject<TrafficControlLayer> ()->GetRootQueueDiscOnDevice (apDev.Get (0));
+  NS_TEST_ASSERT_MSG_EQ (root->GetNQueueDiscClasses (), 4, "The root queue disc should have 4 classes");
+  // Get the four child queue discs and connect their Enqueue trace to the PacketEnqueuedInQueueDisc
+  // method, which counts how many packets with the given ToS value have been enqueued
+  root->GetQueueDiscClass (0)->GetQueueDisc ()->TraceConnectWithoutContext ("Enqueue",
+                        MakeBoundCallback (&WifiAcMappingTest::PacketEnqueuedInQueueDisc, m_tos, m_QueueDiscCount));
+
+  root->GetQueueDiscClass (1)->GetQueueDisc ()->TraceConnectWithoutContext ("Enqueue",
+                        MakeBoundCallback (&WifiAcMappingTest::PacketEnqueuedInQueueDisc, m_tos, m_QueueDiscCount+1));
+
+  root->GetQueueDiscClass (2)->GetQueueDisc ()->TraceConnectWithoutContext ("Enqueue",
+                        MakeBoundCallback (&WifiAcMappingTest::PacketEnqueuedInQueueDisc, m_tos, m_QueueDiscCount+2));
+
+  root->GetQueueDiscClass (3)->GetQueueDisc ()->TraceConnectWithoutContext ("Enqueue",
+                        MakeBoundCallback (&WifiAcMappingTest::PacketEnqueuedInQueueDisc, m_tos, m_QueueDiscCount+3));
+
+  Ptr<WifiMac> apMac = DynamicCast<WifiNetDevice> (apDev.Get (0))->GetMac ();
+  PointerValue ptr;
+  // Get the four wifi mac queues and connect their Enqueue trace to the PacketEnqueuedInWifiMacQueue
+  // method, which counts how many packets with the given ToS value have been enqueued
+  apMac->GetAttribute ("BE_Txop", ptr);
+  ptr.Get<QosTxop> ()->GetWifiMacQueue ()->TraceConnectWithoutContext ("Enqueue",
+                        MakeBoundCallback (&WifiAcMappingTest::PacketEnqueuedInWifiMacQueue, m_tos, m_WifiMacQueueCount));
+
+  apMac->GetAttribute ("BK_Txop", ptr);
+  ptr.Get<QosTxop> ()->GetWifiMacQueue ()->TraceConnectWithoutContext ("Enqueue",
+                        MakeBoundCallback (&WifiAcMappingTest::PacketEnqueuedInWifiMacQueue, m_tos, m_WifiMacQueueCount+1));
+
+  apMac->GetAttribute ("VI_Txop", ptr);
+  ptr.Get<QosTxop> ()->GetWifiMacQueue ()->TraceConnectWithoutContext ("Enqueue",
+                        MakeBoundCallback (&WifiAcMappingTest::PacketEnqueuedInWifiMacQueue, m_tos, m_WifiMacQueueCount+2));
+
+  apMac->GetAttribute ("VO_Txop", ptr);
+  ptr.Get<QosTxop> ()->GetWifiMacQueue ()->TraceConnectWithoutContext ("Enqueue",
+                        MakeBoundCallback (&WifiAcMappingTest::PacketEnqueuedInWifiMacQueue, m_tos, m_WifiMacQueueCount+3));
+>>>>>>> origin
 
   Simulator::Run ();
 
@@ -174,24 +341,50 @@ WifiAcMappingTest::DoRun (void)
     {
       if (i == m_expectedQueue)
         {
+<<<<<<< HEAD
           NS_TEST_ASSERT_MSG_EQ (queues[i]->GetSize (), 1, "There is no packet in the expected queue " << i);
         }
       else
         {
           NS_TEST_ASSERT_MSG_EQ (queues[i]->GetSize (), 0, "Unexpectedly, there is a packet in queue " << i);
+=======
+          NS_TEST_ASSERT_MSG_GT_OR_EQ (m_QueueDiscCount[i], 1, "There is no packet in the expected queue disc " << i);
+          NS_TEST_ASSERT_MSG_GT_OR_EQ (m_WifiMacQueueCount[i], 1, "There is no packet in the expected Wifi MAC queue " << i);
+        }
+      else
+        {
+          NS_TEST_ASSERT_MSG_EQ (m_QueueDiscCount[i], 0, "Unexpectedly, there is a packet in queue disc " << i);
+          NS_TEST_ASSERT_MSG_EQ (m_WifiMacQueueCount[i], 0, "Unexpectedly, there is a packet in Wifi MAC queue " << i);
+>>>>>>> origin
         }
     }
 
   uint32_t totalOctetsThrough =
+<<<<<<< HEAD
     DynamicCast<PacketSink>(sinkApp.Get (0))->GetTotalRx ();
 
   // Check that the first packet has been received
   NS_TEST_ASSERT_MSG_EQ (totalOctetsThrough, 500, "A single packet should have been received");
+=======
+    DynamicCast<PacketSink> (sinkApp.Get (0))->GetTotalRx ();
+
+  // Check that the three packets have been received
+  NS_TEST_ASSERT_MSG_EQ (totalOctetsThrough, 1500, "Three packets should have been received");
+>>>>>>> origin
 
   Simulator::Destroy ();
 }
 
+<<<<<<< HEAD
 
+=======
+/**
+ * \ingroup wifi-test
+ * \ingroup tests
+ *
+ * \brief Access category mapping Test Suite
+ */
+>>>>>>> origin
 class WifiAcMappingTestSuite : public TestSuite
 {
 public:
@@ -199,7 +392,11 @@ public:
 };
 
 WifiAcMappingTestSuite::WifiAcMappingTestSuite ()
+<<<<<<< HEAD
   : TestSuite ("ns3-wifi-ac-mapping", SYSTEM)
+=======
+  : TestSuite ("wifi-ac-mapping", SYSTEM)
+>>>>>>> origin
 {
   AddTestCase (new WifiAcMappingTest (0xb8, 2), TestCase::QUICK); // EF in AC_VI
   AddTestCase (new WifiAcMappingTest (0x28, 1), TestCase::QUICK); // AF11 in AC_BK

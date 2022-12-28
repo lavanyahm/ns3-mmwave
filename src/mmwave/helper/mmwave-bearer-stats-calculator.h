@@ -1,3 +1,4 @@
+<<<<<<< HEAD
  /* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
  /*
  *   Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
@@ -24,6 +25,34 @@
  *        	 	  Russell Ford <russell.ford@nyu.edu>
  *        		  Menglei Zhang <menglei@nyu.edu>
  */
+=======
+/* -*-  Mode: C++; c-file-style: "gnu"; indent-tabs-mode:nil; -*- */
+/*
+*   Copyright (c) 2011 Centre Tecnologic de Telecomunicacions de Catalunya (CTTC)
+*   Copyright (c) 2015, NYU WIRELESS, Tandon School of Engineering, New York University
+*
+*   This program is free software; you can redistribute it and/or modify
+*   it under the terms of the GNU General Public License version 2 as
+*   published by the Free Software Foundation;
+*
+*   This program is distributed in the hope that it will be useful,
+*   but WITHOUT ANY WARRANTY; without even the implied warranty of
+*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+*   GNU General Public License for more details.
+*
+*   You should have received a copy of the GNU General Public License
+*   along with this program; if not, write to the Free Software
+*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*
+*   Author: Marco Miozzo <marco.miozzo@cttc.es>
+*           Nicola Baldo  <nbaldo@cttc.es>
+*
+*   Modified by: Marco Mezzavilla < mezzavilla@nyu.edu>
+*                         Sourjya Dutta <sdutta@nyu.edu>
+*                         Russell Ford <russell.ford@nyu.edu>
+*                         Menglei Zhang <menglei@nyu.edu>
+*/
+>>>>>>> origin
 
 
 #ifndef MMWAVE_RADIO_BEARER_STATS_CALCULATOR_H_
@@ -39,8 +68,10 @@
 #include <map>
 #include <fstream>
 
-namespace ns3
-{
+namespace ns3 {
+
+namespace mmwave {
+
 /// Container: (IMSI, LCID) pair, uint32_t
 typedef std::map<ImsiLcidPair_t, uint32_t> Uint32Map;
 /// Container: (IMSI, LCID) pair, uint64_t
@@ -59,10 +90,10 @@ typedef std::map<ImsiLcidPair_t, LteFlowId_t> FlowIdMap;
  *
  * This class is an ns-3 trace sink that performs the calculation of
  * PDU statistics for uplink and downlink. Statistics are generated
- * on a per radio bearer basis. This class can be used for 
+ * on a per radio bearer basis. This class can be used for
  * RLC PDU stats or PDCP PDU stats by connecting to the appropriate
  * trace sources at the RLC or PDCP layer.
- * 
+ *
  * The statistics are calculated at consecutive time windows and
  * periodically written to a file. The calculated statistics are:
  *
@@ -140,26 +171,26 @@ public:
   std::string GetDlPdcpOutputFilename (void);
 
 
-  /** 
-   * 
+  /**
+   *
    * \param t the value of the StartTime attribute
    */
   void SetStartTime (Time t);
 
-  /** 
-   * 
+  /**
+   *
    * \return the value of the StartTime attribute
    */
   Time GetStartTime () const;
 
-  /** 
-   * 
+  /**
+   *
    * \param e the epoch duration
    */
   void SetEpoch (Time e);
 
-  /** 
-   * 
+  /**
+   *
    * \return the epoch duration
    */
   Time GetEpoch () const;
@@ -438,6 +469,11 @@ private:
    * true if any output is pending
    */
   bool m_pendingOutput;
+  
+  /**
+   * true if results are shown aggregated
+   */
+  bool m_aggregatedStats;
 
   /**
    * Protocol type, by default RLC
@@ -457,6 +493,8 @@ private:
   std::ofstream m_dlOutFile;
   std::ofstream m_ulOutFile;
 };
+
+} // namespace mmwave
 
 } // namespace ns3
 

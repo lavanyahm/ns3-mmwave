@@ -21,18 +21,28 @@
 #ifndef WIFI_MAC_HELPER_H
 #define WIFI_MAC_HELPER_H
 
+<<<<<<< HEAD
 #include <string>
 #include "ns3/attribute.h"
 #include "ns3/object-factory.h"
+=======
+#include "ns3/object-factory.h"
+#include "ns3/wifi-standards.h"
+>>>>>>> origin
 
 namespace ns3 {
 
 class WifiMac;
+<<<<<<< HEAD
+=======
+class NetDevice;
+>>>>>>> origin
 
 /**
  * \brief create MAC layers for a ns3::WifiNetDevice.
  *
  * This class can create MACs of type ns3::ApWifiMac, ns3::StaWifiMac and ns3::AdhocWifiMac.
+<<<<<<< HEAD
  * Its purpose is to allow a WifiHelper to configure and install WifiMac objects on a collection 
  * of nodes. The WifiMac objects themselves are mainly composed of TxMiddle, RxMiddle, DcfManager, 
  * MacLow, WifiRemoteStationManager, MpduAggregator and MsduAggregartor objects, so this helper 
@@ -45,6 +55,16 @@ class WifiMac;
  * that Mirko Banchi (mk.banchi@gmail.com) originally contributed.
  * It should now be used instead of those two deprecated helpers.
  *
+=======
+ * Its purpose is to allow a WifiHelper to configure and install WifiMac objects on a collection
+ * of nodes. The WifiMac objects themselves are mainly composed of TxMiddle, RxMiddle, ChannelAccessManager,
+ * FrameExchangeManager, WifiRemoteStationManager, MpduAggregator and MsduAggregartor objects, so this helper
+ * offers the opportunity to configure attribute values away from their default values, on a
+ * per-NodeContainer basis. By default, it creates an Adhoc MAC layer without QoS. Typically,
+ * it is used to set type and attribute values, then hand this object over to the WifiHelper that
+ * finishes the job of installing.
+ *
+>>>>>>> origin
  * This class may be further subclassed (WaveMacHelper is an example of this).
  *
  */
@@ -62,6 +82,7 @@ public:
   virtual ~WifiMacHelper ();
 
   /**
+<<<<<<< HEAD
    * \param type the type of ns3::WifiMac to create.
    * Valid values of the type field must be a type subclassed from WifiMac.
    *
@@ -105,17 +126,118 @@ public:
                         std::string n10 = "", const AttributeValue &v10 = EmptyAttributeValue ());
 
   /**
+=======
+   * \tparam Args \deduced Template type parameter pack for the sequence of name-value pairs.
+   * \param type the type of ns3::WifiMac to create.
+   * \param args A sequence of name-value pairs of the attributes to set.
+   *
+   * All the attributes specified in this method should exist
+   * in the requested MAC.
+   */
+  template <typename... Args>
+  void SetType (std::string type, Args&&... args);
+
+  /**
+   * Helper function used to set the Protection Manager.
+   *
+   * \tparam Args \deduced Template type parameter pack for the sequence of name-value pairs.
+   * \param type the type of Protection Manager
+   * \param args A sequence of name-value pairs of the attributes to set.
+   */
+  template <typename... Args>
+  void SetProtectionManager (std::string type, Args&&... args);
+
+  /**
+   * Helper function used to set the Acknowledgment Manager.
+   *
+   * \tparam Args \deduced Template type parameter pack for the sequence of name-value pairs.
+   * \param type the type of Acknowledgment Manager
+   * \param args A sequence of name-value pairs of the attributes to set.
+   */
+  template <typename... Args>
+  void SetAckManager (std::string type, Args&&... args);
+
+  /**
+   * Helper function used to set the Multi User Scheduler that can be aggregated
+   * to an HE AP's MAC.
+   *
+   * \tparam Args \deduced Template type parameter pack for the sequence of name-value pairs.
+   * \param type the type of Multi User Scheduler
+   * \param args A sequence of name-value pairs of the attributes to set.
+   */
+  template <typename... Args>
+  void SetMultiUserScheduler (std::string type, Args&&... args);
+
+  /**
+   * \param device the device within which the MAC object will reside
+   * \param standard the standard to configure during installation
+>>>>>>> origin
    * \returns a new MAC object.
    *
    * This allows the ns3::WifiHelper class to create MAC objects from ns3::WifiHelper::Install.
    */
+<<<<<<< HEAD
   virtual Ptr<WifiMac> Create (void) const;
 
 
 protected:
   ObjectFactory m_mac;
+=======
+  virtual Ptr<WifiMac> Create (Ptr<NetDevice> device, WifiStandard standard) const;
+
+
+protected:
+  ObjectFactory m_mac;                ///< MAC object factory
+  ObjectFactory m_protectionManager;  ///< Factory to create a protection manager
+  ObjectFactory m_ackManager;         ///< Factory to create an acknowledgment manager
+  ObjectFactory m_muScheduler;        ///< Multi-user Scheduler object factory
+>>>>>>> origin
 };
 
 } // namespace ns3
 
+<<<<<<< HEAD
+=======
+
+/***************************************************************
+ *  Implementation of the templates declared above.
+ ***************************************************************/
+
+namespace ns3 {
+
+template <typename... Args>
+void
+WifiMacHelper::SetType (std::string type, Args&&... args)
+{
+  m_mac.SetTypeId (type);
+  m_mac.Set (args...);
+}
+
+template <typename... Args>
+void
+WifiMacHelper::SetProtectionManager (std::string type, Args&&... args)
+{
+  m_protectionManager.SetTypeId (type);
+  m_protectionManager.Set (args...);
+}
+
+template <typename... Args>
+void
+WifiMacHelper::SetAckManager (std::string type, Args&&... args)
+{
+  m_ackManager.SetTypeId (type);
+  m_ackManager.Set (args...);
+}
+
+template <typename... Args>
+void
+WifiMacHelper::SetMultiUserScheduler (std::string type, Args&&... args)
+{
+  m_muScheduler.SetTypeId (type);
+  m_muScheduler.Set (args...);
+}
+
+} // namespace ns3
+
+>>>>>>> origin
 #endif /* WIFI_MAC_HELPER_H */

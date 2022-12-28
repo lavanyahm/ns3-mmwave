@@ -66,6 +66,19 @@ MobilityModel::GetPosition (void) const
   return DoGetPosition ();
 }
 Vector
+MobilityModel::GetPositionWithReference (const Vector& referencePosition) const
+{
+  return DoGetPositionWithReference (referencePosition);
+}
+
+// Default implementation ignores referencePosition
+Vector
+MobilityModel::DoGetPositionWithReference (const Vector& referencePosition) const
+{
+  return DoGetPosition ();
+}
+
+Vector
 MobilityModel::GetVelocity (void) const
 {
   return DoGetVelocity ();
@@ -88,10 +101,7 @@ MobilityModel::GetDistanceFrom (Ptr<const MobilityModel> other) const
 double
 MobilityModel::GetRelativeSpeed (Ptr<const MobilityModel> other) const
 {
-  double x = GetVelocity().x - other->GetVelocity().x;
-  double y = GetVelocity().y - other->GetVelocity().y;
-  double z = GetVelocity().z - other->GetVelocity().z;
-  return sqrt( (x*x) + (y*y) + (z*z) );
+  return (GetVelocity () - other->GetVelocity ()).GetLength ();
 }
 
 void

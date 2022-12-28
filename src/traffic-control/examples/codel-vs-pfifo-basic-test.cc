@@ -84,23 +84,34 @@ int main (int argc, char *argv[])
   std::string accessDelay = "0.1ms";
 
   std::string queueDiscType = "PfifoFast";       //PfifoFast or CoDel
+<<<<<<< HEAD
   uint32_t queueSize = 1000;      //in packets
+=======
+  uint32_t queueDiscSize = 1000;  //in packets
+  uint32_t queueSize = 10;        //in packets
+>>>>>>> origin
   uint32_t pktSize = 1458;        //in bytes. 1458 to prevent fragments
-  float startTime = 0.1;
-  float simDuration = 60;        //in seconds
+  float startTime = 0.1f;
+  float simDuration = 60;         //in seconds
 
   bool isPcapEnabled = true;
   std::string pcapFileName = "pcapFilePfifoFast.pcap";
   std::string cwndTrFileName = "cwndPfifoFast.tr";
   bool logging = false;
 
-  CommandLine cmd;
+  CommandLine cmd (__FILE__);
   cmd.AddValue ("bottleneckBandwidth", "Bottleneck bandwidth", bottleneckBandwidth);
   cmd.AddValue ("bottleneckDelay", "Bottleneck delay", bottleneckDelay);
   cmd.AddValue ("accessBandwidth", "Access link bandwidth", accessBandwidth);
   cmd.AddValue ("accessDelay", "Access link delay", accessDelay);
+<<<<<<< HEAD
   cmd.AddValue ("queueDiscType", "Queue disc type: PfifoFast, CoDel", queueDiscType);
   cmd.AddValue ("queueSize", "Queue size in packets", queueSize);
+=======
+  cmd.AddValue ("queueDiscType", "Bottleneck queue disc type: PfifoFast, CoDel", queueDiscType);
+  cmd.AddValue ("queueDiscSize", "Bottleneck queue disc size in packets", queueDiscSize);
+  cmd.AddValue ("queueSize", "Devices queue size in packets", queueSize);
+>>>>>>> origin
   cmd.AddValue ("pktSize", "Packet size in bytes", pktSize);
   cmd.AddValue ("startTime", "Simulation start time", startTime);
   cmd.AddValue ("simDuration", "Simulation duration in seconds", simDuration);
@@ -126,8 +137,14 @@ int main (int argc, char *argv[])
       GlobalValue::Bind ("ChecksumEnabled", BooleanValue (true));
     }
 
+<<<<<<< HEAD
   Config::SetDefault ("ns3::Queue::Mode", StringValue ("QUEUE_MODE_PACKETS"));
   Config::SetDefault ("ns3::Queue::MaxPackets", UintegerValue (queueSize));
+=======
+  // Devices queue configuration
+  Config::SetDefault ("ns3::DropTailQueue<Packet>::MaxSize",
+                      QueueSizeValue (QueueSize (QueueSizeUnit::PACKETS, queueSize)));
+>>>>>>> origin
 
   // Create gateway, source, and sink
   NodeContainer gateway;
@@ -149,11 +166,26 @@ int main (int argc, char *argv[])
   InternetStackHelper stack;
   stack.InstallAll ();
 
+<<<<<<< HEAD
   TrafficControlHelper tchPfifo;
   tchPfifo.SetRootQueueDisc ("ns3::PfifoFastQueueDisc");
 
   TrafficControlHelper tchCoDel;
   tchCoDel.SetRootQueueDisc ("ns3::CoDelQueueDisc");
+=======
+  // Access link traffic control configuration
+  TrafficControlHelper tchPfifoFastAccess;
+  tchPfifoFastAccess.SetRootQueueDisc ("ns3::PfifoFastQueueDisc", "MaxSize", StringValue ("1000p"));
+
+  // Bottleneck link traffic control configuration
+  TrafficControlHelper tchPfifo;
+  tchPfifo.SetRootQueueDisc ("ns3::PfifoFastQueueDisc", "MaxSize",
+                             StringValue (std::to_string(queueDiscSize) + "p"));
+
+  TrafficControlHelper tchCoDel;
+  tchCoDel.SetRootQueueDisc ("ns3::CoDelQueueDisc");
+  Config::SetDefault ("ns3::CoDelQueueDisc::MaxSize", StringValue (std::to_string(queueDiscSize) + "p"));
+>>>>>>> origin
 
   Ipv4AddressHelper address;
   address.SetBase ("10.0.0.0", "255.255.255.0");
@@ -165,12 +197,20 @@ int main (int argc, char *argv[])
   NetDeviceContainer devicesAccessLink, devicesBottleneckLink;
 
   devicesAccessLink = accessLink.Install (source.Get (0), gateway.Get (0));
+<<<<<<< HEAD
   tchPfifo.Install (devicesAccessLink);
+=======
+  tchPfifoFastAccess.Install (devicesAccessLink);
+>>>>>>> origin
   address.NewNetwork ();
   Ipv4InterfaceContainer interfaces = address.Assign (devicesAccessLink);
 
   devicesBottleneckLink = bottleneckLink.Install (gateway.Get (0), sink.Get (0));
   address.NewNetwork ();
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin
   if (queueDiscType.compare ("PfifoFast") == 0)
     {
       tchPfifo.Install (devicesBottleneckLink);

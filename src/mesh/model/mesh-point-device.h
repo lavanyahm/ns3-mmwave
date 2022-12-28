@@ -22,6 +22,7 @@
 #ifndef L2ROUTING_NET_DEVICE_H
 #define L2ROUTING_NET_DEVICE_H
 
+#include "ns3/node.h"
 #include "ns3/net-device.h"
 #include "ns3/mac48-address.h"
 #include "ns3/bridge-channel.h"
@@ -29,7 +30,6 @@
 
 namespace ns3 {
 
-class Node;
 /**
  * \ingroup mesh
  *
@@ -39,7 +39,7 @@ class Node;
  *   - Aggregating and coordinating 1..* real devices -- mesh interfaces, see MeshInterfaceDevice class.
  *   - Hosting all mesh-related level 2 protocols.
  *
- * One of hosted L2 protocols must inplement L2RoutingProtocol interface and is used for packets forwarding.
+ * One of hosted L2 protocols must implement L2RoutingProtocol interface and is used for packets forwarding.
  *
  * From the level 3 point of view MeshPointDevice is similar to BridgeNetDevice, but the packets,
  * which going through may be changed (because L2 protocols may require their own headers or tags).
@@ -49,17 +49,21 @@ class Node;
 class MeshPointDevice : public NetDevice
 {
 public:
-  /// Object type ID for NS3 object system
+  /**
+   * \brief Get the type ID.
+   * \return the object TypeId
+   */
   static TypeId GetTypeId ();
   /// C-tor create empty (without interfaces and protocols) mesh point
   MeshPointDevice ();
   /// D-tor
   virtual ~MeshPointDevice ();
 
-  ///\name Interfaces
-  //\{
+  /// \name Interfaces
+  ///@{
   /**
    * \brief Attach new interface to the station. Interface must support 48-bit MAC address and SendFrom method.
+   * \param port the port used
    *
    * \attention Only MeshPointDevice can have IP address, but not individual interfaces.
    */
@@ -77,15 +81,24 @@ public:
    * \return vector of interfaces
    */
   std::vector<Ptr<NetDevice> > GetInterfaces () const;
-  //\}
+  ///@}
 
-  ///\name Protocols
-  //\{
-  /// Register routing protocol to be used. Protocol must be already installed on this mesh point.
+
+  /// \name Protocols
+  ///@{
+  /**
+   * Register routing protocol to be used. Protocol must be already installed on this mesh point.
+   *
+   * \param protocol the routing protocol
+   */
   void SetRoutingProtocol (Ptr<MeshL2RoutingProtocol> protocol);
-  /// Access current routing protocol
+  /**
+   * Access current routing protocol
+   *
+   * \return the current routing protocol
+   */
   Ptr<MeshL2RoutingProtocol> GetRoutingProtocol () const;
-  //\}
+  ///@}
 
   // Inherited from NetDevice
   virtual void SetIfIndex (const uint32_t index);
@@ -114,19 +127,39 @@ public:
   virtual Address GetMulticast (Ipv6Address addr) const;
   virtual void DoDispose ();
 
-  ///\name Statistics
-  //\{
-  /// Print statistics counters
+  /// \name Statistics
+  ///@{
+  /**
+   *  Print statistics counters
+   *  \param os the output stream
+   */
   void Report (std::ostream & os) const;
   /// Reset statistics counters
   void ResetStats ();
-  //\}
+  ///@}
 
 private:
-  /// Receive packet from interface
+  /**
+   * Receive packet from interface
+   *
+   * \param device the device to receive from
+   * \param packet the received packet
+   * \param protocol the protocol
+   * \param source the source address
+   * \param destination the destination address
+   * \param packetType the packet type
+   */
   void ReceiveFromDevice (Ptr<NetDevice> device, Ptr<const Packet> packet, uint16_t protocol,
                           Address const &source, Address const &destination, PacketType packetType);
-  /// Forward packet down to interfaces
+  /**
+   * Forward packet down to interfaces
+   *
+   * \param incomingPort the incoming port
+   * \param packet the packet to forward
+   * \param protocol the protocol
+   * \param src the source MAC address
+   * \param dst the destination MAC address
+   */
   void Forward (Ptr<NetDevice> incomingPort, Ptr<const Packet> packet,
                 uint16_t protocol, const Mac48Address src,
                 const Mac48Address dst);
@@ -165,20 +198,21 @@ private:
   /// Current routing protocol, used mainly by GetRoutingProtocol
   Ptr<MeshL2RoutingProtocol> m_routingProtocol;
 
-  ///\name Device statistics counters
-  ///\{
+  /// statistics counters
   struct Statistics
   {
-    uint32_t unicastData;
-    uint32_t unicastDataBytes;
-    uint32_t broadcastData;
-    uint32_t broadcastDataBytes;
+    uint32_t unicastData; ///< unicast data
+    uint32_t unicastDataBytes; ///< unicast data bytes
+    uint32_t broadcastData; ///< broadcast data
+    uint32_t broadcastDataBytes; ///< broadcast data bytes
 
+    /// constructor
     Statistics ();
   };
-  /// Counters
-  Statistics m_rxStats, m_txStats, m_fwdStats;
-  ///\}
+  // Counters
+  Statistics m_rxStats; ///< receive statistics
+  Statistics m_txStats; ///< transmit statistics
+  Statistics m_fwdStats; ///< forward statistics
 };
 } // namespace ns3
 #endif

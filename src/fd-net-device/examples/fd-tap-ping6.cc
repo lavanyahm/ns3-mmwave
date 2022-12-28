@@ -60,7 +60,11 @@ NS_LOG_COMPONENT_DEFINE ("TAPPing6Example");
 int
 main (int argc, char *argv[])
 {
+<<<<<<< HEAD
   CommandLine cmd;
+=======
+  CommandLine cmd (__FILE__);
+>>>>>>> origin
   cmd.Parse (argc, argv);
   
   NS_LOG_INFO ("Ping6 Emulation Example with TAP");

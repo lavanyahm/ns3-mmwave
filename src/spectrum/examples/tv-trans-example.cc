@@ -41,7 +41,11 @@ using namespace ns3;
  */
 int main (int argc, char** argv)
 {
+<<<<<<< HEAD
   CommandLine cmd;
+=======
+  CommandLine cmd (__FILE__);
+>>>>>>> origin
   cmd.Parse (argc, argv);
   
   /* nodes and positions */

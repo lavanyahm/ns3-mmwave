@@ -19,6 +19,10 @@
  */
 
 #include "rip-header.h"
+<<<<<<< HEAD
+=======
+#include "ns3/log.h"
+>>>>>>> origin
 
 namespace ns3 {
 
@@ -149,8 +153,14 @@ std::ostream & operator << (std::ostream & os, const RipRte & h)
 /*
  * RipHeader
  */
+<<<<<<< HEAD
 NS_OBJECT_ENSURE_REGISTERED (RipHeader)
   ;
+=======
+NS_LOG_COMPONENT_DEFINE ("RipHeader");
+NS_OBJECT_ENSURE_REGISTERED (RipHeader);
+
+>>>>>>> origin
 
 RipHeader::RipHeader ()
   : m_command (0)
@@ -193,7 +203,11 @@ void RipHeader::Serialize (Buffer::Iterator start) const
   Buffer::Iterator i = start;
 
   i.WriteU8 (uint8_t (m_command));
+<<<<<<< HEAD
   i.WriteU8 (1);
+=======
+  i.WriteU8 (2);
+>>>>>>> origin
   i.WriteU16 (0);
 
   for (std::list<RipRte>::const_iterator iter = m_rteList.begin ();
@@ -219,11 +233,25 @@ uint32_t RipHeader::Deserialize (Buffer::Iterator start)
       return 0;
     }
 
+<<<<<<< HEAD
   temp = i.ReadU8 ();
   NS_ASSERT_MSG (temp == 1, "RIP received a message with mismatch version, aborting.");
 
   uint16_t temp16 = i.ReadU16 ();
   NS_ASSERT_MSG (temp16 == 0, "RIP received a message with invalid filled flags, aborting.");
+=======
+  if (i.ReadU8 () != 2)
+    {
+      NS_LOG_LOGIC ("RIP received a message with mismatch version, ignoring.");
+      return 0;
+    }
+
+  if (i.ReadU16 () != 0)
+    {
+      NS_LOG_LOGIC ("RIP received a message with invalid filled flags, ignoring.");
+      return 0;
+    }
+>>>>>>> origin
 
   uint8_t rteNumber = i.GetRemainingSize ()/20;
   for (uint8_t n=0; n<rteNumber; n++)

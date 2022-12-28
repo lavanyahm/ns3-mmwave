@@ -41,6 +41,7 @@
 #include "ns3/udp-socket-factory.h"
 #include "ns3/string.h"
 #include "ns3/pointer.h"
+#include "ns3/boolean.h"
 
 namespace ns3 {
 
@@ -67,6 +68,11 @@ OnOffApplication::GetTypeId (void)
                    AddressValue (),
                    MakeAddressAccessor (&OnOffApplication::m_peer),
                    MakeAddressChecker ())
+    .AddAttribute ("Local",
+                   "The Address on which to bind the socket. If not set, it is generated automatically.",
+                   AddressValue (),
+                   MakeAddressAccessor (&OnOffApplication::m_local),
+                   MakeAddressChecker ())
     .AddAttribute ("OnTime", "A RandomVariableStream used to pick the duration of the 'On' state.",
                    StringValue ("ns3::ConstantRandomVariable[Constant=1.0]"),
                    MakePointerAccessor (&OnOffApplication::m_onTime),
@@ -82,13 +88,30 @@ OnOffApplication::GetTypeId (void)
                    UintegerValue (0),
                    MakeUintegerAccessor (&OnOffApplication::m_maxBytes),
                    MakeUintegerChecker<uint64_t> ())
+<<<<<<< HEAD
     .AddAttribute ("Protocol", "The type of protocol to use.",
+=======
+    .AddAttribute ("Protocol", "The type of protocol to use. This should be "
+                   "a subclass of ns3::SocketFactory",
+>>>>>>> origin
                    TypeIdValue (UdpSocketFactory::GetTypeId ()),
                    MakeTypeIdAccessor (&OnOffApplication::m_tid),
+                   // This should check for SocketFactory as a parent
                    MakeTypeIdChecker ())
+    .AddAttribute ("EnableSeqTsSizeHeader",
+                   "Enable use of SeqTsSizeHeader for sequence number and timestamp",
+                   BooleanValue (false),
+                   MakeBooleanAccessor (&OnOffApplication::m_enableSeqTsSizeHeader),
+                   MakeBooleanChecker ())
     .AddTraceSource ("Tx", "A new packet is created and is sent",
                      MakeTraceSourceAccessor (&OnOffApplication::m_txTrace),
                      "ns3::Packet::TracedCallback")
+    .AddTraceSource ("TxWithAddresses", "A new packet is created and is sent",
+                     MakeTraceSourceAccessor (&OnOffApplication::m_txTraceWithAddresses),
+                     "ns3::Packet::TwoAddressTracedCallback")
+    .AddTraceSource ("TxWithSeqTsSize", "A new packet is created with SeqTsSizeHeader",
+                     MakeTraceSourceAccessor (&OnOffApplication::m_txTraceWithSeqTsSize),
+                     "ns3::PacketSink::SeqTsSizeCallback")
   ;
   return tid;
 }
@@ -99,7 +122,8 @@ OnOffApplication::OnOffApplication ()
     m_connected (false),
     m_residualBits (0),
     m_lastStartTime (Seconds (0)),
-    m_totBytes (0)
+    m_totBytes (0),
+    m_unsentPacket (0)
 {
   NS_LOG_FUNCTION (this);
 }
@@ -137,7 +161,9 @@ OnOffApplication::DoDispose (void)
 {
   NS_LOG_FUNCTION (this);
 
+  CancelEvents ();
   m_socket = 0;
+  m_unsentPacket = 0;
   // chain up
   Application::DoDispose ();
 }
@@ -151,15 +177,33 @@ void OnOffApplication::StartApplication () // Called at time specified by Start
   if (!m_socket)
     {
       m_socket = Socket::CreateSocket (GetNode (), m_tid);
-      if (Inet6SocketAddress::IsMatchingType (m_peer))
+      int ret = -1;
+
+      if (! m_local.IsInvalid())
         {
-          m_socket->Bind6 ();
+          NS_ABORT_MSG_IF ((Inet6SocketAddress::IsMatchingType (m_peer) && InetSocketAddress::IsMatchingType (m_local)) ||
+                           (InetSocketAddress::IsMatchingType (m_peer) && Inet6SocketAddress::IsMatchingType (m_local)),
+                           "Incompatible peer and local address IP version");
+          ret = m_socket->Bind (m_local);
         }
-      else if (InetSocketAddress::IsMatchingType (m_peer) ||
-               PacketSocketAddress::IsMatchingType (m_peer))
+      else
         {
-          m_socket->Bind ();
+          if (Inet6SocketAddress::IsMatchingType (m_peer))
+            {
+              ret = m_socket->Bind6 ();
+            }
+          else if (InetSocketAddress::IsMatchingType (m_peer) ||
+                   PacketSocketAddress::IsMatchingType (m_peer))
+            {
+              ret = m_socket->Bind ();
+            }
         }
+
+      if (ret == -1)
+        {
+          NS_FATAL_ERROR ("Failed to bind socket");
+        }
+
       m_socket->Connect (m_peer);
       m_socket->SetAllowBroadcast (true);
       m_socket->ShutdownRecv ();
@@ -207,6 +251,13 @@ void OnOffApplication::CancelEvents ()
   m_cbrRateFailSafe = m_cbrRate;
   Simulator::Cancel (m_sendEvent);
   Simulator::Cancel (m_startStopEvent);
+  // Canceling events may cause discontinuity in sequence number if the
+  // SeqTsSizeHeader is header, and m_unsentPacket is true
+  if (m_unsentPacket)
+    {
+      NS_LOG_DEBUG ("Discarding cached packet upon CancelEvents ()");
+    }
+  m_unsentPacket = 0;
 }
 
 // Event handlers
@@ -233,11 +284,12 @@ void OnOffApplication::ScheduleNextTx ()
 
   if (m_maxBytes == 0 || m_totBytes < m_maxBytes)
     {
+      NS_ABORT_MSG_IF (m_residualBits > m_pktSize * 8, "Calculation to compute next send time will overflow");
       uint32_t bits = m_pktSize * 8 - m_residualBits;
       NS_LOG_LOGIC ("bits = " << bits);
       Time nextTime (Seconds (bits /
                               static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
-      NS_LOG_LOGIC ("nextTime = " << nextTime);
+      NS_LOG_LOGIC ("nextTime = " << nextTime.As (Time::S));
       m_sendEvent = Simulator::Schedule (nextTime,
                                          &OnOffApplication::SendPacket, this);
     }
@@ -252,7 +304,7 @@ void OnOffApplication::ScheduleStartEvent ()
   NS_LOG_FUNCTION (this);
 
   Time offInterval = Seconds (m_offTime->GetValue ());
-  NS_LOG_LOGIC ("start at " << offInterval);
+  NS_LOG_LOGIC ("start at " << offInterval.As (Time::S));
   m_startStopEvent = Simulator::Schedule (offInterval, &OnOffApplication::StartSending, this);
 }
 
@@ -261,7 +313,7 @@ void OnOffApplication::ScheduleStopEvent ()
   NS_LOG_FUNCTION (this);
 
   Time onInterval = Seconds (m_onTime->GetValue ());
-  NS_LOG_LOGIC ("stop at " << onInterval);
+  NS_LOG_LOGIC ("stop at " << onInterval.As (Time::S));
   m_startStopEvent = Simulator::Schedule (onInterval, &OnOffApplication::StopSending, this);
 }
 
@@ -271,30 +323,67 @@ void OnOffApplication::SendPacket ()
   NS_LOG_FUNCTION (this);
 
   NS_ASSERT (m_sendEvent.IsExpired ());
-  Ptr<Packet> packet = Create<Packet> (m_pktSize);
-  m_txTrace (packet);
-  m_socket->Send (packet);
-  m_totBytes += m_pktSize;
-  if (InetSocketAddress::IsMatchingType (m_peer))
+
+  Ptr<Packet> packet;
+  if (m_unsentPacket)
     {
-      NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
-                   << "s on-off application sent "
-                   <<  packet->GetSize () << " bytes to "
-                   << InetSocketAddress::ConvertFrom(m_peer).GetIpv4 ()
-                   << " port " << InetSocketAddress::ConvertFrom (m_peer).GetPort ()
-                   << " total Tx " << m_totBytes << " bytes");
+      packet = m_unsentPacket;
     }
-  else if (Inet6SocketAddress::IsMatchingType (m_peer))
+  else if (m_enableSeqTsSizeHeader)
     {
-      NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds ()
-                   << "s on-off application sent "
-                   <<  packet->GetSize () << " bytes to "
-                   << Inet6SocketAddress::ConvertFrom(m_peer).GetIpv6 ()
-                   << " port " << Inet6SocketAddress::ConvertFrom (m_peer).GetPort ()
-                   << " total Tx " << m_totBytes << " bytes");
+      Address from, to;
+      m_socket->GetSockName (from);
+      m_socket->GetPeerName (to);
+      SeqTsSizeHeader header;
+      header.SetSeq (m_seq++);
+      header.SetSize (m_pktSize);
+      NS_ABORT_IF (m_pktSize < header.GetSerializedSize ());
+      packet = Create<Packet> (m_pktSize - header.GetSerializedSize ());
+      // Trace before adding header, for consistency with PacketSink
+      m_txTraceWithSeqTsSize (packet, from, to, header);
+      packet->AddHeader (header);
     }
-  m_lastStartTime = Simulator::Now ();
+  else
+    {
+      packet = Create<Packet> (m_pktSize);
+    }
+
+  int actual = m_socket->Send (packet);
+  if ((unsigned) actual == m_pktSize)
+    {
+      m_txTrace (packet);
+      m_totBytes += m_pktSize;
+      m_unsentPacket = 0;
+      Address localAddress;
+      m_socket->GetSockName (localAddress);
+      if (InetSocketAddress::IsMatchingType (m_peer))
+        {
+          NS_LOG_INFO ("At time " << Simulator::Now ().As (Time::S)
+                       << " on-off application sent "
+                       <<  packet->GetSize () << " bytes to "
+                       << InetSocketAddress::ConvertFrom(m_peer).GetIpv4 ()
+                       << " port " << InetSocketAddress::ConvertFrom (m_peer).GetPort ()
+                       << " total Tx " << m_totBytes << " bytes");
+          m_txTraceWithAddresses (packet, localAddress, InetSocketAddress::ConvertFrom (m_peer));
+        }
+      else if (Inet6SocketAddress::IsMatchingType (m_peer))
+        {
+          NS_LOG_INFO ("At time " << Simulator::Now ().As (Time::S)
+                       << " on-off application sent "
+                       <<  packet->GetSize () << " bytes to "
+                       << Inet6SocketAddress::ConvertFrom(m_peer).GetIpv6 ()
+                       << " port " << Inet6SocketAddress::ConvertFrom (m_peer).GetPort ()
+                       << " total Tx " << m_totBytes << " bytes");
+          m_txTraceWithAddresses (packet, localAddress, Inet6SocketAddress::ConvertFrom(m_peer));
+        }
+    }
+  else
+    {
+      NS_LOG_DEBUG ("Unable to send packet; actual " << actual << " size " << m_pktSize << "; caching for later attempt");
+      m_unsentPacket = packet;
+    }
   m_residualBits = 0;
+  m_lastStartTime = Simulator::Now ();
   ScheduleNextTx ();
 }
 
@@ -308,6 +397,7 @@ void OnOffApplication::ConnectionSucceeded (Ptr<Socket> socket)
 void OnOffApplication::ConnectionFailed (Ptr<Socket> socket)
 {
   NS_LOG_FUNCTION (this << socket);
+  NS_FATAL_ERROR ("Can't connect");
 }
 
 

@@ -39,7 +39,11 @@
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("DsrPassiveBuffer");
+<<<<<<< HEAD
   
+=======
+
+>>>>>>> origin
 namespace dsr {
 
 NS_OBJECT_ENSURE_REGISTERED (DsrPassiveBuffer);
@@ -163,8 +167,14 @@ DsrPassiveBuffer::Find (Ipv4Address dst)
   return false;
 }
 
+/// IsExpired structure
 struct IsExpired
 {
+  /**
+   * Check for an expired entry
+   * \param e passive buffer entry
+   * \return true if equal
+   */
   bool
   operator() (DsrPassiveBuffEntry const & e) const
   {
@@ -191,7 +201,7 @@ DsrPassiveBuffer::Purge ()
         }
     }
   m_passiveBuffer.erase (std::remove_if (m_passiveBuffer.begin (), m_passiveBuffer.end (), pred),
-                       m_passiveBuffer.end ());
+                         m_passiveBuffer.end ());
 }
 
 void

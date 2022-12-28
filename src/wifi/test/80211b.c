@@ -20,6 +20,7 @@
 
 /*
  * This program is used to generate plots found in the paper
+<<<<<<< HEAD
  * G. Pei and Tom Henderson, "Validation of ns-3 802.11b PHY model", 
  * available online at http://www.nsnam.org/~pei/80211b.pdf
  * 
@@ -29,27 +30,64 @@
  *
  * The executable output should be redirected into a text file 80211b.txt
  *   ./80211b > 80211b.txt 
+=======
+ * G. Pei and Tom Henderson, "Validation of ns-3 802.11b PHY model",
+ * available online at http://www.nsnam.org/~pei/80211b.pdf
+ *
+ * It can be compiled as a C program and relies on a library installation of
+ * the GNU Scientific Library (gsl).  To compile:
+ *   gcc 80211b.c -o 80211b -lm -lgsl -lgslcblas
+ *
+ * The executable output should be redirected into a text file 80211b.txt
+ *   ./80211b > 80211b.txt
+>>>>>>> origin
  *
  * Then gnuplot can load the associated plot file which references 80211b.txt:
  *   gnuplot 80211b.plt
  */
 
+<<<<<<< HEAD
 #include "math.h"
 #include "stdlib.h"
 #include "stdio.h"
+=======
+>>>>>>> origin
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_cdf.h>
 #include <gsl/gsl_sf_bessel.h>
+<<<<<<< HEAD
+=======
+
+>>>>>>> origin
 #define min(a,b) ((a) < (b) ? (a) : (b))
 #define max(a,b) ((a) > (b) ? (a) : (b))
 #define WLAN_SIR_perfect 10.0 // if SIR > 10dB, perfect reception
 #define WLAN_SIR_impossible 0.1 // if SIR < -10dB, impossible to receive
 
+<<<<<<< HEAD
 typedef struct fn_parameter_t
 {
   double beta;
   double n;
+=======
+/**
+ * \ingroup wifi
+ * \defgroup wifi-test wifi module tests
+ */
+
+
+/**
+ * \ingroup wifi-test
+ * \ingroup tests
+ *
+ * \brief fn_parameter_t structure
+ */
+typedef struct fn_parameter_t
+{
+  double beta; ///< beta
+  double n; ///< n
+>>>>>>> origin
 } fn_parameters;
 
 double QFunction (double x)
@@ -201,9 +239,15 @@ int main (int argc, char * argv[])
 {
   double rss, sinr;
   double totalPkt = 200.0;
+<<<<<<< HEAD
 //double noise = 1.552058;  // (dB) this noise figure value corresponds to 
                             // -99 dBm noise floor reported in CMU paper
   double noise = 7;  // (dB) this noise figure value corresponds to the 
+=======
+//double noise = 1.552058;  // (dB) this noise figure value corresponds to
+  // -99 dBm noise floor reported in CMU paper
+  double noise = 7;  // (dB) this noise figure value corresponds to the
+>>>>>>> origin
                      // default in YansWifiPhy, and matches CMU testbed results
   double EcNc, EbN01, EbN02, EbN05, EbN011;
   double ieee1,ieee2,ieee5,ieee11;

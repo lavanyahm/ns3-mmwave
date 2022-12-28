@@ -23,6 +23,7 @@
 #include "ns3/simulator.h"
 #include "ns3/object-factory.h"
 #include "ns3/queue.h"
+#include "ns3/net-device-queue-interface.h"
 #include "ns3/csma-net-device.h"
 #include "ns3/csma-channel.h"
 #include "ns3/config.h"
@@ -40,7 +41,7 @@ NS_LOG_COMPONENT_DEFINE ("CsmaHelper");
 
 CsmaHelper::CsmaHelper ()
 {
-  m_queueFactory.SetTypeId ("ns3::DropTailQueue");
+  m_queueFactory.SetTypeId ("ns3::DropTailQueue<Packet>");
   m_deviceFactory.SetTypeId ("ns3::CsmaNetDevice");
   m_channelFactory.SetTypeId ("ns3::CsmaChannel");
 }
@@ -52,6 +53,8 @@ CsmaHelper::SetQueue (std::string type,
                       std::string n3, const AttributeValue &v3,
                       std::string n4, const AttributeValue &v4)
 {
+  QueueBase::AppendItemTypeIfNotPresent (type, "Packet");
+
   m_queueFactory.SetTypeId (type);
   m_queueFactory.Set (n1, v1);
   m_queueFactory.Set (n2, v2);
@@ -171,10 +174,10 @@ CsmaHelper::EnableAsciiInternal (
       // The "+", '-', and 'd' events are driven by trace sources actually in the
       // transmit queue.
       //
-      Ptr<Queue> queue = device->GetQueue ();
-      asciiTraceHelper.HookDefaultEnqueueSinkWithoutContext<Queue> (queue, "Enqueue", theStream);
-      asciiTraceHelper.HookDefaultDropSinkWithoutContext<Queue> (queue, "Drop", theStream);
-      asciiTraceHelper.HookDefaultDequeueSinkWithoutContext<Queue> (queue, "Dequeue", theStream);
+      Ptr<Queue<Packet> > queue = device->GetQueue ();
+      asciiTraceHelper.HookDefaultEnqueueSinkWithoutContext<Queue<Packet> > (queue, "Enqueue", theStream);
+      asciiTraceHelper.HookDefaultDropSinkWithoutContext<Queue<Packet> > (queue, "Drop", theStream);
+      asciiTraceHelper.HookDefaultDequeueSinkWithoutContext<Queue<Packet> > (queue, "Dequeue", theStream);
 
       return;
     }
@@ -304,9 +307,13 @@ CsmaHelper::InstallPriv (Ptr<Node> node, Ptr<CsmaChannel> channel) const
   Ptr<CsmaNetDevice> device = m_deviceFactory.Create<CsmaNetDevice> ();
   device->SetAddress (Mac48Address::Allocate ());
   node->AddDevice (device);
-  Ptr<Queue> queue = m_queueFactory.Create<Queue> ();
+  Ptr<Queue<Packet> > queue = m_queueFactory.Create<Queue<Packet> > ();
   device->SetQueue (queue);
   device->Attach (channel);
+  // Aggregate a NetDeviceQueueInterface object
+  Ptr<NetDeviceQueueInterface> ndqi = CreateObject<NetDeviceQueueInterface> ();
+  ndqi->GetTxQueue (0)->ConnectQueueTraces (queue);
+  device->AggregateObject (ndqi);
 
   return device;
 }

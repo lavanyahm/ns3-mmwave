@@ -25,6 +25,7 @@
  */
 
 #include "tcp-htcp.h"
+<<<<<<< HEAD
 
 #include "ns3/log.h"
 #include "ns3/trace-source-accessor.h"
@@ -36,6 +37,10 @@
 #include "ns3/sequence-number.h"
 #include "ns3/double.h"
 #include "ns3/nstime.h"
+=======
+#include "ns3/log.h"
+#include "ns3/simulator.h"
+>>>>>>> origin
 
 namespace ns3 {
 
@@ -118,7 +123,11 @@ Ptr<TcpCongestionOps> TcpHtcp::Fork (void)
 }
 
 void TcpHtcp::CongestionAvoidance (Ptr<TcpSocketState> tcb,
+<<<<<<< HEAD
                                 uint32_t segmentsAcked)
+=======
+                                   uint32_t segmentsAcked)
+>>>>>>> origin
 {
   NS_LOG_FUNCTION (this << tcb << segmentsAcked);
   if (segmentsAcked > 0)
@@ -128,7 +137,11 @@ void TcpHtcp::CongestionAvoidance (Ptr<TcpSocketState> tcb,
       adder = std::max (1.0, adder);
       tcb->m_cWnd += static_cast<uint32_t> (adder);
       NS_LOG_INFO ("In CongAvoid, updated to cwnd " << tcb->m_cWnd
+<<<<<<< HEAD
                                          << " ssthresh " << tcb->m_ssThresh);
+=======
+                                                    << " ssthresh " << tcb->m_ssThresh);
+>>>>>>> origin
     }
 }
 
@@ -147,7 +160,11 @@ void TcpHtcp::UpdateAlpha (void)
       double diffSec = diff.GetSeconds ();
       // alpha=1+10(Delta-Delta_L)+[0.5(Delta-Delta_L)]^2  (seconds)
       // from Leith and Shorten H-TCP paper
+<<<<<<< HEAD
       m_alpha = (1 + 10 * diffSec + 0.25 * (diffSec * diffSec));   
+=======
+      m_alpha = (1 + 10 * diffSec + 0.25 * (diffSec * diffSec));
+>>>>>>> origin
     }
   m_alpha = 2 * (1 - m_beta) * m_alpha;
   if (m_alpha < 1)
@@ -160,6 +177,7 @@ void TcpHtcp::UpdateAlpha (void)
 void TcpHtcp::UpdateBeta (void)
 {
   NS_LOG_FUNCTION (this);
+<<<<<<< HEAD
   if (m_lastThroughput > 0)
     {
       if (((m_throughput - m_lastThroughput) / m_lastThroughput) > m_throughputRatio)
@@ -167,19 +185,36 @@ void TcpHtcp::UpdateBeta (void)
           m_beta = m_defaultBackoff;
         }
       else
+=======
+
+  // Default value for m_beta
+  m_beta = m_defaultBackoff;
+
+  if (m_throughput > m_lastThroughput && m_lastThroughput > 0)
+    {
+      uint32_t diff = m_throughput - m_lastThroughput;
+      if (diff / m_lastThroughput <= m_throughputRatio)
+>>>>>>> origin
         {
           m_beta = m_minRtt.GetDouble () / m_maxRtt.GetDouble ();
         }
     }
+<<<<<<< HEAD
   else
     {
       m_beta = m_defaultBackoff;
     }
+=======
+>>>>>>> origin
   NS_LOG_DEBUG ("Updated m_beta: " << m_beta);
 }
 
 uint32_t TcpHtcp::GetSsThresh (Ptr<const TcpSocketState> tcb,
+<<<<<<< HEAD
                             uint32_t bytesInFlight)
+=======
+                               uint32_t bytesInFlight)
+>>>>>>> origin
 {
   NS_LOG_FUNCTION (this << tcb << bytesInFlight);
 
@@ -189,7 +224,11 @@ uint32_t TcpHtcp::GetSsThresh (Ptr<const TcpSocketState> tcb,
   UpdateAlpha ();
 
   uint32_t segWin = 2 * tcb->m_segmentSize;
+<<<<<<< HEAD
   uint32_t bFlight = bytesInFlight * m_beta;
+=======
+  uint32_t bFlight = static_cast<uint32_t> (bytesInFlight * m_beta);
+>>>>>>> origin
   uint32_t ssThresh = std::max (segWin, bFlight);
   m_minRtt = Time::Max ();
   m_maxRtt = Time::Min ();
@@ -201,7 +240,11 @@ uint32_t TcpHtcp::GetSsThresh (Ptr<const TcpSocketState> tcb,
 }
 
 void TcpHtcp::PktsAcked (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked,
+<<<<<<< HEAD
                       const Time &rtt)
+=======
+                         const Time &rtt)
+>>>>>>> origin
 {
 
   NS_LOG_FUNCTION (this << tcb << segmentsAcked << rtt);
@@ -211,8 +254,13 @@ void TcpHtcp::PktsAcked (Ptr<TcpSocketState> tcb, uint32_t segmentsAcked,
       m_dataSent += segmentsAcked * tcb->m_segmentSize;
     }
 
+<<<<<<< HEAD
   m_throughput = m_dataSent
     / (Simulator::Now ().GetSeconds () - m_lastCon.GetSeconds ());
+=======
+  m_throughput = static_cast<uint32_t> (m_dataSent
+                                        / (Simulator::Now ().GetSeconds () - m_lastCon.GetSeconds ()));
+>>>>>>> origin
 
   UpdateAlpha ();
   if (rtt < m_minRtt)

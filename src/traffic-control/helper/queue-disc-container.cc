@@ -43,14 +43,22 @@ QueueDiscContainer::End (void) const
   return m_queueDiscs.end ();
 }
 
+<<<<<<< HEAD
 uint32_t
+=======
+std::size_t
+>>>>>>> origin
 QueueDiscContainer::GetN (void) const
 {
   return m_queueDiscs.size ();
 }
 
 Ptr<QueueDisc>
+<<<<<<< HEAD
 QueueDiscContainer::Get (uint32_t i) const
+=======
+QueueDiscContainer::Get (std::size_t i) const
+>>>>>>> origin
 {
   return m_queueDiscs[i];
 }

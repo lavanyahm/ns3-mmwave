@@ -400,8 +400,9 @@ void
 Buffer::AddAtEnd (const Buffer &o)
 {
   NS_LOG_FUNCTION (this << &o);
+
   if (m_data->m_count == 1 &&
-      m_end == m_zeroAreaEnd &&
+      (m_end == m_zeroAreaEnd || m_zeroAreaStart == m_zeroAreaEnd) &&
       m_end == m_data->m_dirtyEnd &&
       o.m_start == o.m_zeroAreaStart &&
       o.m_zeroAreaEnd - o.m_zeroAreaStart > 0)
@@ -411,8 +412,12 @@ Buffer::AddAtEnd (const Buffer &o)
        * we attempt to aggregate two buffers which contain
        * adjacent zero areas.
        */
+      if (m_zeroAreaStart == m_zeroAreaEnd)
+        {
+          m_zeroAreaStart = m_end;
+        }
       uint32_t zeroSize = o.m_zeroAreaEnd - o.m_zeroAreaStart;
-      m_zeroAreaEnd += zeroSize;
+      m_zeroAreaEnd = m_end + zeroSize;
       m_end = m_zeroAreaEnd;
       m_data->m_dirtyEnd = m_zeroAreaEnd;
       uint32_t endData = o.m_end - o.m_zeroAreaEnd;
@@ -426,14 +431,11 @@ Buffer::AddAtEnd (const Buffer &o)
       return;
     }
 
-  Buffer dst = CreateFullCopy ();
-  Buffer src = o.CreateFullCopy ();
-
-  dst.AddAtEnd (src.GetSize ());
-  Buffer::Iterator destStart = dst.End ();
-  destStart.Prev (src.GetSize ());
-  destStart.Write (src.Begin (), src.End ());
-  *this = dst;
+  *this = CreateFullCopy ();
+  AddAtEnd (o.GetSize ());
+  Buffer::Iterator destStart = End ();
+  destStart.Prev (o.GetSize ());
+  destStart.Write (o.Begin (), o.End ());
   NS_ASSERT (CheckInternalState ());
 }
 
@@ -632,16 +634,18 @@ Buffer::Serialize (uint8_t* buffer, uint32_t maxSize) const
   // Add the actual data
   if (size + ((dataEndLength + 3) & (~3)) <= maxSize)
     {
-      size += (dataEndLength + 3) & (~3);
-      memcpy (p, m_data->m_data+m_zeroAreaStart,dataEndLength);
-      p += (((dataEndLength + 3) & (~3))/4); // Advance p, insuring 4 byte boundary
+      // The following line is unnecessary.
+      // size += (dataEndLength + 3) & (~3);
+      memcpy (p, m_data->m_data+m_zeroAreaStart, dataEndLength);
+      // The following line is unnecessary.
+      // p += (((dataEndLength + 3) & (~3))/4); // Advance p, insuring 4 byte boundary
     }
   else
     {
       return 0;
     }
 
-  // Serialzed everything successfully
+  // Serialized everything successfully
   return 1;
 }
 
@@ -680,7 +684,8 @@ Buffer::Deserialize (const uint8_t *buffer, uint32_t size)
   Buffer::Iterator tmp = End ();
   tmp.Prev (dataEndLength);
   tmp.Write (reinterpret_cast<uint8_t *> (const_cast<uint32_t *> (p)), dataEndLength);
-  p += (((dataEndLength+3)&(~3))/4); // Advance p, insuring 4 byte boundary
+  // The following line is unnecessary.
+  // p += (((dataEndLength+3)&(~3))/4); // Advance p, insuring 4 byte boundary
   sizeCheck -= ((dataEndLength+3)&(~3));
 
   NS_ASSERT (sizeCheck == 0);
@@ -812,14 +817,10 @@ bool
 Buffer::Iterator::CheckNoZero (uint32_t start, uint32_t end) const
 {
   NS_LOG_FUNCTION (this << &start << &end);
-  for (uint32_t i = start; i < end; i++)
-    {
-      if (!Check (i))
-        {
-          return false;
-        }
-    }
-  return true;
+  return !(start < m_dataStart ||
+           end > m_dataEnd ||
+           (end > m_zeroStart && start < m_zeroEnd && m_zeroEnd != m_zeroStart && start != end)
+           );
 }
 bool 
 Buffer::Iterator::Check (uint32_t i) const

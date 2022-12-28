@@ -30,16 +30,42 @@
 #include "ns3/tcp-socket-base.h"
 #include "ns3/tcp-illinois.h"
 
+<<<<<<< HEAD
 namespace ns3 {
+=======
+using namespace ns3;
+>>>>>>> origin
 
 NS_LOG_COMPONENT_DEFINE ("TcpIllinoisTestSuite");
 
 /**
+<<<<<<< HEAD
  * \brief Testing TcpIllinois C-AIMD algorithm
+=======
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief TcpIllinois C-AIMD algorithm tests.
+>>>>>>> origin
  */
 class TcpIllinoisTest : public TestCase
 {
 public:
+<<<<<<< HEAD
+=======
+  /**
+   * \brief Constructor.
+   * \param cWnd Congestion window.
+   * \param ssThresh Slow Start Threshold.
+   * \param segmentSize Segment size.
+   * \param cntRtt RTT counter.
+   * \param maxRtt Max RTT.
+   * \param segmentsAcked Number of segments ACKed.
+   * \param nextTxSeq Next Tx sequence number.
+   * \param lastAckedSeq Last ACKed sequence number.
+   * \param name Test description.
+   */
+>>>>>>> origin
   TcpIllinoisTest (uint32_t cWnd,
                    uint32_t ssThresh,
                    uint32_t segmentSize,
@@ -52,6 +78,7 @@ public:
 
 private:
   virtual void DoRun ();
+<<<<<<< HEAD
   void IncreaseWindow (Ptr<TcpIllinois> cong);
   void RecalcParam (Ptr<TcpIllinois> cong);
   Time CalculateMaxDelay ();
@@ -75,6 +102,62 @@ private:
   bool m_rttAbove;
   uint8_t m_rttLow;
   uint32_t m_ackCnt;
+=======
+  /**
+   * \brief Increases the TCP window.
+   * \param cong The congestion control.
+   */
+  void IncreaseWindow (Ptr<TcpIllinois> cong);
+  /**
+   * \brief Recalculate the internal TCP Illinois params.
+   * \param cong The congestion control.
+   */
+  void RecalcParam (Ptr<TcpIllinois> cong);
+  /**
+   * \brief Calculate the maximum delay.
+   * \returns The maximum delay.
+   */
+  Time CalculateMaxDelay ();
+  /**
+   * \brief Calculate the average delay.
+   * \returns The average delay.
+   */
+  Time CalculateAvgDelay ();
+  /**
+   * \brief Calculate the TCP Illinois alpha param.
+   * \param cong The congestion control.
+   * \param da Average delay (in milliseconds).
+   * \param dm Maximum delay (in milliseconds).
+   */
+  void CalculateAlpha (Ptr<TcpIllinois> cong, double da, double dm);
+  /**
+   * \brief Calculate the TCP Illinois beta param.
+   * \param cong The congestion control.
+   * \param da Average delay (in milliseconds).
+   * \param dm Maximum delay (in milliseconds).
+   */
+  void CalculateBeta (Ptr<TcpIllinois> cong, double da, double dm);
+  /**
+   * brief Get and check the SSH threshold.
+   */
+  void GetSsThresh ();
+
+  uint32_t m_cWnd;        //!< Congestion window.
+  uint32_t m_ssThresh;    //!< Slow Start Threshold.
+  uint32_t m_segmentSize; //!< Segment size.
+  Time m_baseRtt;         //!< Base RTT.
+  Time m_maxRtt;          //!< Max RTT.
+  uint32_t m_segmentsAcked; //!< Number of segments ACKed.
+  SequenceNumber32 m_nextTxSeq; //!< Next Tx sequence number.
+  SequenceNumber32 m_lastAckedSeq;  //!< Last ACKed sequence number.
+  double m_alpha;   //!< TCP Illinois alpha parameter.
+  double m_beta;   //!< TCP Illinois beta parameter.
+  uint32_t m_cntRtt;  //!< RTT counter.
+  Time m_sumRtt;      //!< Sum of all the RTTs.
+  bool m_rttAbove;    //!< RTT above threshold.
+  uint8_t m_rttLow;   //!< RTT low counter.
+  uint32_t m_ackCnt;  //!< ACK counter.
+>>>>>>> origin
 };
 
 TcpIllinoisTest::TcpIllinoisTest (uint32_t cWnd,
@@ -303,8 +386,20 @@ TcpIllinoisTest::GetSsThresh ()
   m_ssThresh = ssThresh * m_segmentSize;
 }
 
+<<<<<<< HEAD
 // -------------------------------------------------------------------
 static class TcpIllinoisTestSuite : public TestSuite
+=======
+
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief TCP Illinois TestSuite
+ */
+class TcpIllinoisTestSuite : public TestSuite
+>>>>>>> origin
 {
 public:
   TcpIllinoisTestSuite () : TestSuite ("tcp-illinois-test", UNIT)
@@ -322,6 +417,12 @@ public:
                                       "Illinois test on cWnd and ssThresh when avg queueing delay is in between its min & max"),
                  TestCase::QUICK);
   }
+<<<<<<< HEAD
 } g_tcpIllinoisTest;
 
 } // namespace ns3
+=======
+};
+
+static TcpIllinoisTestSuite g_tcpIllinoisTest; //!< Static variable for test initialization
+>>>>>>> origin

@@ -27,12 +27,18 @@
 
 #include "radvd-interface.h"
 #include "ns3/application.h"
+<<<<<<< HEAD
 #include "ns3/socket.h"
 #include "ns3/random-variable-stream.h"
+=======
+>>>>>>> origin
 
 
 namespace ns3
 {
+
+class UniformRandomVariable;
+class Socket;
 
 /**
  * \ingroup internet-apps

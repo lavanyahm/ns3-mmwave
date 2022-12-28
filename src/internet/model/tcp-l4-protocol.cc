@@ -42,6 +42,12 @@
 #include "tcp-socket-factory-impl.h"
 #include "tcp-socket-base.h"
 #include "tcp-congestion-ops.h"
+<<<<<<< HEAD
+=======
+#include "tcp-cubic.h"
+#include "tcp-recovery-ops.h"
+#include "tcp-prr-recovery.h"
+>>>>>>> origin
 #include "rtt-estimator.h"
 
 #include <vector>
@@ -77,8 +83,18 @@ TcpL4Protocol::GetTypeId (void)
                    MakeTypeIdChecker ())
     .AddAttribute ("SocketType",
                    "Socket type of TCP objects.",
+<<<<<<< HEAD
                    TypeIdValue (TcpNewReno::GetTypeId ()),
                    MakeTypeIdAccessor (&TcpL4Protocol::m_congestionTypeId),
+=======
+                   TypeIdValue (TcpCubic::GetTypeId ()),
+                   MakeTypeIdAccessor (&TcpL4Protocol::m_congestionTypeId),
+                   MakeTypeIdChecker ())
+    .AddAttribute ("RecoveryType",
+                   "Recovery type of TCP objects.",
+                   TypeIdValue (TcpPrrRecovery::GetTypeId ()),
+                   MakeTypeIdAccessor (&TcpL4Protocol::m_recoveryTypeId),
+>>>>>>> origin
                    MakeTypeIdChecker ())
     .AddAttribute ("SocketList", "The list of sockets associated to this protocol.",
                    ObjectVectorValue (),
@@ -91,8 +107,7 @@ TcpL4Protocol::GetTypeId (void)
 TcpL4Protocol::TcpL4Protocol ()
   : m_endPoints (new Ipv4EndPointDemux ()), m_endPoints6 (new Ipv6EndPointDemux ())
 {
-  NS_LOG_FUNCTION_NOARGS ();
-  NS_LOG_LOGIC ("Made a TcpL4Protocol " << this);
+  NS_LOG_FUNCTION (this);
 }
 
 TcpL4Protocol::~TcpL4Protocol ()
@@ -177,20 +192,44 @@ TcpL4Protocol::DoDispose (void)
 Ptr<Socket>
 TcpL4Protocol::CreateSocket (TypeId congestionTypeId)
 {
+<<<<<<< HEAD
   NS_LOG_FUNCTION (this << congestionTypeId.GetName ());
   ObjectFactory rttFactory;
   ObjectFactory congestionAlgorithmFactory;
   rttFactory.SetTypeId (m_rttTypeId);
   congestionAlgorithmFactory.SetTypeId (congestionTypeId);
+=======
+  return CreateSocket (congestionTypeId, m_recoveryTypeId);
+}
+
+Ptr<Socket>
+TcpL4Protocol::CreateSocket (TypeId congestionTypeId, TypeId recoveryTypeId)
+{
+  NS_LOG_FUNCTION (this << congestionTypeId.GetName ());
+  ObjectFactory rttFactory;
+  ObjectFactory congestionAlgorithmFactory;
+  ObjectFactory recoveryAlgorithmFactory;
+  rttFactory.SetTypeId (m_rttTypeId);
+  congestionAlgorithmFactory.SetTypeId (congestionTypeId);
+  recoveryAlgorithmFactory.SetTypeId (recoveryTypeId);
+>>>>>>> origin
 
   Ptr<RttEstimator> rtt = rttFactory.Create<RttEstimator> ();
   Ptr<TcpSocketBase> socket = CreateObject<TcpSocketBase> ();
   Ptr<TcpCongestionOps> algo = congestionAlgorithmFactory.Create<TcpCongestionOps> ();
+<<<<<<< HEAD
+=======
+  Ptr<TcpRecoveryOps> recovery = recoveryAlgorithmFactory.Create<TcpRecoveryOps> ();
+>>>>>>> origin
 
   socket->SetNode (m_node);
   socket->SetTcp (this);
   socket->SetRtt (rtt);
   socket->SetCongestionControlAlgorithm (algo);
+<<<<<<< HEAD
+=======
+  socket->SetRecoveryAlgorithm (recovery);
+>>>>>>> origin
 
   m_sockets.push_back (socket);
   return socket;
@@ -199,13 +238,17 @@ TcpL4Protocol::CreateSocket (TypeId congestionTypeId)
 Ptr<Socket>
 TcpL4Protocol::CreateSocket (void)
 {
+<<<<<<< HEAD
   return CreateSocket (m_congestionTypeId);
+=======
+  return CreateSocket (m_congestionTypeId, m_recoveryTypeId);
+>>>>>>> origin
 }
 
 Ipv4EndPoint *
 TcpL4Protocol::Allocate (void)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   return m_endPoints->Allocate ();
 }
 
@@ -217,25 +260,27 @@ TcpL4Protocol::Allocate (Ipv4Address address)
 }
 
 Ipv4EndPoint *
-TcpL4Protocol::Allocate (uint16_t port)
+TcpL4Protocol::Allocate (Ptr<NetDevice> boundNetDevice, uint16_t port)
 {
-  NS_LOG_FUNCTION (this << port);
-  return m_endPoints->Allocate (port);
+  NS_LOG_FUNCTION (this << boundNetDevice << port);
+  return m_endPoints->Allocate (boundNetDevice, port);
 }
 
 Ipv4EndPoint *
-TcpL4Protocol::Allocate (Ipv4Address address, uint16_t port)
+TcpL4Protocol::Allocate (Ptr<NetDevice> boundNetDevice, Ipv4Address address, uint16_t port)
 {
-  NS_LOG_FUNCTION (this << address << port);
-  return m_endPoints->Allocate (address, port);
+  NS_LOG_FUNCTION (this << boundNetDevice << address << port);
+  return m_endPoints->Allocate (boundNetDevice, address, port);
 }
 
 Ipv4EndPoint *
-TcpL4Protocol::Allocate (Ipv4Address localAddress, uint16_t localPort,
+TcpL4Protocol::Allocate (Ptr<NetDevice> boundNetDevice,
+                         Ipv4Address localAddress, uint16_t localPort,
                          Ipv4Address peerAddress, uint16_t peerPort)
 {
-  NS_LOG_FUNCTION (this << localAddress << localPort << peerAddress << peerPort);
-  return m_endPoints->Allocate (localAddress, localPort,
+  NS_LOG_FUNCTION (this << boundNetDevice << localAddress << localPort << peerAddress << peerPort);
+  return m_endPoints->Allocate (boundNetDevice,
+                                localAddress, localPort,
                                 peerAddress, peerPort);
 }
 
@@ -249,7 +294,7 @@ TcpL4Protocol::DeAllocate (Ipv4EndPoint *endPoint)
 Ipv6EndPoint *
 TcpL4Protocol::Allocate6 (void)
 {
-  NS_LOG_FUNCTION_NOARGS ();
+  NS_LOG_FUNCTION (this);
   return m_endPoints6->Allocate ();
 }
 
@@ -261,25 +306,27 @@ TcpL4Protocol::Allocate6 (Ipv6Address address)
 }
 
 Ipv6EndPoint *
-TcpL4Protocol::Allocate6 (uint16_t port)
+TcpL4Protocol::Allocate6 (Ptr<NetDevice> boundNetDevice, uint16_t port)
 {
-  NS_LOG_FUNCTION (this << port);
-  return m_endPoints6->Allocate (port);
+  NS_LOG_FUNCTION (this << boundNetDevice << port);
+  return m_endPoints6->Allocate (boundNetDevice, port);
 }
 
 Ipv6EndPoint *
-TcpL4Protocol::Allocate6 (Ipv6Address address, uint16_t port)
+TcpL4Protocol::Allocate6 (Ptr<NetDevice> boundNetDevice, Ipv6Address address, uint16_t port)
 {
-  NS_LOG_FUNCTION (this << address << port);
-  return m_endPoints6->Allocate (address, port);
+  NS_LOG_FUNCTION (this << boundNetDevice << address << port);
+  return m_endPoints6->Allocate (boundNetDevice, address, port);
 }
 
 Ipv6EndPoint *
-TcpL4Protocol::Allocate6 (Ipv6Address localAddress, uint16_t localPort,
+TcpL4Protocol::Allocate6 (Ptr<NetDevice> boundNetDevice,
+                          Ipv6Address localAddress, uint16_t localPort,
                           Ipv6Address peerAddress, uint16_t peerPort)
 {
-  NS_LOG_FUNCTION (this << localAddress << localPort << peerAddress << peerPort);
-  return m_endPoints6->Allocate (localAddress, localPort,
+  NS_LOG_FUNCTION (this << boundNetDevice << localAddress << localPort << peerAddress << peerPort);
+  return m_endPoints6->Allocate (boundNetDevice,
+                                 localAddress, localPort,
                                  peerAddress, peerPort);
 }
 
@@ -296,7 +343,7 @@ TcpL4Protocol::ReceiveIcmp (Ipv4Address icmpSource, uint8_t icmpTtl,
                             Ipv4Address payloadSource,Ipv4Address payloadDestination,
                             const uint8_t payload[8])
 {
-  NS_LOG_FUNCTION (this << icmpSource << icmpTtl << icmpType << icmpCode << icmpInfo
+  NS_LOG_FUNCTION (this << icmpSource << (uint16_t) icmpTtl << (uint16_t) icmpType << (uint16_t) icmpCode << icmpInfo
                         << payloadSource << payloadDestination);
   uint16_t src, dst;
   src = payload[0] << 8;
@@ -323,7 +370,7 @@ TcpL4Protocol::ReceiveIcmp (Ipv6Address icmpSource, uint8_t icmpTtl,
                             Ipv6Address payloadSource,Ipv6Address payloadDestination,
                             const uint8_t payload[8])
 {
-  NS_LOG_FUNCTION (this << icmpSource << icmpTtl << icmpType << icmpCode << icmpInfo
+  NS_LOG_FUNCTION (this << icmpSource << (uint16_t) icmpTtl << (uint16_t) icmpType << (uint16_t) icmpCode << icmpInfo
                         << payloadSource << payloadDestination);
   uint16_t src, dst;
   src = payload[0] << 8;
@@ -447,8 +494,8 @@ TcpL4Protocol::Receive (Ptr<Packet> packet,
 
           src = Ipv6Address::MakeIpv4MappedAddress (incomingIpHeader.GetSource ());
           dst = Ipv6Address::MakeIpv4MappedAddress (incomingIpHeader.GetDestination ());
-          ipv6Header.SetSourceAddress (src);
-          ipv6Header.SetDestinationAddress (dst);
+          ipv6Header.SetSource (src);
+          ipv6Header.SetDestination (dst);
           return (this->Receive (packet, ipv6Header, fakeInterface));
         }
 
@@ -482,19 +529,19 @@ TcpL4Protocol::Receive (Ptr<Packet> packet,
                         Ipv6Header const &incomingIpHeader,
                         Ptr<Ipv6Interface> interface)
 {
-  NS_LOG_FUNCTION (this << packet << incomingIpHeader.GetSourceAddress () <<
-                   incomingIpHeader.GetDestinationAddress ());
+  NS_LOG_FUNCTION (this << packet << incomingIpHeader.GetSource () <<
+                   incomingIpHeader.GetDestination ());
 
   TcpHeader incomingTcpHeader;
   IpL4Protocol::RxStatus checksumControl;
 
-  // If we are receving a v4-mapped packet, we will re-calculate the TCP checksum
+  // If we are receiving a v4-mapped packet, we will re-calculate the TCP checksum
   // Is it worth checking every received "v6" packet to see if it is v4-mapped in
   // order to avoid re-calculating TCP checksums for v4-mapped packets?
 
   checksumControl = PacketReceived (packet, incomingTcpHeader,
-                                    incomingIpHeader.GetSourceAddress (),
-                                    incomingIpHeader.GetDestinationAddress ());
+                                    incomingIpHeader.GetSource (),
+                                    incomingIpHeader.GetDestination ());
 
   if (checksumControl != IpL4Protocol::RX_OK)
     {
@@ -502,21 +549,25 @@ TcpL4Protocol::Receive (Ptr<Packet> packet,
     }
 
   Ipv6EndPointDemux::EndPoints endPoints =
-    m_endPoints6->Lookup (incomingIpHeader.GetDestinationAddress (),
+    m_endPoints6->Lookup (incomingIpHeader.GetDestination (),
                           incomingTcpHeader.GetDestinationPort (),
-                          incomingIpHeader.GetSourceAddress (),
+                          incomingIpHeader.GetSource (),
                           incomingTcpHeader.GetSourcePort (), interface);
   if (endPoints.empty ())
     {
       NS_LOG_LOGIC ("TcpL4Protocol " << this << " received a packet but"
                     " no endpoints matched." <<
+<<<<<<< HEAD
                     " destination IP: " << incomingIpHeader.GetDestinationAddress () <<
+=======
+                    " destination IP: " << incomingIpHeader.GetDestination () <<
+>>>>>>> origin
                     " destination port: "<< incomingTcpHeader.GetDestinationPort () <<
-                    " source IP: " << incomingIpHeader.GetSourceAddress () <<
+                    " source IP: " << incomingIpHeader.GetSource () <<
                     " source port: "<< incomingTcpHeader.GetSourcePort ());
 
-      NoEndPointsFound (incomingTcpHeader, incomingIpHeader.GetSourceAddress (),
-                        incomingIpHeader.GetDestinationAddress ());
+      NoEndPointsFound (incomingTcpHeader, incomingIpHeader.GetSource (),
+                        incomingIpHeader.GetDestination ());
 
       return IpL4Protocol::RX_ENDPOINT_CLOSED;
     }
@@ -614,8 +665,8 @@ TcpL4Protocol::SendPacketV6 (Ptr<Packet> packet, const TcpHeader &outgoing,
   if (ipv6 != 0)
     {
       Ipv6Header header;
-      header.SetSourceAddress (saddr);
-      header.SetDestinationAddress (daddr);
+      header.SetSource (saddr);
+      header.SetDestination (daddr);
       header.SetNextHeader (PROT_NUMBER);
       Socket::SocketErrno errno_;
       Ptr<Ipv6Route> route;

@@ -22,12 +22,16 @@
 #ifndef NET_DEVICE_H
 #define NET_DEVICE_H
 
+<<<<<<< HEAD
 #include <string>
 #include <vector>
+=======
+>>>>>>> origin
 #include <stdint.h>
 #include "ns3/callback.h"
 #include "ns3/object.h"
 #include "ns3/ptr.h"
+#include "packet.h"
 #include "address.h"
 #include "ns3/ipv4-address.h"
 #include "ns3/ipv6-address.h"
@@ -36,14 +40,18 @@ namespace ns3 {
 
 class Node;
 class Channel;
+<<<<<<< HEAD
 class Packet;
 class QueueLimits;
+=======
+>>>>>>> origin
 
 /**
  * \ingroup network
  * \defgroup netdevice Network Device
  */
 
+<<<<<<< HEAD
 /**
  * \ingroup netdevice
  * \brief Base class to represent items of packet Queues
@@ -345,6 +353,8 @@ private:
 };
 
 
+=======
+>>>>>>> origin
 /**
  * \ingroup netdevice
  *
@@ -377,6 +387,7 @@ private:
  * API has been optimized to make it easy to add new MAC protocols,
  * not to add new layer 3 protocols.
  *
+<<<<<<< HEAD
  * Devices aiming to be Traffic Control aware must implement a NotifyNewAggregate
  * method to perform the following operations:
  *   - cache the pointer to the netdevice queue interface aggregated to the device
@@ -401,6 +412,27 @@ private:
  *     device queue
  *   - call NotifyTransmittedBytes after successfully dequeuing a packet from
  *     the device queue
+=======
+ * Devices aiming to support flow control and dynamic queue limits must perform
+ * the following operations:
+ *   - in the NotifyNewAggregate method
+ *     + cache the pointer to the netdevice queue interface aggregated to the
+ *       device
+ *     + set the select queue callback through the netdevice queue interface,
+ *       if the device is multi-queue
+ *   - anytime before initialization
+ *     + set the number of device transmission queues (and optionally create them)
+ *       through the netdevice queue interface, if the device is multi-queue
+ *   - when the device queues have been created, invoke
+ *     NetDeviceQueueInterface::ConnectQueueTraces, which
+ *     + connects the Enqueue traced callback of the device queues to the
+ *       PacketEnqueued static method of the NetDeviceQueue class
+ *     + connects the Dequeue and DropAfterDequeue traced callback of the device
+ *       queues to the PacketDequeued static method of the NetDeviceQueue
+ *       class
+ *     + connects the DropBeforeEnqueue traced callback of the device queues to
+ *       the PacketDiscarded static method of the NetDeviceQueue class
+>>>>>>> origin
  */
 class NetDevice : public Object
 {

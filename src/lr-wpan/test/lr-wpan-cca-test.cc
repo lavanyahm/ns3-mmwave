@@ -35,26 +35,67 @@
 
 using namespace ns3;
 
-using namespace ns3;
-
 NS_LOG_COMPONENT_DEFINE ("lr-wpan-clear-channel-assessment-test");
 
+/**
+ * \ingroup lr-wpan-test
+ * \ingroup tests
+ *
+ * \brief LrWpan CCA Test
+ */
 class LrWpanCcaTestCase : public TestCase
 {
 public:
   LrWpanCcaTestCase ();
 
 private:
+  /**
+   * \brief Function called when PlmeCcaConfirm is hit.
+   * \param testcase The TestCase.
+   * \param device The LrWpanNetDevice.
+   * \param status The device status.
+   */
   static void PlmeCcaConfirm (LrWpanCcaTestCase *testcase, Ptr<LrWpanNetDevice> device, LrWpanPhyEnumeration status);
+  /**
+   * \brief Function called when PhyTxBegin is hit.
+   * \param testcase The TestCase.
+   * \param device The LrWpanNetDevice.
+   * \param packet The packet.
+   */
   static void PhyTxBegin (LrWpanCcaTestCase *testcase, Ptr<LrWpanNetDevice> device, Ptr<const Packet> packet);
+  /**
+   * \brief Function called when PhyTxEnd is hit.
+   * \param testcase The TestCase.
+   * \param device The LrWpanNetDevice.
+   * \param packet The packet.
+   */
   static void PhyTxEnd (LrWpanCcaTestCase *testcase, Ptr<LrWpanNetDevice> device, Ptr<const Packet> packet);
+  /**
+   * \brief Function called when PhyRxBegin is hit.
+   * \param testcase The TestCase.
+   * \param device The LrWpanNetDevice.
+   * \param packet The packet.
+   */
   static void PhyRxBegin (LrWpanCcaTestCase *testcase, Ptr<LrWpanNetDevice> device, Ptr<const Packet> packet);
+  /**
+   * \brief Function called when PhyRxEnd is hit.
+   * \param testcase The TestCase.
+   * \param device The LrWpanNetDevice.
+   * \param packet The packet.
+   * \param sinr The received SINR.
+   */
   static void PhyRxEnd (LrWpanCcaTestCase *testcase, Ptr<LrWpanNetDevice> device, Ptr<const Packet> packet, double sinr);
+  /**
+   * \brief Function called when PhyRxDrop is hit.
+   * \param testcase The TestCase.
+   * \param device The LrWpanNetDevice.
+   * \param packet The packet.
+   */
   static void PhyRxDrop (LrWpanCcaTestCase *testcase, Ptr<LrWpanNetDevice> device, Ptr<const Packet> packet);
 
   virtual void DoRun (void);
 
-  LrWpanPhyEnumeration m_status;
+  LrWpanPhyEnumeration m_status; //!< PHY status.
 
 };
 
@@ -67,7 +108,7 @@ LrWpanCcaTestCase::LrWpanCcaTestCase ()
 void
 LrWpanCcaTestCase::PlmeCcaConfirm (LrWpanCcaTestCase *testcase, Ptr<LrWpanNetDevice> device, LrWpanPhyEnumeration status)
 {
-  std::cout << std::setiosflags (std::ios::fixed) << std::setprecision (9) << "[" << Simulator::Now ().GetSeconds () << "] " << device->GetMac ()->GetShortAddress () << " PlmeCcaConfirm: " << LrWpanHelper::LrWpanPhyEnumerationPrinter (status) << std::endl;
+  std::cout << std::setiosflags (std::ios::fixed) << std::setprecision (9) << "[" << Simulator::Now ().As (Time::S) << "] " << device->GetMac ()->GetShortAddress () << " PlmeCcaConfirm: " << LrWpanHelper::LrWpanPhyEnumerationPrinter (status) << std::endl;
 
   testcase->m_status = status;
 }
@@ -77,7 +118,7 @@ LrWpanCcaTestCase::PhyTxBegin (LrWpanCcaTestCase *testcase, Ptr<LrWpanNetDevice>
 {
   std::ostringstream os;
   packet->Print (os);
-  std::cout << std::setiosflags (std::ios::fixed) << std::setprecision (9) << "[" << Simulator::Now ().GetSeconds () << "] " << device->GetMac ()->GetShortAddress () << " PhyTxBegin: " << os.str () << std::endl;
+  std::cout << std::setiosflags (std::ios::fixed) << std::setprecision (9) << "[" << Simulator::Now ().As (Time::S) << "] " << device->GetMac ()->GetShortAddress () << " PhyTxBegin: " << os.str () << std::endl;
 }
 
 void
@@ -85,7 +126,7 @@ LrWpanCcaTestCase::PhyTxEnd (LrWpanCcaTestCase *testcase, Ptr<LrWpanNetDevice> d
 {
   std::ostringstream os;
   packet->Print (os);
-  std::cout << std::setiosflags (std::ios::fixed) << std::setprecision (9) << "[" << Simulator::Now ().GetSeconds () << "] " << device->GetMac ()->GetShortAddress () << " PhyTxEnd: " << os.str () << std::endl;
+  std::cout << std::setiosflags (std::ios::fixed) << std::setprecision (9) << "[" << Simulator::Now ().As (Time::S) << "] " << device->GetMac ()->GetShortAddress () << " PhyTxEnd: " << os.str () << std::endl;
 }
 
 void
@@ -93,7 +134,7 @@ LrWpanCcaTestCase::PhyRxBegin (LrWpanCcaTestCase *testcase, Ptr<LrWpanNetDevice>
 {
   std::ostringstream os;
   packet->Print (os);
-  std::cout << std::setiosflags (std::ios::fixed) << std::setprecision (9) << "[" << Simulator::Now ().GetSeconds () << "] " << device->GetMac ()->GetShortAddress () << " PhyRxBegin: " << os.str () << std::endl;
+  std::cout << std::setiosflags (std::ios::fixed) << std::setprecision (9) << "[" << Simulator::Now ().As (Time::S) << "] " << device->GetMac ()->GetShortAddress () << " PhyRxBegin: " << os.str () << std::endl;
 }
 
 void
@@ -101,7 +142,7 @@ LrWpanCcaTestCase::PhyRxEnd (LrWpanCcaTestCase *testcase, Ptr<LrWpanNetDevice> d
 {
   std::ostringstream os;
   packet->Print (os);
-  std::cout << std::setiosflags (std::ios::fixed) << std::setprecision (9) << "[" << Simulator::Now ().GetSeconds () << "] " << device->GetMac ()->GetShortAddress () << " PhyRxEnd (" << sinr << "): " << os.str () << std::endl;
+  std::cout << std::setiosflags (std::ios::fixed) << std::setprecision (9) << "[" << Simulator::Now ().As (Time::S) << "] " << device->GetMac ()->GetShortAddress () << " PhyRxEnd (" << sinr << "): " << os.str () << std::endl;
 
   // The first packet was received. Now start a CCA, to try to detect the second packet which is still being transmitted.
   device->GetPhy ()->PlmeCcaRequest ();
@@ -111,7 +152,7 @@ void LrWpanCcaTestCase::PhyRxDrop (LrWpanCcaTestCase *testcase, Ptr<LrWpanNetDev
 {
   std::ostringstream os;
   packet->Print (os);
-  std::cout << std::setiosflags (std::ios::fixed) << std::setprecision (9) << "[" << Simulator::Now ().GetSeconds () << "] " << device->GetMac ()->GetShortAddress () << " PhyRxDrop: " << os.str () << std::endl;
+  std::cout << std::setiosflags (std::ios::fixed) << std::setprecision (9) << "[" << Simulator::Now ().As (Time::S) << "] " << device->GetMac ()->GetShortAddress () << " PhyRxDrop: " << os.str () << std::endl;
 }
 
 void
@@ -250,6 +291,12 @@ LrWpanCcaTestCase::DoRun (void)
   Simulator::Destroy ();
 }
 
+/**
+ * \ingroup lr-wpan-test
+ * \ingroup tests
+ *
+ * \brief LrWpan ACK TestSuite
+ */
 class LrWpanCcaTestSuite : public TestSuite
 {
 public:
@@ -262,4 +309,4 @@ LrWpanCcaTestSuite::LrWpanCcaTestSuite ()
   AddTestCase (new LrWpanCcaTestCase, TestCase::QUICK);
 }
 
-static LrWpanCcaTestSuite g_lrWpanCcaTestSuite;
+static LrWpanCcaTestSuite g_lrWpanCcaTestSuite; //!< Static variable for test initialization

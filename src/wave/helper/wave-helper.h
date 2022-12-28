@@ -15,6 +15,7 @@
  *
  * Author: Junling Bu <linlinjavaer@gmail.com>
  */
+
 #ifndef WAVE_HELPER_H
 #define WAVE_HELPER_H
 
@@ -27,12 +28,12 @@
 #include "ns3/yans-wifi-helper.h"
 
 namespace ns3 {
-class WifiPhy;
-class WifiMac;
+
 class WaveNetDevice;
 class Node;
 
 /**
+ * \ingroup wave
  * To trace WaveNetDevice, we have to overwrite the trace functions of class YansWifiPhyHelper.
  * The source code is very similar with YansWifiPhy, only with some adaptation.
  */
@@ -41,6 +42,7 @@ class YansWavePhyHelper : public YansWifiPhyHelper
 public:
   /**
    * Create a phy helper in a default working state.
+   * \return A phy helper
    */
   static YansWavePhyHelper Default (void);
 
@@ -80,6 +82,7 @@ private:
 };
 
 /**
+ * \ingroup wave
  * \brief helps to create WaveNetDevice objects
  *
  * This class can help to create a large set of similar
@@ -242,10 +245,10 @@ public:
   int64_t AssignStreams (NetDeviceContainer c, int64_t stream);
 
 protected:
-  ObjectFactory m_stationManager;
-  ObjectFactory m_channelScheduler;
-  std::vector<uint32_t> m_macsForChannelNumber;
-  uint32_t m_physNumber;
+  ObjectFactory m_stationManager; ///< station manager
+  ObjectFactory m_channelScheduler; ///< channel scheduler
+  std::vector<uint32_t> m_macsForChannelNumber; ///< MACs for channel number
+  uint32_t m_physNumber; ///< Phy number
 };
 }
 #endif /* WAVE_HELPER_H */

@@ -36,7 +36,7 @@
 
 namespace ns3 {
 
-class Queue;
+template <typename Item> class Queue;
 class CsmaChannel;
 class ErrorModel;
 
@@ -128,20 +128,20 @@ public:
    *
    * The CsmaNetDevice "owns" a queue.  This queue may be set by higher
    * level topology objects to implement a particular queueing method such as
-   * DropTail or RED.
+   * DropTail.
    *
    * \see Queue
    * \see DropTailQueue
    * \param queue a Ptr to the queue for being assigned to the device.
    */
-  void SetQueue (Ptr<Queue> queue);
+  void SetQueue (Ptr<Queue<Packet> > queue);
 
   /**
    * Get a copy of the attached Queue.
    *
    * \return a pointer to the queue.
    */
-  Ptr<Queue> GetQueue (void) const; 
+  Ptr<Queue<Packet> > GetQueue (void) const;
 
   /**
    * Attach a receive ErrorModel to the CsmaNetDevice.
@@ -268,7 +268,7 @@ public:
    * \param packet packet to send
    * \param dest layer 2 destination address
    * \param protocolNumber protocol number
-   * \return true if successfull, false otherwise (drop, ...)
+   * \return true if successful, false otherwise (drop, ...)
    */
   virtual bool Send (Ptr<Packet> packet, const Address& dest, 
                      uint16_t protocolNumber);
@@ -279,7 +279,7 @@ public:
    * \param source layer 2 source address
    * \param dest layer 2 destination address
    * \param protocolNumber protocol number
-   * \return true if successfull, false otherwise (drop, ...)
+   * \return true if successful, false otherwise (drop, ...)
    */
   virtual bool SendFrom (Ptr<Packet> packet, const Address& source, const Address& dest, 
                          uint16_t protocolNumber);
@@ -530,7 +530,7 @@ private:
    * \see class Queue
    * \see class DropTailQueue
    */
-  Ptr<Queue> m_queue;
+  Ptr<Queue<Packet> > m_queue;
 
   /**
    * Error model for receive packet events.  When active this model will be

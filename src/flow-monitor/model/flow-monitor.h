@@ -143,7 +143,7 @@ public:
    * \return the object TypeId
    */
   static TypeId GetTypeId ();
-  TypeId GetInstanceTypeId () const;
+  virtual TypeId GetInstanceTypeId () const;
   FlowMonitor ();
 
   /// Add a FlowClassifier to be used by the flow monitor.
@@ -151,9 +151,11 @@ public:
   void AddFlowClassifier (Ptr<FlowClassifier> classifier);
 
   /// Set the time, counting from the current time, from which to start monitoring flows.
+  /// This method overwrites any previous calls to Start()
   /// \param time delta time to start
   void Start (const Time &time);
   /// Set the time, counting from the current time, from which to stop monitoring flows.
+  /// This method overwrites any previous calls to Stop()
   /// \param time delta time to stop
   void Stop (const Time &time);
   /// Begin monitoring flows *right now*
@@ -241,14 +243,14 @@ public:
   /// \param indent number of spaces to use as base indentation level
   /// \param enableHistograms if true, include also the histograms in the output
   /// \param enableProbes if true, include also the per-probe/flow pair statistics in the output
-  void SerializeToXmlStream (std::ostream &os, int indent, bool enableHistograms, bool enableProbes);
+  void SerializeToXmlStream (std::ostream &os, uint16_t indent, bool enableHistograms, bool enableProbes);
 
   /// Same as SerializeToXmlStream, but returns the output as a std::string
   /// \param indent number of spaces to use as base indentation level
   /// \param enableHistograms if true, include also the histograms in the output
   /// \param enableProbes if true, include also the per-probe/flow pair statistics in the output
   /// \return the XML output as string
-  std::string SerializeToXmlString (int indent, bool enableHistograms, bool enableProbes);
+  std::string SerializeToXmlString (uint16_t indent, bool enableHistograms, bool enableProbes);
 
   /// Same as SerializeToXmlStream, but writes to a file instead
   /// \param fileName name or path of the output file that will be created

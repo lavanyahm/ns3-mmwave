@@ -18,7 +18,11 @@
  */
 #include "tcp-bic.h"
 #include "ns3/log.h"
+<<<<<<< HEAD
 #include "ns3/tcp-socket-base.h"
+=======
+#include "ns3/simulator.h"
+>>>>>>> origin
 
 namespace ns3 {
 
@@ -52,9 +56,15 @@ TcpBic::GetTypeId (void)
                    "cWnd_max-BinarySearchCoefficient. It can be viewed as the gradient "
                    "of the slow start AIM phase: less this value is, "
                    "more steep the increment will be.",
+<<<<<<< HEAD
                    IntegerValue (5),
                    MakeIntegerAccessor (&TcpBic::m_smoothPart),
                    MakeIntegerChecker <int> (1))
+=======
+                   UintegerValue (5),
+                   MakeUintegerAccessor (&TcpBic::m_smoothPart),
+                   MakeUintegerChecker <uint32_t> (1))
+>>>>>>> origin
     .AddAttribute ("BinarySearchCoefficient", "Inverse of the coefficient for the "
                    "binary search. Default 4, as in Linux",
                    UintegerValue (4),
@@ -178,7 +188,11 @@ TcpBic::Update (Ptr<TcpSocketState> tcb)
       else
         {
           /* binary search increase */
+<<<<<<< HEAD
           cnt = segCwnd / dist;
+=======
+          cnt = static_cast<uint32_t> (segCwnd / dist);
+>>>>>>> origin
 
           NS_LOG_INFO ("Binary search increase, cnt=" << cnt);
         }
@@ -249,8 +263,13 @@ TcpBic::GetSsThresh (Ptr<const TcpSocketState> tcb, uint32_t bytesInFlight)
   if (segCwnd < m_lastMaxCwnd && m_fastConvergence)
     {
       NS_LOG_INFO ("Fast Convergence. Last max cwnd: " << m_lastMaxCwnd <<
+<<<<<<< HEAD
                    " updated to " << (uint32_t) m_beta * segCwnd);
       m_lastMaxCwnd = m_beta * segCwnd;
+=======
+                   " updated to " << static_cast<uint32_t> (m_beta * segCwnd));
+      m_lastMaxCwnd = static_cast<uint32_t> (m_beta * segCwnd);
+>>>>>>> origin
     }
   else
     {
@@ -266,7 +285,11 @@ TcpBic::GetSsThresh (Ptr<const TcpSocketState> tcb, uint32_t bytesInFlight)
     }
   else
     {
+<<<<<<< HEAD
       ssThresh = std::max (segCwnd * m_beta, 2.0) * tcb->m_segmentSize;
+=======
+      ssThresh = static_cast<uint32_t> (std::max (segCwnd * m_beta, 2.0) * tcb->m_segmentSize);
+>>>>>>> origin
       NS_LOG_INFO ("More than lowWindow, ssTh= " << ssThresh);
     }
 

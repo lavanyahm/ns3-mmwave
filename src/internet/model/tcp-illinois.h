@@ -28,10 +28,19 @@
 #ifndef TCPILLINOIS_H
 #define TCPILLINOIS_H
 
+<<<<<<< HEAD
 #include "ns3/tcp-congestion-ops.h"
 
 namespace ns3 {
 
+=======
+#include "tcp-congestion-ops.h"
+
+namespace ns3 {
+
+class TcpSocketState;
+
+>>>>>>> origin
 /**
  * \ingroup congestionOps
  *

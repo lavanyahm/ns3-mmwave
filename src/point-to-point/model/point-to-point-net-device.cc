@@ -76,7 +76,7 @@ PointToPointNetDevice::GetTypeId (void)
                    "A queue to use as the transmit queue in the device.",
                    PointerValue (),
                    MakePointerAccessor (&PointToPointNetDevice::m_queue),
-                   MakePointerChecker<Queue> ())
+                   MakePointerChecker<Queue<Packet> > ())
 
     //
     // Trace sources at the "top" of the net device, where packets transition
@@ -115,7 +115,7 @@ PointToPointNetDevice::GetTypeId (void)
                      "ns3::Packet::TracedCallback")
 #endif
     //
-    // Trace souces at the "bottom" of the net device, where packets transition
+    // Trace sources at the "bottom" of the net device, where packets transition
     // to/from the channel.
     //
     .AddTraceSource ("PhyTxBegin", 
@@ -232,7 +232,10 @@ PointToPointNetDevice::DoDispose ()
   m_receiveErrorModel = 0;
   m_currentPkt = 0;
   m_queue = 0;
+<<<<<<< HEAD
   m_queueInterface = 0;
+=======
+>>>>>>> origin
   NetDevice::DoDispose ();
 }
 
@@ -246,7 +249,7 @@ PointToPointNetDevice::SetDataRate (DataRate bps)
 void
 PointToPointNetDevice::SetInterframeGap (Time t)
 {
-  NS_LOG_FUNCTION (this << t.GetSeconds ());
+  NS_LOG_FUNCTION (this << t.As (Time::S));
   m_tInterframeGap = t;
 }
 
@@ -269,7 +272,7 @@ PointToPointNetDevice::TransmitStart (Ptr<Packet> p)
   Time txTime = m_bps.CalculateBytesTxTime (p->GetSize ());
   Time txCompleteTime = txTime + m_tInterframeGap;
 
-  NS_LOG_LOGIC ("Schedule TransmitCompleteEvent in " << txCompleteTime.GetSeconds () << "sec");
+  NS_LOG_LOGIC ("Schedule TransmitCompleteEvent in " << txCompleteTime.As (Time::S));
   Simulator::Schedule (txCompleteTime, &PointToPointNetDevice::TransmitComplete, this);
 
   bool result = m_channel->TransmitStart (p, this, txTime);
@@ -309,21 +312,27 @@ PointToPointNetDevice::TransmitComplete (void)
   if (item == 0)
     {
       NS_LOG_LOGIC ("No pending packets in device queue after tx complete");
+<<<<<<< HEAD
       if (txq)
       {
         NS_LOG_DEBUG ("The device queue is being woken up (" << m_queue->GetNPackets () <<
                       " packets and " << m_queue->GetNBytes () << " bytes inside)");
         txq->Wake ();
       }
+=======
+>>>>>>> origin
       return;
     }
 
   //
   // Got another packet off of the queue, so start the transmit process again.
+<<<<<<< HEAD
   // If the queue was stopped, start it again if there is room for another packet.
   // Note that we cannot wake the upper layers because otherwise a packet is sent
   // to the device while the machine state is busy, thus causing the assert in
   // TransmitStart to fail.
+=======
+>>>>>>> origin
   //
   if (txq && txq->IsStopped ())
     {
@@ -367,7 +376,7 @@ PointToPointNetDevice::Attach (Ptr<PointToPointChannel> ch)
 }
 
 void
-PointToPointNetDevice::SetQueue (Ptr<Queue> q)
+PointToPointNetDevice::SetQueue (Ptr<Queue<Packet> > q)
 {
   NS_LOG_FUNCTION (this << q);
   m_queue = q;
@@ -430,7 +439,7 @@ PointToPointNetDevice::Receive (Ptr<Packet> packet)
     }
 }
 
-Ptr<Queue>
+Ptr<Queue<Packet> >
 PointToPointNetDevice::GetQueue (void) const
 { 
   NS_LOG_FUNCTION (this);
@@ -624,6 +633,7 @@ PointToPointNetDevice::Send (
           m_snifferTrace (packet);
           m_promiscSnifferTrace (packet);
           bool ret = TransmitStart (packet);
+<<<<<<< HEAD
           if (txq)
             {
               // Inform BQL
@@ -645,13 +655,21 @@ PointToPointNetDevice::Send (
                             " packets and " << m_queue->GetNBytes () << " bytes inside)");
               txq->Stop ();
             }
+=======
+          return ret;
+>>>>>>> origin
         }
       return true;
     }
 
+<<<<<<< HEAD
   // Enqueue may fail (overflow). This should not happen if the traffic control
   // module has been installed. Anyway, stop the tx queue, so that the upper layers
   // do not send packets until there is room in the queue again.
+=======
+  // Enqueue may fail (overflow)
+
+>>>>>>> origin
   m_macTxDropTrace (packet);
   if (txq)
   {
@@ -723,7 +741,7 @@ PointToPointNetDevice::GetRemote (void) const
 {
   NS_LOG_FUNCTION (this);
   NS_ASSERT (m_channel->GetNDevices () == 2);
-  for (uint32_t i = 0; i < m_channel->GetNDevices (); ++i)
+  for (std::size_t i = 0; i < m_channel->GetNDevices (); ++i)
     {
       Ptr<NetDevice> tmp = m_channel->GetDevice (i);
       if (tmp != this)

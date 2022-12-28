@@ -23,47 +23,78 @@
 #include "ns3/string.h"
 #include "ns3/integer.h"
 #include "ns3/gnuplot.h"
+#include "ns3/command-line.h"
 #include <map>
 #include <cmath>
 
+/**
+ * \file
+ * \ingroup core-examples
+ * \ingroup randomvariable
+ * Example program illustrating use of RandomVariableStream
+ */
+
 using namespace ns3;
 
-/// Round a double number to the given precision. e.g. dround(0.234, 0.1) = 0.2
-/// and dround(0.257, 0.1) = 0.3
+namespace {
+
+/**
+ * Round a double number to the given precision.
+ * For example, `dround(0.234, 0.1) = 0.2`
+ * and `dround(0.257, 0.1) = 0.3`
+ * \param [in] number The number to round.
+ * \param [in] precision The least significant digit to keep in the rounding.
+ * \returns \pname{number} rounded to \pname{precision}.
+ */
 double dround (double number, double precision)
 {
   number /= precision;
   if (number >= 0)
-    number = std::floor (number + 0.5);
+    {
+      number = std::floor (number + 0.5);
+    }
   else
-    number = std::ceil (number - 0.5);
+    {
+      number = std::ceil (number - 0.5);
+    }
   number *= precision;
   return number;
 }
 
+/**
+ * Generate a histogram from a RandomVariableStream.
+ * \param [in] rndvar The RandomVariableStream to sample.
+ * \param [in] probes The number of samples.
+ * \param [in] precision The precision to round samples to.
+ * \param [in] title The title for the histogram.
+ * \param [in] impulses Set the plot style to IMPULSES.
+ * \return The histogram as a GnuPlot data set.
+ */
 static GnuplotDataset
-Histogramm (Ptr<RandomVariableStream> rndvar, unsigned int probes, double precision, const std::string& title, bool notcontinous = false)
+Histogram (Ptr<RandomVariableStream> rndvar,
+           unsigned int probes, double precision,
+           const std::string& title, bool impulses = false)
 {
-  typedef std::map<double, unsigned int> histogramm_maptype;
-  histogramm_maptype histogramm;
+  typedef std::map<double, unsigned int> histogram_maptype;
+  histogram_maptype histogram;
 
-  for(unsigned int i = 0; i < probes; ++i)
+  for (unsigned int i = 0; i < probes; ++i)
     {
       double val = dround ( rndvar->GetValue (), precision );
 
-      ++histogramm[val];
+      ++histogram[val];
     }
 
   Gnuplot2dDataset data;
   data.SetTitle (title);
 
-  if (notcontinous)
+  if (impulses)
     {
       data.SetStyle (Gnuplot2dDataset::IMPULSES);
     }
 
-  for(histogramm_maptype::const_iterator hi = histogramm.begin ();
-      hi != histogramm.end (); ++hi)
+  for (histogram_maptype::const_iterator hi = histogram.begin ();
+       hi != histogram.end (); ++hi)
     {
       data.Add (hi->first, (double)hi->second / (double)probes / precision);
     }
@@ -71,8 +102,14 @@ Histogramm (Ptr<RandomVariableStream> rndvar, unsigned int probes, double precis
   return data;
 }
 
+}  // unnamed namespace
+
+
 int main (int argc, char *argv[])
 {
+  CommandLine cmd (__FILE__);
+  cmd.Parse (argc, argv);
+
   unsigned int probes = 1000000;
   double precision = 0.01;
 
@@ -88,8 +125,8 @@ int main (int argc, char *argv[])
     x->SetAttribute ("Min", DoubleValue (0.0));
     x->SetAttribute ("Max", DoubleValue (1.0));
 
-    plot.AddDataset ( Histogramm (x, probes, precision,
-                                  "UniformRandomVariable [0.0 .. 1.0)") );
+    plot.AddDataset ( Histogram (x, probes, precision,
+                                 "UniformRandomVariable [0.0 .. 1.0)") );
     plot.AddDataset ( Gnuplot2dFunction ("1.0",
                                          "0 <= x && x <= 1 ? 1.0 : 0") );
 
@@ -105,8 +142,8 @@ int main (int argc, char *argv[])
     Ptr<ExponentialRandomVariable> x1 = CreateObject<ExponentialRandomVariable> ();
     x1->SetAttribute ("Mean", DoubleValue (0.5));
 
-    plot.AddDataset ( Histogramm (x1, probes, precision,
-                                  "ExponentialRandomVariable m=0.5") );
+    plot.AddDataset ( Histogram (x1, probes, precision,
+                                 "ExponentialRandomVariable m=0.5") );
 
     plot.AddDataset ( Gnuplot2dFunction ("ExponentialDistribution mean 0.5",
                                          "ExpDist(x, 0.5)") );
@@ -114,8 +151,8 @@ int main (int argc, char *argv[])
     Ptr<ExponentialRandomVariable> x2 = CreateObject<ExponentialRandomVariable> ();
     x2->SetAttribute ("Mean", DoubleValue (1.0));
 
-    plot.AddDataset ( Histogramm (x2, probes, precision,
-                                  "ExponentialRandomVariable m=1") );
+    plot.AddDataset ( Histogram (x2, probes, precision,
+                                 "ExponentialRandomVariable m=1") );
 
     plot.AddDataset ( Gnuplot2dFunction ("ExponentialDistribution mean 1.0",
                                          "ExpDist(x, 1.0)") );
@@ -123,8 +160,8 @@ int main (int argc, char *argv[])
     Ptr<ExponentialRandomVariable> x3 = CreateObject<ExponentialRandomVariable> ();
     x3->SetAttribute ("Mean", DoubleValue (1.5));
 
-    plot.AddDataset ( Histogramm (x3, probes, precision,
-                                  "ExponentialRandomVariable m=1.5") );
+    plot.AddDataset ( Histogram (x3, probes, precision,
+                                 "ExponentialRandomVariable m=1.5") );
 
     plot.AddDataset ( Gnuplot2dFunction ("ExponentialDistribution mean 1.5",
                                          "ExpDist(x, 1.5)") );
@@ -138,25 +175,25 @@ int main (int argc, char *argv[])
     plot.AppendExtra ("set xrange [0:2]");
 
     Ptr<ParetoRandomVariable> x1 = CreateObject<ParetoRandomVariable> ();
-    x1->SetAttribute ("Mean", DoubleValue (1.0));
+    x1->SetAttribute ("Scale", DoubleValue (1.0));
     x1->SetAttribute ("Shape", DoubleValue (1.5));
 
-    plot.AddDataset ( Histogramm (x1, probes, precision,
-                                  "ParetoRandomVariable m=1.0 s=1.5") );
+    plot.AddDataset ( Histogram (x1, probes, precision,
+                                 "ParetoRandomVariable scale=1.0 shape=1.5") );
 
     Ptr<ParetoRandomVariable> x2 = CreateObject<ParetoRandomVariable> ();
-    x2->SetAttribute ("Mean", DoubleValue (1.0));
+    x2->SetAttribute ("Scale", DoubleValue (1.0));
     x2->SetAttribute ("Shape", DoubleValue (2.0));
 
-    plot.AddDataset ( Histogramm (x2, probes, precision,
-                                  "ParetoRandomVariable m=1.0 s=2.0") );
+    plot.AddDataset ( Histogram (x2, probes, precision,
+                                 "ParetoRandomVariable scale=1.0 shape=2.0") );
 
     Ptr<ParetoRandomVariable> x3 = CreateObject<ParetoRandomVariable> ();
-    x3->SetAttribute ("Mean", DoubleValue (1.0));
+    x3->SetAttribute ("Scale", DoubleValue (1.0));
     x3->SetAttribute ("Shape", DoubleValue (2.5));
 
-    plot.AddDataset ( Histogramm (x3, probes, precision,
-                                  "ParetoRandomVariable m=1.0 s=2.5") );
+    plot.AddDataset ( Histogram (x3, probes, precision,
+                                 "ParetoRandomVariable scale=1.0 shape=2.5") );
 
     gnuplots.AddPlot (plot);
   }
@@ -170,22 +207,22 @@ int main (int argc, char *argv[])
     x1->SetAttribute ("Scale", DoubleValue (1.0));
     x1->SetAttribute ("Shape", DoubleValue (1.0));
 
-    plot.AddDataset ( Histogramm (x1, probes, precision,
-                                  "WeibullRandomVariable m=1.0 s=1.0") );
+    plot.AddDataset ( Histogram (x1, probes, precision,
+                                 "WeibullRandomVariable scale=1.0 shape=1.0") );
 
     Ptr<WeibullRandomVariable> x2 = CreateObject<WeibullRandomVariable> ();
     x2->SetAttribute ("Scale", DoubleValue (1.0));
     x2->SetAttribute ("Shape", DoubleValue (2.0));
 
-    plot.AddDataset ( Histogramm (x2, probes, precision,
-                                  "WeibullRandomVariable m=1.0 s=2.0") );
+    plot.AddDataset ( Histogram (x2, probes, precision,
+                                 "WeibullRandomVariable scale=1.0 shape=2.0") );
 
     Ptr<WeibullRandomVariable> x3 = CreateObject<WeibullRandomVariable> ();
     x3->SetAttribute ("Scale", DoubleValue (1.0));
     x3->SetAttribute ("Shape", DoubleValue (3.0));
 
-    plot.AddDataset ( Histogramm (x3, probes, precision,
-                                  "WeibullRandomVariable m=1.0 s=3.0") );
+    plot.AddDataset ( Histogram (x3, probes, precision,
+                                 "WeibullRandomVariable scale=1.0 shape=3.0") );
 
     gnuplots.AddPlot (plot);
   }
@@ -200,8 +237,8 @@ int main (int argc, char *argv[])
     x1->SetAttribute ("Mean", DoubleValue (0.0));
     x1->SetAttribute ("Variance", DoubleValue (1.0));
 
-    plot.AddDataset ( Histogramm (x1, probes, precision,
-                                  "NormalRandomVariable m=0.0 v=1.0") );
+    plot.AddDataset ( Histogram (x1, probes, precision,
+                                 "NormalRandomVariable m=0.0 v=1.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("NormalDist {/Symbol m}=0.0 {/Symbol s}=1.0",
                                          "NormalDist(x,0.0,1.0)") );
@@ -210,8 +247,8 @@ int main (int argc, char *argv[])
     x2->SetAttribute ("Mean", DoubleValue (0.0));
     x2->SetAttribute ("Variance", DoubleValue (2.0));
 
-    plot.AddDataset ( Histogramm (x2, probes, precision,
-                                  "NormalRandomVariable m=0.0 v=2.0") );
+    plot.AddDataset ( Histogram (x2, probes, precision,
+                                 "NormalRandomVariable m=0.0 v=2.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("NormalDist {/Symbol m}=0.0 {/Symbol s}=sqrt(2.0)",
                                          "NormalDist(x,0.0,sqrt(2.0))") );
@@ -220,8 +257,8 @@ int main (int argc, char *argv[])
     x3->SetAttribute ("Mean", DoubleValue (0.0));
     x3->SetAttribute ("Variance", DoubleValue (3.0));
 
-    plot.AddDataset ( Histogramm (x3, probes, precision,
-                                  "NormalRandomVariable m=0.0 v=3.0") );
+    plot.AddDataset ( Histogram (x3, probes, precision,
+                                 "NormalRandomVariable m=0.0 v=3.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("NormalDist {/Symbol m}=0.0 {/Symbol s}=sqrt(3.0)",
                                          "NormalDist(x,0.0,sqrt(3.0))") );
@@ -229,7 +266,7 @@ int main (int argc, char *argv[])
     gnuplots.AddPlot (plot);
   }
 
-  /// \todo Turn this plot back on once its distribution has been finished.
+  /** \todo Turn this plot back on once its distribution has been finished. */
   /*
   {
     Gnuplot plot;
@@ -244,14 +281,14 @@ int main (int argc, char *argv[])
     emp1.CDF (0.8, 10.0 / 15.0);
     emp1.CDF (1.0, 15.0 / 15.0);
 
-    plot.AddDataset ( Histogramm (emp1, probes, precision,
+    plot.AddDataset ( Histogram (emp1, probes, precision,
                                   "EmpiricalRandomVariable (Stairs)") );
 
     gnuplots.AddPlot (plot);
   }
   */
 
-  /// \todo Turn this plot back on once its distribution has been finished.
+  /** \todo Turn this plot back on once its distribution has been finished. */
   /*
   {
     Gnuplot plot;
@@ -261,7 +298,7 @@ int main (int argc, char *argv[])
     double values[] = { 0.0, 0.2, 0.2, 0.4, 0.2, 0.6, 0.8, 0.8, 1.0 };
     DeterministicRandomVariable det1 (values, sizeof(values) / sizeof(values[0]));
 
-    plot.AddDataset ( Histogramm (det1, probes, precision,
+    plot.AddDataset ( Histogram (det1, probes, precision,
                                   "DeterministicRandomVariable", true) );
 
     gnuplots.AddPlot (plot);
@@ -279,8 +316,8 @@ int main (int argc, char *argv[])
     x1->SetAttribute ("Mu", DoubleValue (0.0));
     x1->SetAttribute ("Sigma", DoubleValue (1.0));
 
-    plot.AddDataset ( Histogramm (x1, probes, precision,
-                                  "LogNormalRandomVariable m=0.0 s=1.0") );
+    plot.AddDataset ( Histogram (x1, probes, precision,
+                                 "LogNormalRandomVariable m=0.0 s=1.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("LogNormalDist(x, 0.0, 1.0)",
                                          "LogNormalDist(x, 0.0, 1.0)") );
@@ -289,15 +326,15 @@ int main (int argc, char *argv[])
     x2->SetAttribute ("Mu", DoubleValue (0.0));
     x2->SetAttribute ("Sigma", DoubleValue (0.5));
 
-    plot.AddDataset ( Histogramm (x2, probes, precision,
-                                  "LogNormalRandomVariable m=0.0 s=0.5") );
+    plot.AddDataset ( Histogram (x2, probes, precision,
+                                 "LogNormalRandomVariable m=0.0 s=0.5") );
 
     Ptr<LogNormalRandomVariable> x3 = CreateObject<LogNormalRandomVariable> ();
     x3->SetAttribute ("Mu", DoubleValue (0.0));
     x3->SetAttribute ("Sigma", DoubleValue (0.25));
 
-    plot.AddDataset ( Histogramm (x3, probes, precision,
-                                  "LogNormalRandomVariable m=0.0 s=0.25") );
+    plot.AddDataset ( Histogram (x3, probes, precision,
+                                 "LogNormalRandomVariable m=0.0 s=0.25") );
 
     plot.AddDataset ( Gnuplot2dFunction ("LogNormalDist(x, 0.0, 0.25)",
                                          "LogNormalDist(x, 0.0, 0.25)") );
@@ -306,15 +343,15 @@ int main (int argc, char *argv[])
     x4->SetAttribute ("Mu", DoubleValue (0.0));
     x4->SetAttribute ("Sigma", DoubleValue (0.125));
 
-    plot.AddDataset ( Histogramm (x4, probes, precision,
-                                  "LogNormalRandomVariable m=0.0 s=0.125") );
+    plot.AddDataset ( Histogram (x4, probes, precision,
+                                 "LogNormalRandomVariable m=0.0 s=0.125") );
 
     Ptr<LogNormalRandomVariable> x5 = CreateObject<LogNormalRandomVariable> ();
     x5->SetAttribute ("Mu", DoubleValue (0.0));
     x5->SetAttribute ("Sigma", DoubleValue (2.0));
 
-    plot.AddDataset ( Histogramm (x5, probes, precision,
-                                  "LogNormalRandomVariable m=0.0 s=2.0") );
+    plot.AddDataset ( Histogram (x5, probes, precision,
+                                 "LogNormalRandomVariable m=0.0 s=2.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("LogNormalDist(x, 0.0, 2.0)",
                                          "LogNormalDist(x, 0.0, 2.0)") );
@@ -323,8 +360,8 @@ int main (int argc, char *argv[])
     x6->SetAttribute ("Mu", DoubleValue (0.0));
     x6->SetAttribute ("Sigma", DoubleValue (2.5));
 
-    plot.AddDataset ( Histogramm (x6, probes, precision,
-                                  "LogNormalRandomVariable m=0.0 s=2.5") );
+    plot.AddDataset ( Histogram (x6, probes, precision,
+                                 "LogNormalRandomVariable m=0.0 s=2.5") );
 
     gnuplots.AddPlot (plot);
   }
@@ -339,24 +376,24 @@ int main (int argc, char *argv[])
     x1->SetAttribute ("Max", DoubleValue (1.0));
     x1->SetAttribute ("Mean", DoubleValue (0.5));
 
-    plot.AddDataset ( Histogramm (x1, probes, precision,
-                                  "TriangularRandomVariable [0.0 .. 1.0) m=0.5") );
+    plot.AddDataset ( Histogram (x1, probes, precision,
+                                 "TriangularRandomVariable [0.0 .. 1.0) m=0.5") );
 
     Ptr<TriangularRandomVariable> x2 = CreateObject<TriangularRandomVariable> ();
     x2->SetAttribute ("Min", DoubleValue (0.0));
     x2->SetAttribute ("Max", DoubleValue (1.0));
     x2->SetAttribute ("Mean", DoubleValue (0.4));
 
-    plot.AddDataset ( Histogramm (x2, probes, precision,
-                                  "TriangularRandomVariable [0.0 .. 1.0) m=0.4") );
+    plot.AddDataset ( Histogram (x2, probes, precision,
+                                 "TriangularRandomVariable [0.0 .. 1.0) m=0.4") );
 
     Ptr<TriangularRandomVariable> x3 = CreateObject<TriangularRandomVariable> ();
     x3->SetAttribute ("Min", DoubleValue (0.0));
     x3->SetAttribute ("Max", DoubleValue (1.0));
     x3->SetAttribute ("Mean", DoubleValue (0.65));
 
-    plot.AddDataset ( Histogramm (x3, probes, precision,
-                                  "TriangularRandomVariable [0.0 .. 1.0) m=0.65") );
+    plot.AddDataset ( Histogram (x3, probes, precision,
+                                 "TriangularRandomVariable [0.0 .. 1.0) m=0.65") );
 
     gnuplots.AddPlot (plot);
   }
@@ -374,8 +411,8 @@ int main (int argc, char *argv[])
     x1->SetAttribute ("Alpha", DoubleValue (1.0));
     x1->SetAttribute ("Beta", DoubleValue (1.0));
 
-    plot.AddDataset ( Histogramm (x1, probes, precision,
-                                  "GammaRandomVariable a=1.0 b=1.0") );
+    plot.AddDataset ( Histogram (x1, probes, precision,
+                                 "GammaRandomVariable a=1.0 b=1.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("{/Symbol g}(x, 1.0, 1.0)",
                                          "GammaDist(x, 1.0, 1.0)") );
@@ -384,8 +421,8 @@ int main (int argc, char *argv[])
     x2->SetAttribute ("Alpha", DoubleValue (1.5));
     x2->SetAttribute ("Beta", DoubleValue (1.0));
 
-    plot.AddDataset ( Histogramm (x2, probes, precision,
-                                  "GammaRandomVariable a=1.5 b=1.0") );
+    plot.AddDataset ( Histogram (x2, probes, precision,
+                                 "GammaRandomVariable a=1.5 b=1.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("{/Symbol g}(x, 1.5, 1.0)",
                                          "GammaDist(x, 1.5, 1.0)") );
@@ -394,8 +431,8 @@ int main (int argc, char *argv[])
     x3->SetAttribute ("Alpha", DoubleValue (2.0));
     x3->SetAttribute ("Beta", DoubleValue (1.0));
 
-    plot.AddDataset ( Histogramm (x3, probes, precision,
-                                  "GammaRandomVariable a=2.0 b=1.0") );
+    plot.AddDataset ( Histogram (x3, probes, precision,
+                                 "GammaRandomVariable a=2.0 b=1.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("{/Symbol g}(x, 2.0, 1.0)",
                                          "GammaDist(x, 2.0, 1.0)") );
@@ -404,8 +441,8 @@ int main (int argc, char *argv[])
     x4->SetAttribute ("Alpha", DoubleValue (4.0));
     x4->SetAttribute ("Beta", DoubleValue (1.0));
 
-    plot.AddDataset ( Histogramm (x4, probes, precision,
-                                  "GammaRandomVariable a=4.0 b=1.0") );
+    plot.AddDataset ( Histogram (x4, probes, precision,
+                                 "GammaRandomVariable a=4.0 b=1.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("{/Symbol g}(x, 4.0, 1.0)",
                                          "GammaDist(x, 4.0, 1.0)") );
@@ -414,8 +451,8 @@ int main (int argc, char *argv[])
     x5->SetAttribute ("Alpha", DoubleValue (2.0));
     x5->SetAttribute ("Beta", DoubleValue (2.0));
 
-    plot.AddDataset ( Histogramm (x5, probes, precision,
-                                  "GammaRandomVariable a=2.0 b=2.0") );
+    plot.AddDataset ( Histogram (x5, probes, precision,
+                                 "GammaRandomVariable a=2.0 b=2.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("{/Symbol g}(x, 2.0, 2.0)",
                                          "GammaDist(x, 2.0, 2.0)") );
@@ -424,8 +461,8 @@ int main (int argc, char *argv[])
     x6->SetAttribute ("Alpha", DoubleValue (2.5));
     x6->SetAttribute ("Beta", DoubleValue (3.0));
 
-    plot.AddDataset ( Histogramm (x6, probes, precision,
-                                  "GammaRandomVariable a=2.5 b=3.0") );
+    plot.AddDataset ( Histogram (x6, probes, precision,
+                                 "GammaRandomVariable a=2.5 b=3.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("{/Symbol g}(x, 2.5, 3.0)",
                                          "GammaDist(x, 2.5, 3.0)") );
@@ -434,8 +471,8 @@ int main (int argc, char *argv[])
     x7->SetAttribute ("Alpha", DoubleValue (2.5));
     x7->SetAttribute ("Beta", DoubleValue (4.5));
 
-    plot.AddDataset ( Histogramm (x7, probes, precision,
-                                  "GammaRandomVariable a=2.5 b=4.5") );
+    plot.AddDataset ( Histogram (x7, probes, precision,
+                                 "GammaRandomVariable a=2.5 b=4.5") );
 
     plot.AddDataset ( Gnuplot2dFunction ("{/Symbol g}(x, 2.5, 4.5)",
                                          "GammaDist(x, 2.5, 4.5)") );
@@ -455,8 +492,8 @@ int main (int argc, char *argv[])
     x1->SetAttribute ("K", IntegerValue (1));
     x1->SetAttribute ("Lambda", DoubleValue (1.0));
 
-    plot.AddDataset ( Histogramm (x1, probes, precision,
-                                  "ErlangRandomVariable k=1 {/Symbol l}=1.0") );
+    plot.AddDataset ( Histogram (x1, probes, precision,
+                                 "ErlangRandomVariable k=1 {/Symbol l}=1.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("Erlang(x, 1, 1.0)",
                                          "ErlangDist(x, 1, 1.0)") );
@@ -465,8 +502,8 @@ int main (int argc, char *argv[])
     x2->SetAttribute ("K", IntegerValue (2));
     x2->SetAttribute ("Lambda", DoubleValue (1.0));
 
-    plot.AddDataset ( Histogramm (x2, probes, precision,
-                                  "ErlangRandomVariable k=2 {/Symbol l}=1.0") );
+    plot.AddDataset ( Histogram (x2, probes, precision,
+                                 "ErlangRandomVariable k=2 {/Symbol l}=1.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("Erlang(x, 2, 1.0)",
                                          "ErlangDist(x, 2, 1.0)") );
@@ -475,8 +512,8 @@ int main (int argc, char *argv[])
     x3->SetAttribute ("K", IntegerValue (3));
     x3->SetAttribute ("Lambda", DoubleValue (1.0));
 
-    plot.AddDataset ( Histogramm (x3, probes, precision,
-                                  "ErlangRandomVariable k=3 {/Symbol l}=1.0") );
+    plot.AddDataset ( Histogram (x3, probes, precision,
+                                 "ErlangRandomVariable k=3 {/Symbol l}=1.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("Erlang(x, 3, 1.0)",
                                          "ErlangDist(x, 3, 1.0)") );
@@ -485,8 +522,8 @@ int main (int argc, char *argv[])
     x4->SetAttribute ("K", IntegerValue (5));
     x4->SetAttribute ("Lambda", DoubleValue (1.0));
 
-    plot.AddDataset ( Histogramm (x4, probes, precision,
-                                  "ErlangRandomVariable k=5 {/Symbol l}=1.0") );
+    plot.AddDataset ( Histogram (x4, probes, precision,
+                                 "ErlangRandomVariable k=5 {/Symbol l}=1.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("Erlang(x, 5, 1.0)",
                                          "ErlangDist(x, 5, 1.0)") );
@@ -495,8 +532,8 @@ int main (int argc, char *argv[])
     x5->SetAttribute ("K", IntegerValue (2));
     x5->SetAttribute ("Lambda", DoubleValue (2.0));
 
-    plot.AddDataset ( Histogramm (x5, probes, precision,
-                                  "ErlangRandomVariable k=2 {/Symbol l}=2.0") );
+    plot.AddDataset ( Histogram (x5, probes, precision,
+                                 "ErlangRandomVariable k=2 {/Symbol l}=2.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("Erlang(x, 2, 2.0)",
                                          "ErlangDist(x, 2, 2.0)") );
@@ -505,8 +542,8 @@ int main (int argc, char *argv[])
     x6->SetAttribute ("K", IntegerValue (2));
     x6->SetAttribute ("Lambda", DoubleValue (3.0));
 
-    plot.AddDataset ( Histogramm (x6, probes, precision,
-                                  "ErlangRandomVariable k=2 {/Symbol l}=3.0") );
+    plot.AddDataset ( Histogram (x6, probes, precision,
+                                 "ErlangRandomVariable k=2 {/Symbol l}=3.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("Erlang(x, 2, 3.0)",
                                          "ErlangDist(x, 2, 3.0)") );
@@ -515,8 +552,8 @@ int main (int argc, char *argv[])
     x7->SetAttribute ("K", IntegerValue (2));
     x7->SetAttribute ("Lambda", DoubleValue (5.0));
 
-    plot.AddDataset ( Histogramm (x7, probes, precision,
-                                  "ErlangRandomVariable k=2 {/Symbol l}=5.0") );
+    plot.AddDataset ( Histogram (x7, probes, precision,
+                                 "ErlangRandomVariable k=2 {/Symbol l}=5.0") );
 
     plot.AddDataset ( Gnuplot2dFunction ("Erlang(x, 2, 5.0)",
                                          "ErlangDist(x, 2, 5.0)") );

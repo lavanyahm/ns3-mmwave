@@ -32,34 +32,30 @@
 
 using namespace ns3;
 
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv6 Test
+ */
 class Ipv6L3ProtocolTestCase : public TestCase
 {
 public:
-  /**
-   * \brief Constructor.
-   */
   Ipv6L3ProtocolTestCase ();
 
-  /**
-   * \brief Destructor.
-   */
-  virtual
-  ~Ipv6L3ProtocolTestCase ();
-
-  /**
-   * \brief Run unit tests for this class.
-   * \return false if all tests have passed, false otherwise
-   */
-  virtual void
-  DoRun ();
+  virtual ~Ipv6L3ProtocolTestCase ();
+  virtual void DoRun ();
 };
+
 Ipv6L3ProtocolTestCase::Ipv6L3ProtocolTestCase () :
   TestCase ("Verify the IPv6 layer 3 protocol")
 {
 }
+
 Ipv6L3ProtocolTestCase::~Ipv6L3ProtocolTestCase ()
 {
 }
+
 void
 Ipv6L3ProtocolTestCase::DoRun ()
 {
@@ -92,15 +88,15 @@ Ipv6L3ProtocolTestCase::DoRun ()
   index = ipv6->AddIpv6Interface (interface2);
   NS_TEST_ASSERT_MSG_EQ (index, 2, "The index is not 2??");
 
+  interface->SetUp ();
+  interface2->SetUp ();
+
   Ipv6InterfaceAddress ifaceAddr = interface->GetLinkLocalAddress ();
   NS_TEST_ASSERT_MSG_EQ (ifaceAddr.GetAddress ().IsLinkLocal (), true,
                          "Should be link local??");
 
-  interface->SetUp ();
   NS_TEST_ASSERT_MSG_EQ (interface->GetNAddresses (), 1,
                          "interface has always a link-local address"); /* interface has always a link-local address */
-
-  interface2->SetUp ();
 
   Ipv6InterfaceAddress ifaceAddr1 = Ipv6InterfaceAddress (
       "2001:1234:5678:9000::1", Ipv6Prefix (64));
@@ -157,7 +153,7 @@ Ipv6L3ProtocolTestCase::DoRun ()
   num = interface->GetNAddresses ();
   NS_TEST_ASSERT_MSG_EQ (num, 1, "Number of addresses should be 1??");
 
-  /* Test Ipv6Address::RemoveAddress(index, addresss) */
+  /* Test Ipv6Address::RemoveAddress(index, address) */
   index = ipv6->GetInterfaceForAddress ("2001:ffff:5678:9001::2");
   bool result = ipv6->RemoveAddress (index, Ipv6Address 
                                      ("2001:ffff:5678:9001::2"));
@@ -180,7 +176,15 @@ Ipv6L3ProtocolTestCase::DoRun ()
 
   Simulator::Destroy ();
 } //end DoRun
-static class IPv6L3ProtocolTestSuite : public TestSuite
+
+
+/**
+ * \ingroup internet-test
+ * \ingroup tests
+ *
+ * \brief IPv6 TestSuite
+ */
+class IPv6L3ProtocolTestSuite : public TestSuite
 {
 public:
   IPv6L3ProtocolTestSuite () :
@@ -188,4 +192,6 @@ public:
   {
     AddTestCase (new Ipv6L3ProtocolTestCase (), TestCase::QUICK);
   }
-} g_ipv6protocolTestSuite;
+};
+
+static IPv6L3ProtocolTestSuite g_ipv6protocolTestSuite; //!< Static variable for test initialization

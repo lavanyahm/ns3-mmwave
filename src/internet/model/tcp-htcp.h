@@ -27,6 +27,7 @@
 #ifndef TCP_HTCP_H
 #define TCP_HTCP_H
 
+<<<<<<< HEAD
 #include "ns3/tcp-congestion-ops.h"
 #include "ns3/traced-value.h"
 #include "ns3/sequence-number.h"
@@ -36,6 +37,16 @@ namespace ns3 {
 /**
  * \ingroup socket
  * \ingroup tcp
+=======
+#include "tcp-congestion-ops.h"
+
+namespace ns3 {
+
+class TcpSocketState;
+
+/**
+ * \ingroup congestionOps
+>>>>>>> origin
  *
  * \brief An implementation of the H-TCP variant of TCP.
  *

@@ -21,7 +21,6 @@
 #ifndef CAPABILITY_INFORMATION_H
 #define CAPABILITY_INFORMATION_H
 
-#include <stdint.h>
 #include "ns3/buffer.h"
 
 namespace ns3 {
@@ -50,7 +49,11 @@ public:
    * Set the short preamble bit
    * in the capability information field.
    *
+<<<<<<< HEAD
    * /param shortPreamble the short preamble bit
+=======
+   * \param shortPreamble the short preamble bit
+>>>>>>> origin
    *
    */
   void SetShortPreamble (bool shortPreamble);
@@ -58,10 +61,22 @@ public:
    * Set the short slot time bit
    * in the capability information field.
    *
+<<<<<<< HEAD
    * /param shortslotTime the short preamble bit
    *
    */
   void SetShortSlotTime (bool shortSlotTime);
+=======
+   * \param shortSlotTime the short preamble bit
+   *
+   */
+  void SetShortSlotTime (bool shortSlotTime);
+  /**
+   * Set the CF-Pollable bit
+   * in the capability information field.
+   */
+  void SetCfPollable (void);
+>>>>>>> origin
 
   /**
    * Check if the Extended Service Set (ESS) bit
@@ -95,6 +110,17 @@ public:
    *         field is set to 1
    */
   bool IsShortSlotTime (void) const;
+<<<<<<< HEAD
+=======
+  /**
+   * Check if the CF-Pollable bit
+   * in the capability information field is set to 1.
+   *
+   * \return CF-Pollable bit in the capability information
+   *         field is set to 1
+   */
+  bool IsCfPollable (void) const;
+>>>>>>> origin
 
   /**
    * Return the serialized size of capability
@@ -143,7 +169,8 @@ private:
    * \param n the bit position
    */
   void Clear (uint8_t n);
-  uint16_t m_capability;
+
+  uint16_t m_capability; ///< capability
 };
 
 } //namespace ns3

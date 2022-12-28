@@ -1,6 +1,10 @@
 Queue disciplines
 --------------------------------------------------------------
 
+<<<<<<< HEAD
+=======
+.. include:: replace.txt
+>>>>>>> origin
 .. heading hierarchy:
    ------------- Chapter
    ************* Section (#.#)
@@ -11,18 +15,39 @@ Model Description
 *****************
 
 Packets received by the Traffic Control layer for transmission to a netdevice
+<<<<<<< HEAD
 can be passed to a Queue Discipline to perform scheduling and policing.
+=======
+can be passed to a queueing discipline (queue disc) to perform scheduling and
+policing.  The |ns3| term "queue disc" corresponds to what Linux calls a "qdisc".
+>>>>>>> origin
 A netdevice can have a single (root) queue disc installed on it.
 Installing a queue disc on a netdevice is not mandatory. If a netdevice does
 not have a queue disc installed on it, the traffic control layer sends the packets
 directly to the netdevice. This is the case, for instance, of the loopback netdevice.
 
+<<<<<<< HEAD
 As in Linux, a queue disc may contain distinct elements:
 
 * queues, which actually store the packets waiting for transmission
 * classes, which allow to reserve a different treatment to different packets
 * filters, which determine the queue or class which a packet is destined to
 
+=======
+As in Linux, queue discs may be simple queues or may be complicated hierarchical
+structures.  A queue disc may contain distinct elements:
+
+* queues, which actually store the packets waiting for transmission
+* classes, which permit the definition of different treatments for different subdivisions of traffic
+* filters, which determine the queue or class which a packet is destined to
+
+Linux uses the terminology "classful qdiscs" or "classless qdiscs" to describe
+how packets are handled.  This use of the term "class" should be distinguished
+from the C++ language "class".  In general, the below discussion uses "class"
+in the Linux, not C++, sense, but there are some uses of the C++ term, so
+please keep in mind the dual use of this term in the below text.
+
+>>>>>>> origin
 Notice that a child queue disc must be attached to every class and a packet
 filter is only able to classify packets of a single protocol. Also, while in Linux
 some queue discs (e.g., fq-codel) use an internal classifier and do not make use of
@@ -36,30 +61,97 @@ classes). More recently, after the appearance of multi-queue devices (such as Wi
 some multi-queue aware queue discs have been introduced. Multi-queue aware queue discs
 handle as many queues (or queue discs -- without using classes) as the number of
 transmission queues used by the device on which the queue disc is installed.
+<<<<<<< HEAD
 An attempt is made, also, to enqueue each packet in the "same" queue both within the
 queue disc and within the device.
+=======
+An attempt is made, also, to classify each packet similarly in the queue disc and within
+the device (i.e., to keep the packet classification consistent across layers).
+>>>>>>> origin
 
 The traffic control layer interacts with a queue disc in a simple manner: after requesting
 to enqueue a packet, the traffic control layer requests the qdisc to "run", i.e., to
 dequeue a set of packets, until a predefined number ("quota") of packets is dequeued
+<<<<<<< HEAD
 or the netdevice stops the queue disc. A netdevice may stop the queue disc when its
 transmission queue(s) is/are (almost) full. Also, a netdevice may wake the
 queue disc when its transmission queue(s) is/are (almost) empty. Waking a queue disc
 is equivalent to make it run.
+=======
+or the netdevice stops the queue disc.  A netdevice shall
+stop the queue disc when its transmission queue does not have room for another
+packet. Also, a netdevice shall wake the queue disc when it detects that there
+is room for another packet in its transmission queue, but the transmission queue
+is stopped. Waking a queue disc is equivalent to make it run.
+
+Every queue disc collects statistics about the total number of packets/bytes
+received from the upper layers (in case of root queue disc) or from the parent
+queue disc (in case of child queue disc), enqueued, dequeued, requeued, dropped,
+dropped before enqueue, dropped after dequeue, marked, and stored in the queue disc and
+sent to the netdevice or to the parent queue disc. Note that packets that are
+dequeued may be requeued, i.e., retained by the traffic control infrastructure,
+if the netdevice is not ready to receive them. Requeued packets are not part
+of the queue disc. The following identities hold:
+
+* dropped = dropped before enqueue + dropped after dequeue
+* received = dropped before enqueue + enqueued
+* queued = enqueued - dequeued
+* sent = dequeued - dropped after dequeue (- 1 if there is a requeued packet)
+
+Separate counters are also kept for each possible reason to drop a packet.
+When a packet is dropped by an internal queue, e.g., because the queue is full,
+the reason is "Dropped by internal queue". When a packet is dropped by a child
+queue disc, the reason is "(Dropped by child queue disc) " followed by the
+reason why the child queue disc dropped the packet.
+
+The QueueDisc base class provides the SojournTime trace source, which provides
+the sojourn time of every packet dequeued from a queue disc, including packets
+that are dropped or requeued after being dequeued. The sojourn time is taken
+when the packet is dequeued from the queue disc, hence it does not account for
+the additional time the packet is retained within the queue disc in case it is
+requeued.
+
+>>>>>>> origin
 
 Design
 ==========
 
+<<<<<<< HEAD
 An abstract base class, class QueueDisc, is subclassed to implement a specific
+=======
+A C++ abstract base class, class QueueDisc, is subclassed to implement a specific
+>>>>>>> origin
 queue disc. A subclass is required to implement the following methods:
 
 * ``bool DoEnqueue (Ptr<QueueDiscItem> item)``:  Enqueue a packet
 * ``Ptr<QueueDiscItem> DoDequeue (void)``:  Dequeue a packet
+<<<<<<< HEAD
 * ``Ptr<const QueueDiscItem> DoPeek (void) const``: Peek a packet
 * ``bool CheckConfig (void) const``: Check if the configuration is correct
 * ``void InitializeParams (void)``: Initialize queue disc parameters
 
 The base class QueueDisc implements:
+=======
+* ``bool CheckConfig (void) const``: Check if the configuration is correct
+* ``void InitializeParams (void)``: Initialize queue disc parameters
+
+and may optionally override the default implementation of the following method:
+
+* ``Ptr<const QueueDiscItem> DoPeek (void) const``: Peek the next packet to extract
+
+The default implementation of the ``DoPeek`` method is based on the qdisc_peek_dequeued
+function of the Linux kernel, which dequeues a packet and retains it in the
+queue disc as a requeued packet. This approach is recommended
+especially for queue discs for which it is not obvious what is the next
+packet that will be dequeued (e.g., queue discs having multiple internal
+queues or child queue discs or queue discs that drop packets after dequeue).
+Therefore, unless the subclass redefines the ``DoPeek`` method, calling ``Peek`` causes
+the next packet to be dequeued from the queue disc, though the packet is still
+considered to be part of the queue disc and the dequeue trace is fired when
+Dequeue is called and the packet is actually extracted from the queue disc.
+
+The C++ base class QueueDisc implements:
+>>>>>>> origin
 
 * methods to add/get a single queue, class or filter and methods to get the number \
   of installed queues, classes or filters
@@ -74,27 +166,49 @@ The base class QueueDisc provides many trace sources:
 * ``Dequeue``
 * ``Requeue``
 * ``Drop``
+<<<<<<< HEAD
 * ``PacketsInQueue``
 * ``BytesInQueue``
 
 The base class QueueDisc holds the list of attached queues, classes and filter
+=======
+* ``Mark``
+* ``PacketsInQueue``
+* ``BytesInQueue``
+
+The C++ base class QueueDisc holds the list of attached queues, classes and filter
+>>>>>>> origin
 by means of three vectors accessible through attributes (InternalQueueList,
 QueueDiscClassList and PacketFilterList).
 
 Internal queues are implemented as (subclasses of) Queue objects. A Queue stores
 QueueItem objects, which consist of just a Ptr<Packet>. Since a queue disc has to
 store at least the destination address and the protocol number for each enqueued
+<<<<<<< HEAD
 packet, a new class, QueueDiscItem, is derived from QueueItem to store such
+=======
+packet, a new C++ class, QueueDiscItem, is derived from QueueItem to store such
+>>>>>>> origin
 additional information for each packet. Thus, internal queues are implemented as
 Queue objects storing QueueDiscItem objects. Also, there could be the need to store
 further information depending on the network layer protocol of the packet. For
 instance, for IPv4 and IPv6 packets it is needed to separately store the header
+<<<<<<< HEAD
 and the payload, so that header fields can be manipulated, e.g., to support ECN.
 To this end, Ipv4QueueDiscItem and Ipv6QueueDiscItem are derived from QueueDiscItem
 to additionally store the packet header and provide protocol specific operations
 such as ECN marking.
 
 Classes are implemented via the QueueDiscClass class, which just consists of a pointer
+=======
+and the payload, so that header fields can be manipulated, e.g., to support
+Explicit Congestion Notification as defined in RFC 3168.  To this end,
+subclasses ``Ipv4QueueDiscItem`` and ``Ipv6QueueDiscItem`` are derived from
+``QueueDiscItem`` to additionally store the IP header and provide protocol
+specific operations such as ECN marking.
+
+Classes (in the Linux sense of the term) are implemented via the QueueDiscClass class, which consists of a pointer
+>>>>>>> origin
 to the attached queue disc. Such a pointer is accessible through the QueueDisc attribute.
 Classful queue discs needing to set parameters for their classes can subclass
 QueueDiscClass and add the required parameters as attributes.
@@ -116,6 +230,7 @@ of the classified packets.
 Usage
 *****
 
+<<<<<<< HEAD
 By default, the InternetStackHelper aggregates a TrafficControlLayer object to every
 node. When invoked to assign an IPv{4,6} address to a device, the Ipv{4,6}AddressHelper,
 besides creating a Ipv{4,6}Interface, also installs the default qdisc, PfifoFastQueueDisc,
@@ -128,22 +243,51 @@ disc before an IP address is assigned to the device. Alternatively, the default 
 can be removed from the device after assigning an IP address, by using the convenient
 Uninstall method of the TrafficControlHelper class, and then installing a different
 queue disc on the device. Clearly, it is also possible to have no queue disc installed on a device.
+=======
+The traffic control layer is automatically created and inserted on an ``ns3::Node`` object
+when typical device and internet module helpers are used.  By default, the  
+``InternetStackHelper::Install()`` method aggregates a TrafficControlLayer object to every
+node. When invoked to assign an IPv{4,6} address to a device, the Ipv{4,6}AddressHelper,
+besides creating an Ipv{4,6}Interface, also installs the default qdisc
+on the device, unless a queue disc has been already installed.
+For single-queue NetDevices (such as PointToPoint, Csma and Simple), the default root
+qdisc is FqCoDel. For multi-queue NetDevices (such as Wifi), the default root qdisc is
+Mq with as many FqCoDel child qdiscs as the number of device queues.
+
+To install a queue disc other than the default one, it is necessary to install such queue
+disc before an IP address is assigned to the device. Alternatively, the default queue disc
+can be removed from the device after assigning an IP address, by using the
+Uninstall method of the TrafficControlHelper C++ class, and then installing a different
+queue disc on the device.  By uninstalling without adding a new queue disc, it is also possible
+to have no queue disc installed on a device.
+>>>>>>> origin
 
 Helpers
 =======
 
 A typical usage pattern is to create a traffic control helper and to configure type
 and attributes of queue discs, queues, classes and filters from the helper, For example,
+<<<<<<< HEAD
 the default pfifo_fast can be configured as follows:
+=======
+the pfifo_fast can be configured as follows:
+>>>>>>> origin
 
 .. sourcecode:: cpp
 
   TrafficControlHelper tch;
   uint16_t handle = tch.SetRootQueueDisc ("ns3::PfifoFastQueueDisc");
+<<<<<<< HEAD
   tch.AddInternalQueues (handle, 3, "ns3::DropTailQueue", "MaxPackets", UintegerValue (1000));
   QueueDiscContainer qdiscs = tch.Install (devices);
 
 The above code adds three internal queues and a packet filter to the root queue disc of type PfifoFast.
+=======
+  tch.AddInternalQueues (handle, 3, "ns3::DropTailQueue", "MaxSize", StringValue ("1000p"));
+  QueueDiscContainer qdiscs = tch.Install (devices);
+
+The above code adds three internal queues to the root queue disc of type PfifoFast.
+>>>>>>> origin
 With the above configuration, the config path of the root queue disc installed on the j-th
 device of the i-th node (the index of a device is the same as in DeviceList) is:
 
@@ -153,6 +297,13 @@ and the config path of the second internal queue is:
 
 /NodeList/[i]/$ns3::TrafficControlLayer/RootQueueDiscList/[j]/InternalQueueList/1
 
+<<<<<<< HEAD
+=======
+For this helper's configuration to take effect, it should be added to the ns-3 program after
+``InternetStackHelper::Install()`` is called, but before IP addresses are configured using 
+``Ipv{4,6}AddressHelper``.
+
+>>>>>>> origin
 Implementation details
 **********************
 
@@ -217,6 +368,7 @@ given packet. A NetDeviceQueueInterface object must be therefore aggregated to a
 devices having an interface supporting the traffic control layer (i.e., an IPv4 or IPv6
 interface). In particular:
 
+<<<<<<< HEAD
 * a NetDeviceQueueInterface object is aggregated to all the devices as soon as an IPv4/v6 \
   interface is added to the device. This is because Ipv{4,6}AddressHelper::Assign calls \
   Ipv{4,6}L3Protocol::AddInterface, which calls TrafficControlLayer::SetupDevice, which \
@@ -225,6 +377,15 @@ interface). In particular:
 * when notified that a netdevice queue interface has been aggregated, traffic control \
   aware devices can cache the pointer to the \
   netdevice queue interface created by the traffic contol layer into a member variable. \
+=======
+* a NetDeviceQueueInterface object is aggregated to all the devices by the NetDevice
+  helper classes, at ``Install`` time.  See, for example, the implementation in the
+  method ``CsmaHelper::InstallPriv()``.  
+
+* when notified that a netdevice queue interface has been aggregated, traffic control \
+  aware devices can cache the pointer to the \
+  netdevice queue interface created by the traffic control layer into a member variable. \
+>>>>>>> origin
   Also, multi-queue devices can set the number of device transmission queues and set the \
   select queue callback through the netdevice queue interface
 
@@ -232,7 +393,12 @@ interface). In particular:
   that the netdevice has set the number of device transmission queues, if it has to do so) \
   completes the installation of the queue discs by setting the wake callbacks on the device \
   transmission queues (through the netdevice queue interface). Also, the traffic control \
+<<<<<<< HEAD
   calls the Initialize method of the root queue discs.
+=======
+  calls the Initialize method of the root queue discs.  This initialization of queue discs \
+  triggers calls to the ``CheckConfig`` and ``InitializeParams`` methods of the queue disc.
+>>>>>>> origin
 
 Requeue
 ========

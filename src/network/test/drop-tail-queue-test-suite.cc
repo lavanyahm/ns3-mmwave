@@ -18,10 +18,16 @@
 
 #include "ns3/test.h"
 #include "ns3/drop-tail-queue.h"
-#include "ns3/uinteger.h"
+#include "ns3/string.h"
 
 using namespace ns3;
 
+/**
+ * \ingroup network-test
+ * \ingroup tests
+ *
+ * DropTailQueue unit tests.
+ */
 class DropTailQueueTestCase : public TestCase
 {
 public:
@@ -36,8 +42,8 @@ DropTailQueueTestCase::DropTailQueueTestCase ()
 void
 DropTailQueueTestCase::DoRun (void)
 {
-  Ptr<DropTailQueue> queue = CreateObject<DropTailQueue> ();
-  NS_TEST_EXPECT_MSG_EQ (queue->SetAttributeFailSafe ("MaxPackets", UintegerValue (3)), true,
+  Ptr<DropTailQueue<Packet> > queue = CreateObject<DropTailQueue<Packet> > ();
+  NS_TEST_EXPECT_MSG_EQ (queue->SetAttributeFailSafe ("MaxSize", StringValue ("3p")), true,
                          "Verify that we can actually set the attribute");
 
   Ptr<Packet> p1, p2, p3, p4;
@@ -56,6 +62,7 @@ DropTailQueueTestCase::DoRun (void)
   queue->Enqueue (Create<QueueItem> (p4)); // will be dropped
   NS_TEST_EXPECT_MSG_EQ (queue->GetNPackets (), 3, "There should be still three packets in there");
 
+<<<<<<< HEAD
   Ptr<QueueItem> item;
 
   item = queue->Dequeue ();
@@ -75,9 +82,36 @@ DropTailQueueTestCase::DoRun (void)
 
   item = queue->Dequeue ();
   NS_TEST_EXPECT_MSG_EQ ((item == 0), true, "There are really no packets in there");
+=======
+  Ptr<Packet> packet;
+
+  packet = queue->Dequeue ();
+  NS_TEST_EXPECT_MSG_EQ ((packet != 0), true, "I want to remove the first packet");
+  NS_TEST_EXPECT_MSG_EQ (queue->GetNPackets (), 2, "There should be two packets in there");
+  NS_TEST_EXPECT_MSG_EQ (packet->GetUid (), p1->GetUid (), "was this the first packet ?");
+
+  packet = queue->Dequeue ();
+  NS_TEST_EXPECT_MSG_EQ ((packet != 0), true, "I want to remove the second packet");
+  NS_TEST_EXPECT_MSG_EQ (queue->GetNPackets (), 1, "There should be one packet in there");
+  NS_TEST_EXPECT_MSG_EQ (packet->GetUid (), p2->GetUid (), "Was this the second packet ?");
+
+  packet = queue->Dequeue ();
+  NS_TEST_EXPECT_MSG_EQ ((packet != 0), true, "I want to remove the third packet");
+  NS_TEST_EXPECT_MSG_EQ (queue->GetNPackets (), 0, "There should be no packets in there");
+  NS_TEST_EXPECT_MSG_EQ (packet->GetUid (), p3->GetUid (), "Was this the third packet ?");
+
+  packet = queue->Dequeue ();
+  NS_TEST_EXPECT_MSG_EQ ((packet == 0), true, "There are really no packets in there");
+>>>>>>> origin
 }
 
-static class DropTailQueueTestSuite : public TestSuite
+/**
+ * \ingroup network-test
+ * \ingroup tests
+ *
+ * \brief DropTail Queue TestSuite
+ */
+class DropTailQueueTestSuite : public TestSuite
 {
 public:
   DropTailQueueTestSuite ()
@@ -85,4 +119,6 @@ public:
   {
     AddTestCase (new DropTailQueueTestCase (), TestCase::QUICK);
   }
-} g_dropTailQueueTestSuite;
+};
+
+static DropTailQueueTestSuite g_dropTailQueueTestSuite; //!< Static variable for test initialization

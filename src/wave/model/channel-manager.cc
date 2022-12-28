@@ -51,12 +51,6 @@ ChannelManager::ChannelManager ()
 ChannelManager::~ChannelManager ()
 {
   NS_LOG_FUNCTION (this);
-  std::map<uint32_t, WaveChannel *> ::iterator i;
-  for (i = m_channels.begin (); i != m_channels.end (); ++i)
-    {
-      delete (i->second);
-    }
-  m_channels.clear ();
 }
 
 uint32_t
@@ -161,11 +155,30 @@ ChannelManager::GetManagementDataRate (uint32_t channelNumber)
   return m_channels[channelNumber]->dataRate;
 }
 
+WifiPreamble
+ChannelManager::GetManagementPreamble (uint32_t channelNumber)
+{
+  NS_LOG_FUNCTION (this << channelNumber);
+  return m_channels[channelNumber]->preamble;
+}
+
 uint32_t
 ChannelManager::GetManagementPowerLevel (uint32_t channelNumber)
 {
   NS_LOG_FUNCTION (this << channelNumber);
   return m_channels[channelNumber]->txPowerLevel;
+}
+
+void
+ChannelManager::DoDispose (void)
+{
+  NS_LOG_FUNCTION (this);
+  std::map<uint32_t, WaveChannel *> ::iterator i;
+  for (i = m_channels.begin (); i != m_channels.end (); ++i)
+    {
+      delete (i->second);
+    }
+  m_channels.clear ();
 }
 
 } // namespace ns3
