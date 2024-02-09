@@ -30,6 +30,13 @@
  * Source: arXiv CITATIONS.
 */
 
+
+/*Coverage of mmWave at outdoor : 300 ms
+ *A new record for 5G millimeter wave (mmWave) has been achieved by Telecom Italia Mobile (TIM),
+ Ericsson and Qualcomm Technologies after achieving a speed of 1 Gbps on 26 GHz frequencies 
+ of a distance of 6.5 kilometers (4 miles) on a fixed wireless access (FWA) network.
+ *
+ */
 #include "ns3/core-module.h"
 #include "ns3/network-module.h"
 #include "ns3/mobility-module.h"
@@ -60,6 +67,9 @@ ChangeSpeed (Ptr<Node> n, Vector speed)
     //  NS_LOG_UNCOND ("************************--------------------Change Speed-------------------------------*****************");
 }
 #if PrintUePosition
+// 5 to test
+// 39946 for Rx samples
+double numPrints = 39946;
 void
 PrintPosition (Ptr<Node> Uenode,Ptr<Node>enB, Ptr<OutputStreamWrapper> stream)
 {
@@ -74,14 +84,7 @@ main (int argc, char *argv[])
 {
 
 
-    std::string channel_condition = "l"; // channel condition, l = LOS, n = NLOS, otherwise the condition is randomly determined
-
-    CommandLine cmd;
-    cmd.AddValue("channel_condition","Channel Condition (LOS =l : NLOS=n",channel_condition);
-    cmd.Parse(argc,argv);
-    Config::SetDefault ("ns3::MmWaveEnbPhy::TxPower", DoubleValue (double(30)));
-    Config::SetDefault ("ns3::MmWaveEnbPhy::NoiseFigure", DoubleValue (5));
-
+    std::string channel_condition = "n"; // channel condition, l = LOS, n = NLOS, otherwise the condition is randomly determined
     Ptr<MmWaveHelper> ptr_mmWave = CreateObject<MmWaveHelper> ();
     /* A configuration example.
     * ptr_mmWave->GetCcPhyParams ().at (0).GetConfigurationParameters ()->SetAttribute("SymbolPerSlot", UintegerValue(30));*/
@@ -96,11 +99,21 @@ main (int argc, char *argv[])
     uint16_t numberOfeNBNodes = 1;
     uint16_t numberOfUeNodes = 1;
     //Position and Speed of Ues
-    double Ue_x= 40.0;
-    double Ue_y= 20.0;
-    double Ue_z= 00.0;
+    double Ue_x  = 10.0;
+    double Ue_y  = 20.0;
+    double Ue_z  = 00.0;
+    
+   
     double Ue_Speed[2]= {20.0,0.0};
 
+    CommandLine cmd;
+    cmd.AddValue("channel_condition","Channel Condition (LOS =l : NLOS=n",channel_condition);
+    cmd.AddValue("numberOfUeNodes","1/2",numberOfUeNodes);
+    cmd.Parse(argc,argv);
+    Config::SetDefault ("ns3::MmWaveEnbPhy::TxPower", DoubleValue (double(30)));
+    Config::SetDefault ("ns3::MmWaveEnbPhy::NoiseFigure", DoubleValue (5));
+   
+   
 #if 0
     double SetSlotPerSubframe [5]= {4,8,16,32,64};//Numeriology from 3
     double SetBandwidthh[5]= {13.88e6,13.88e6,13.88e6,13.88e6,13.88e6};
@@ -148,12 +161,34 @@ main (int argc, char *argv[])
     building1->SetBoundaries (Box (60.0,60.5,
                                    6.0, 6.5,
                                    0.0, 1.5));
+   // LogComponentEnable ("MmWaveUePhy", LOG_LEVEL_DEBUG);
 
+    
+    
+    
+    
+    
+    
     /*Set Channel and Path Loss Conditions*/
-     ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel");
-   //Dont Conside ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppRmaPropagationLossModel");
-    // ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmaPropagationLossModel");
-    //   ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppIndoorOfficePropagationLossModel");
+
+#if 0 
+Config::SetDefault ("ns3::ThreeGppChannelModel::UpdatePeriod", TimeValue (MilliSeconds (100))); // interval after which the channel for a moving user is updated,
+Config::SetDefault ("ns3::ThreeGppChannelModel::Blockage", BooleanValue (true)); // use blockage or not
+Config::SetDefault ("ns3::ThreeGppChannelModel::PortraitMode", BooleanValue (true)); // use blockage model with UT in portrait mode
+Config::SetDefault ("ns3::ThreeGppChannelModel::NumNonselfBlocking", IntegerValue (4)); // number of non-self blocking obstacles
+ mmwaveHelper->SetChannelConditionModelType ("ns3::BuildingsChannelConditionModel");
+// set the number of antennas for both UEs and eNBs
+mmwaveHelper->SetUePhasedArrayModelAttribute ("NumColumns" , UintegerValue (4));
+mmwaveHelper->SetUePhasedArrayModelAttribute ("NumRows" , UintegerValue (4));
+mmwaveHelper->SetEnbPhasedArrayModelAttribute ("NumColumns" , UintegerValue (8));
+mmwaveHelper->SetEnbPhasedArrayModelAttribute ("NumRows" , UintegerValue (8))
+											
+#endif
+
+// ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmiStreetCanyonPropagationLossModel");//Papaer-1 graphs are all with is model
+ ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppRmaPropagationLossModel");//?
+  //  ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppUmaPropagationLossModel");
+   //   ptr_mmWave->SetPathlossModelType ("ns3::ThreeGppIndoorOfficePropagationLossModel");
 
     if (channel_condition == "l")
     {
@@ -166,11 +201,14 @@ main (int argc, char *argv[])
          std::cout<<"Channel Codition is NLOS";       
         ptr_mmWave->SetChannelConditionModelType ("ns3::NeverLosChannelConditionModel");
     }
-    /*install  Mobility Model*/
+    /*Ue Position allocation and Mobilty Models
+     *
+     *
+     * */
     Ptr<ListPositionAllocator> uePositionAlloc = CreateObject<ListPositionAllocator> ();
-    for (uint16_t i = 0; i < numberOfUeNodes; i++)
+    for (uint16_t Ue_Position_delta = 0; Ue_Position_delta < numberOfUeNodes; Ue_Position_delta = Ue_Position_delta +1)
     {
-        uePositionAlloc->Add (Vector (Ue_x+(20*i), Ue_y, Ue_z));
+        uePositionAlloc->Add (Vector (Ue_x/* + (20 *   Ue_Position_delta )*/, Ue_y, Ue_z));
     }
 
     MobilityHelper uemobility;
@@ -179,13 +217,17 @@ main (int argc, char *argv[])
     uemobility.Install (ueNodes);
 
 
-
+    /*enb Position allocation and Mobilty Models
+     *
+     *
+     * */
     Ptr<ListPositionAllocator> enbPositionAlloc = CreateObject<ListPositionAllocator> ();
     enbPositionAlloc->Add (Vector (0.0, 0.0, 0.0));
     MobilityHelper enbmobility;
     enbmobility.SetMobilityModel ("ns3::ConstantPositionMobilityModel");
     enbmobility.SetPositionAllocator (enbPositionAlloc);
     enbmobility.Install (enbNodes);
+  
     BuildingsHelper::Install (enbNodes);
     BuildingsHelper::Install (ueNodes);
 
@@ -201,6 +243,7 @@ main (int argc, char *argv[])
     phyMacConfig0->SetSymbPerSlot (30);
 
     std::cout<< " System Bandwith "<<phyMacConfig0->GetRbWidth()* phyMacConfig0->GetNumRb()<<"\n";
+    std::cout<< " Number of Ues "<<numberOfUeNodes<<"\n";
     // 2. create the MmWaveComponentCarrier object
     Ptr<MmWaveComponentCarrier> cc0 = CreateObject<MmWaveComponentCarrier> ();
     cc0->SetConfigurationParameters (phyMacConfig0);
@@ -250,10 +293,14 @@ main (int argc, char *argv[])
     AsciiTraceHelper asciiTraceHelper;
     Ptr<OutputStreamWrapper> Ue_1Positionstream = asciiTraceHelper.CreateFileStream ("Ue_1Positionstream.dat");
     Ptr<OutputStreamWrapper> Ue_2Positionstream = asciiTraceHelper.CreateFileStream ("Ue_2Positionstream.dat");
-    double numPrints = 5;
+
     for (int i = 0; i <= numPrints; i++)
     {
         Simulator::Schedule (Seconds((simTime / numPrints) * i), &PrintPosition, ueNodes.Get (0),enbNodes.Get (0),Ue_1Positionstream);
+    if ( numberOfUeNodes==2){
+
+        Simulator::Schedule (Seconds((simTime / numPrints) * i), &PrintPosition, ueNodes.Get (1),enbNodes.Get (0),Ue_2Positionstream);
+    }
     }
 
     /*
